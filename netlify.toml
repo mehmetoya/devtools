@@ -1,3 +1,7 @@
+# ── netlify.toml ──
+# Netlify build & routing configuration for the DevTools multi-tool site.
+# Faz 1: JSON Formatter only. Add new tools by duplicating the [[redirects]] pattern.
+
 [build]
   # No build step needed — pure static HTML
   publish = "."
