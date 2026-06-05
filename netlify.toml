@@ -1,0 +1,54 @@
+[build]
+  # No build step needed — pure static HTML
+  publish = "."
+
+# ── ROUTING ──
+# Each tool lives at /tool-name → maps to its own HTML file.
+# When you add a new tool (e.g. Base64), create base64/index.html
+# and add a corresponding [[redirects]] block.
+
+[[redirects]]
+  from   = "/json-formatter"
+  to     = "/json-formatter/index.html"
+  status = 200
+
+# Future tools (uncomment as you add them):
+# [[redirects]]
+#   from   = "/base64"
+#   to     = "/base64/index.html"
+#   status = 200
+
+# [[redirects]]
+#   from   = "/url-encoder"
+#   to     = "/url-encoder/index.html"
+#   status = 200
+
+# [[redirects]]
+#   from   = "/regex-tester"
+#   to     = "/regex-tester/index.html"
+#   status = 200
+
+# ── ROOT REDIRECT ──
+# Redirect the site root to the first tool until a proper homepage exists.
+# Replace with "to = /index.html" when you build a homepage.
+[[redirects]]
+  from   = "/"
+  to     = "/json-formatter"
+  status = 302
+
+# ── 404 FALLBACK ──
+[[redirects]]
+  from   = "/*"
+  to     = "/json-formatter"
+  status = 404
+
+# ── HEADERS (applied via netlify.toml as well — belt & suspenders) ──
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options            = "DENY"
+    X-Content-Type-Options     = "nosniff"
+    Referrer-Policy            = "strict-origin-when-cross-origin"
+    Permissions-Policy         = "geolocation=(), microphone=(), camera=(), payment=()"
+    Strict-Transport-Security  = "max-age=31536000; includeSubDomains; preload"
+    Content-Security-Policy    = "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';"

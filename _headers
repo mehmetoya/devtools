@@ -1,0 +1,48 @@
+/*
+  # ── SECURITY HEADERS ──
+
+  # Prevent clickjacking — site cannot be embedded in an iframe
+  X-Frame-Options: DENY
+
+  # Prevent MIME-type sniffing
+  X-Content-Type-Options: nosniff
+
+  # Control referrer information sent to other sites
+  Referrer-Policy: strict-origin-when-cross-origin
+
+  # Disable browser features not needed by this tool
+  Permissions-Policy: geolocation=(), microphone=(), camera=(), payment=(), usb=(), interest-cohort=()
+
+  # Content Security Policy
+  # - default-src 'self'          → block everything not from our own origin by default
+  # - script-src 'self'           → no inline scripts (except those already in the HTML file)
+  #   NOTE: because all JS is inline in index.html, we need 'unsafe-inline' here.
+  #   When you split JS into a separate file (e.g. app.js), remove 'unsafe-inline'
+  #   and use a nonce or hash instead for maximum security.
+  # - style-src 'self' 'unsafe-inline' fonts.googleapis.com → allow Google Fonts CSS
+  # - font-src fonts.gstatic.com  → allow Google Fonts files
+  # - img-src 'self' data:        → allow local images + inline data URIs (e.g. favicon)
+  # - connect-src 'none'          → explicitly block all XHR/fetch/WebSocket
+  # - object-src 'none'           → block Flash and plugins
+  # - base-uri 'self'             → prevent base tag injection
+  # - form-action 'self'          → prevent form submissions to external sites
+  # - frame-ancestors 'none'      → second line of defense against clickjacking
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';
+
+  # HSTS — force HTTPS for 1 year, include subdomains
+  # Netlify handles HTTPS automatically, but this header enforces it on the client side.
+  Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+
+# ── CACHING ──
+
+# HTML — short cache, always revalidate (so deploys are instant)
+/*.html
+  Cache-Control: public, max-age=0, must-revalidate
+
+# Root index
+/
+  Cache-Control: public, max-age=0, must-revalidate
+
+# Static assets (if you add CSS/JS files later) — 1 year with immutable
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable

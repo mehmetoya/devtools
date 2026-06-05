@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- ── PRIMARY SEO / GEO ── -->
+  <title>JSON Formatter — Free Online JSON Beautifier & Validator</title>
+  <meta name="description" content="Format, beautify, validate and minify JSON instantly. No data leaves your browser — 100% private, client-side, no server. Free developer tool." />
+  <meta name="keywords" content="json formatter, json beautifier, json validator, json minifier, json viewer, online json tool, json pretty print, free json tool" />
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large" />
+  <link rel="canonical" href="https://YOUR_DOMAIN/json-formatter" />
+
+  <!-- ── OPEN GRAPH (social + AI crawlers) ── -->
+  <meta property="og:type"        content="website" />
+  <meta property="og:title"       content="JSON Formatter — Free, Private, Client-Side" />
+  <meta property="og:description" content="Format, validate and minify JSON in your browser. Nothing is sent to any server. Free developer tool." />
+  <meta property="og:url"         content="https://YOUR_DOMAIN/json-formatter" />
+  <meta property="og:site_name"   content="DevTools" />
+  <meta property="og:locale"      content="en_US" />
+
+  <!-- ── TWITTER / X CARD ── -->
+  <meta name="twitter:card"        content="summary_large_image" />
+  <meta name="twitter:title"       content="JSON Formatter — Free, Private, Client-Side" />
+  <meta name="twitter:description" content="Format, validate and minify JSON in your browser. Nothing is sent to any server." />
+
+  <!-- ── STRUCTURED DATA (JSON-LD) — GEO / LLM signal ── -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "JSON Formatter",
+    "url": "https://YOUR_DOMAIN/json-formatter",
+    "description": "Free online JSON formatter, beautifier, validator and minifier. All processing happens client-side in your browser — no data is sent to any server.",
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "Any",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+    "featureList": [
+      "Format and beautify JSON",
+      "Validate JSON syntax",
+      "Minify / compact JSON",
+      "Sort JSON keys alphabetically",
+      "Convert JSON to CSV",
+      "Syntax highlighting",
+      "Client-side only — no server",
+      "Drag and drop file support"
+    ],
+    "isAccessibleForFree": true,
+    "browserRequirements": "Requires JavaScript"
+  }
+  </script>
+
+  <!-- ── BREADCRUMB (GEO context for AI crawlers) ── -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Home",           "item": "https://YOUR_DOMAIN/" },
+      { "@type": "ListItem", "position": 2, "name": "JSON Formatter", "item": "https://YOUR_DOMAIN/json-formatter" }
+    ]
+  }
+  </script>
+
+  <!-- ── FONTS ── -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet" />
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0d0e11;
+      --surface:   #13151a;
+      --surface2:  #1a1d24;
+      --border:    #2a2d36;
+      --border2:   #373b48;
+      --text:      #e8eaf0;
+      --muted:     #6b7080;
+      --accent:    #4fffb0;
+      --accent-dim:#1a3d2e;
+      --danger:    #ff5b6b;
+      --danger-dim:#3d1a1e;
+      --warn:      #ffb84f;
+      --info:      #5b9eff;
+      --mono:      'IBM Plex Mono', monospace;
+      --sans:      'Syne', sans-serif;
+      --radius:    8px;
+      --radius-lg: 14px;
+    }
+
+    html, body { height: 100%; background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 14px; line-height: 1.5; }
+
+    .shell { display: grid; grid-template-rows: auto 1fr auto; min-height: 100vh; }
+
+    /* ── HEADER ── */
+    header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 28px; height: 56px;
+      border-bottom: 1px solid var(--border); background: var(--surface);
+      position: sticky; top: 0; z-index: 100;
+    }
+    .logo { font-size: 16px; font-weight: 800; letter-spacing: -0.3px; color: var(--text); text-decoration: none; display: flex; align-items: center; gap: 8px; }
+    .logo-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
+    .nav-links { display: flex; align-items: center; gap: 4px; }
+    .nav-link {
+      font-size: 12px; font-weight: 600; color: var(--muted); text-decoration: none;
+      padding: 5px 10px; border-radius: var(--radius); transition: color 0.12s, background 0.12s;
+    }
+    .nav-link:hover { color: var(--text); background: var(--surface2); }
+    .nav-link.active { color: var(--accent); background: var(--accent-dim); }
+    .nav-link.soon { opacity: 0.4; cursor: default; pointer-events: none; }
+    .badge-private {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 11px; font-weight: 600; letter-spacing: 0.4px;
+      color: var(--accent); background: var(--accent-dim);
+      padding: 3px 10px; border-radius: 20px; border: 1px solid rgba(79,255,176,0.2);
+    }
+    .badge-private::before {
+      content: ''; display: inline-block; width: 6px; height: 6px;
+      border-radius: 50%; background: var(--accent); animation: pulse 2s infinite;
+    }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+    /* ── MAIN GRID ── */
+    main { display: grid; grid-template-columns: 1fr 200px 1fr; gap: 0; overflow: hidden; }
+
+    /* ── PANES ── */
+    .pane { display: flex; flex-direction: column; overflow: hidden; border-right: 1px solid var(--border); }
+    .pane:last-child { border-right: none; }
+    .pane-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 16px; height: 42px;
+      background: var(--surface); border-bottom: 1px solid var(--border); flex-shrink: 0;
+    }
+    .pane-title { font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); }
+    .pane-meta  { font-size: 11px; color: var(--muted); font-family: var(--mono); }
+
+    textarea {
+      flex: 1; resize: none; border: none; outline: none;
+      background: var(--bg); color: var(--text);
+      font-family: var(--mono); font-size: 13px; line-height: 1.7;
+      padding: 16px; tab-size: 2; caret-color: var(--accent);
+    }
+    textarea::placeholder { color: var(--muted); }
+    textarea:focus { background: #0f1014; }
+
+    .output-scroll { flex: 1; overflow: auto; background: var(--bg); padding: 16px; }
+    .output-pre { font-family: var(--mono); font-size: 13px; line-height: 1.7; white-space: pre; min-height: 100%; }
+
+    .t-key  { color: #82aaff; }
+    .t-str  { color: #c3e88d; }
+    .t-num  { color: var(--warn); }
+    .t-bool { color: #c792ea; }
+    .t-null { color: var(--muted); }
+    .t-punct{ color: var(--border2); }
+
+    /* ── CONTROLS ── */
+    .controls { display: flex; flex-direction: column; background: var(--surface); border-right: 1px solid var(--border); overflow-y: auto; }
+    .ctrl-section { padding: 20px 14px 16px; border-bottom: 1px solid var(--border); }
+    .ctrl-label { font-size: 10px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
+
+    .btn {
+      display: flex; align-items: center; gap: 8px; width: 100%;
+      padding: 9px 12px; border: 1px solid var(--border2); border-radius: var(--radius);
+      background: var(--surface2); color: var(--text);
+      font-family: var(--sans); font-size: 12px; font-weight: 600;
+      cursor: pointer; transition: background 0.12s, border-color 0.12s, color 0.12s;
+      margin-bottom: 6px; text-align: left;
+    }
+    .btn:last-child { margin-bottom: 0; }
+    .btn:hover  { background: var(--border); border-color: var(--muted); }
+    .btn:active { transform: scale(0.98); }
+    .btn.primary    { background: var(--accent-dim); border-color: rgba(79,255,176,0.3); color: var(--accent); }
+    .btn.primary:hover { background: rgba(79,255,176,0.15); }
+    .btn.danger-btn { background: var(--danger-dim); border-color: rgba(255,91,107,0.3); color: var(--danger); }
+    .btn.danger-btn:hover { background: rgba(255,91,107,0.15); }
+    .btn-icon { width: 16px; height: 16px; flex-shrink: 0; opacity: 0.8; }
+
+    .select-wrap { position: relative; }
+    .select-wrap select {
+      width: 100%; padding: 8px 10px;
+      border: 1px solid var(--border2); border-radius: var(--radius);
+      background: var(--surface2); color: var(--text);
+      font-family: var(--sans); font-size: 12px; font-weight: 600;
+      appearance: none; cursor: pointer; outline: none;
+    }
+    .select-wrap select:focus { border-color: var(--accent); }
+    .select-wrap::after { content: '↓'; position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 11px; pointer-events: none; }
+
+    .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+    .stat-card  { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius); padding: 8px 10px; }
+    .stat-val   { font-size: 17px; font-weight: 800; color: var(--text); line-height: 1.2; }
+    .stat-lbl   { font-size: 10px; color: var(--muted); letter-spacing: 0.3px; margin-top: 2px; }
+
+    /* ── STATUS / FOOTER ── */
+    .statusbar {
+      display: flex; align-items: center; gap: 16px;
+      padding: 0 20px; height: 36px;
+      background: var(--surface); border-top: 1px solid var(--border);
+      font-size: 11px; font-family: var(--mono); flex-shrink: 0;
+    }
+    .status-msg      { flex: 1; font-weight: 500; }
+    .status-msg.ok   { color: var(--accent); }
+    .status-msg.err  { color: var(--danger); }
+    .status-msg.idle { color: var(--muted); }
+    .status-size     { color: var(--muted); }
+    .kbd { font-size: 10px; color: var(--muted); opacity: 0.6; display: none; }
+
+    /* ── SEO CONTENT (visible to crawlers, subtle for users) ── */
+    .seo-section {
+      padding: 40px 32px 32px;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+    }
+    .seo-section h1 {
+      font-size: 22px; font-weight: 800; color: var(--text);
+      margin-bottom: 12px; letter-spacing: -0.3px;
+    }
+    .seo-section h2 {
+      font-size: 15px; font-weight: 700; color: var(--text);
+      margin: 24px 0 8px;
+    }
+    .seo-section p  { font-size: 13px; color: var(--muted); line-height: 1.7; max-width: 800px; margin-bottom: 8px; }
+    .seo-features   { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; margin-top: 16px; }
+    .seo-feature    {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 12px 14px;
+    }
+    .seo-feature strong { display: block; font-size: 12px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+    .seo-feature span   { font-size: 11px; color: var(--muted); }
+    .privacy-banner {
+      display: flex; align-items: flex-start; gap: 12px;
+      background: var(--accent-dim); border: 1px solid rgba(79,255,176,0.2);
+      border-radius: var(--radius-lg); padding: 14px 18px; margin-top: 20px; max-width: 700px;
+    }
+    .privacy-banner-icon { font-size: 20px; flex-shrink: 0; margin-top: 1px; }
+    .privacy-banner p    { font-size: 12px; color: var(--accent); line-height: 1.6; margin: 0; }
+    .privacy-banner strong { color: var(--accent); }
+
+    /* ── TOAST ── */
+    .toast {
+      position: fixed; bottom: 52px; left: 50%;
+      transform: translateX(-50%) translateY(8px);
+      background: var(--surface2); border: 1px solid var(--border2);
+      border-radius: var(--radius); padding: 8px 18px;
+      font-size: 12px; font-family: var(--sans); font-weight: 600;
+      color: var(--accent); opacity: 0;
+      transition: opacity 0.15s, transform 0.15s;
+      pointer-events: none; z-index: 999;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 800px) {
+      main { grid-template-columns: 1fr; grid-template-rows: auto auto auto; overflow: visible; }
+      .pane { min-height: 280px; border-right: none; border-bottom: 1px solid var(--border); }
+      .controls { flex-direction: row; flex-wrap: wrap; }
+      .ctrl-section { flex: 1; min-width: 160px; border-bottom: none; border-right: 1px solid var(--border); }
+      .nav-links { display: none; }
+      .kbd { display: none; }
+    }
+    @media (min-width: 1200px) { .kbd { display: inline; } }
+
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+  </style>
+</head>
+<body>
+<div class="shell">
+
+  <!-- ── HEADER ── -->
+  <header>
+    <a class="logo" href="/" aria-label="DevTools home">
+      <span class="logo-dot" aria-hidden="true"></span>
+      DevTools
+    </a>
+
+    <nav class="nav-links" aria-label="Tools">
+      <a class="nav-link active" href="/json-formatter"  aria-current="page">JSON Formatter</a>
+      <a class="nav-link soon"  href="/base64"           aria-disabled="true" title="Coming soon">Base64</a>
+      <a class="nav-link soon"  href="/url-encoder"      aria-disabled="true" title="Coming soon">URL Encode</a>
+      <a class="nav-link soon"  href="/regex-tester"     aria-disabled="true" title="Coming soon">Regex</a>
+    </nav>
+
+    <span class="badge-private" role="status" aria-label="Privacy: all data processed locally">
+      100% LOCAL — NO SERVER
+    </span>
+  </header>
+
+  <!-- ── TOOL ── -->
+  <main aria-label="JSON Formatter tool">
+
+    <!-- INPUT PANE -->
+    <section class="pane" aria-label="JSON input">
+      <div class="pane-header">
+        <span class="pane-title">Input</span>
+        <span class="pane-meta" id="in-size" aria-live="polite"></span>
+      </div>
+      <textarea
+        id="input"
+        spellcheck="false"
+        autocomplete="off"
+        autocorrect="off"
+        autocapitalize="off"
+        aria-label="Paste JSON here"
+        placeholder='Paste your JSON here…&#10;&#10;{"name": "example", "value": 42}'
+      ></textarea>
+    </section>
+
+    <!-- CONTROLS COLUMN -->
+    <aside class="controls" aria-label="Formatter controls">
+
+      <div class="ctrl-section">
+        <div class="ctrl-label">Format</div>
+        <button class="btn primary" onclick="beautify()" title="Ctrl+Enter">
+          <svg class="btn-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M2 4h12M2 8h8M2 12h10"/></svg>
+          Beautify
+        </button>
+        <button class="btn" onclick="minify()" title="Ctrl+M">
+          <svg class="btn-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M2 8h12M6 5l-3 3 3 3M10 5l3 3-3 3"/></svg>
+          Minify
+        </button>
+      </div>
+
+      <div class="ctrl-section">
+        <div class="ctrl-label">Tools</div>
+        <button class="btn" onclick="validate_only()">
+          <svg class="btn-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M3 8l3.5 3.5L13 4"/></svg>
+          Validate
+        </button>
+        <button class="btn" onclick="sort_keys()">
+          <svg class="btn-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M2 4h8M2 8h5M2 12h11M12 2v8M10 8l2 2 2-2"/></svg>
+          Sort Keys
+        </button>
+        <button class="btn" onclick="to_csv()">
+          <svg class="btn-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="2" y="3" width="12" height="10" rx="1"/><path d="M2 7h12M6 7v6"/></svg>
+          To CSV
+        </button>
+      </div>
+
+      <div class="ctrl-section">
+        <div class="ctrl-label">Indent</div>
+        <div class="select-wrap">
+          <select id="indent" aria-label="Indentation size" onchange="if(document.getElementById('input').value.trim()) beautify()">
+            <option value="2">2 spaces</option>
+            <option value="4">4 spaces</option>
+            <option value="&#9;">Tab</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="ctrl-section">
+        <div class="ctrl-label">Output</div>
+        <button class="btn" onclick="copy_output()">
+          <svg class="btn-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="5" y="5" width="8" height="9" rx="1"/><path d="M3 11V3a1 1 0 011-1h8"/></svg>
+          Copy
+        </button>
+        <button class="btn" onclick="download_output()">
+          <svg class="btn-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M8 2v8M5 7l3 3 3-3M2 13h12"/></svg>
+          Download
+        </button>
+      </div>
+
+      <div class="ctrl-section">
+        <div class="ctrl-label">Stats</div>
+        <div class="stats-grid">
+          <div class="stat-card"><div class="stat-val" id="s-keys">—</div><div class="stat-lbl">keys</div></div>
+          <div class="stat-card"><div class="stat-val" id="s-depth">—</div><div class="stat-lbl">depth</div></div>
+        </div>
+      </div>
+
+      <div class="ctrl-section">
+        <button class="btn" onclick="load_sample()">
+          <svg class="btn-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="2" y="2" width="12" height="12" rx="2"/><path d="M5 8h6M8 5v6"/></svg>
+          Sample
+        </button>
+        <button class="btn danger-btn" onclick="clear_all()" title="Ctrl+K">
+          <svg class="btn-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M3 4h10M6 4V3h4v1M5 4l.5 9h5l.5-9"/></svg>
+          Clear
+        </button>
+      </div>
+
+    </aside>
+
+    <!-- OUTPUT PANE -->
+    <section class="pane" aria-label="Formatted JSON output">
+      <div class="pane-header">
+        <span class="pane-title">Output</span>
+        <span class="pane-meta" id="out-size" aria-live="polite"></span>
+      </div>
+      <div class="output-scroll">
+        <pre class="output-pre" id="output" aria-live="polite" aria-label="Formatted output"></pre>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ── STATUS BAR ── -->
+  <div class="statusbar" role="status" aria-live="polite">
+    <span class="status-msg idle" id="status-msg">Ready — paste JSON to begin</span>
+    <span class="status-size"     id="status-size"></span>
+    <span class="kbd">Ctrl+Enter beautify · Ctrl+M minify · Ctrl+K clear</span>
+  </div>
+
+  <!-- ── SEO / GEO CONTENT SECTION ── -->
+  <!-- This section is intentionally visible — it signals purpose to crawlers and AI models -->
+  <section class="seo-section" aria-label="About this tool">
+
+    <h1>JSON Formatter — Free Online JSON Beautifier & Validator</h1>
+    <p>
+      A free developer tool to format, beautify, validate, minify, and convert JSON data.
+      Paste your JSON into the editor above and it formats instantly with syntax highlighting.
+      Supports sorting keys, converting JSON arrays to CSV, and downloading the result.
+    </p>
+
+    <div class="privacy-banner" role="note">
+      <span class="privacy-banner-icon" aria-hidden="true">🔒</span>
+      <p>
+        <strong>Your data never leaves your browser.</strong>
+        All processing happens locally using JavaScript — no JSON is sent to any server, stored, or logged.
+        This tool has no "Recent Links" feed, no paste history, and no backend.
+        Safe to use with sensitive API responses, tokens, and production payloads.
+      </p>
+    </div>
+
+    <h2>Features</h2>
+    <div class="seo-features">
+      <div class="seo-feature">
+        <strong>Beautify / Pretty Print</strong>
+        <span>Indent JSON with 2 spaces, 4 spaces, or tabs for readability.</span>
+      </div>
+      <div class="seo-feature">
+        <strong>Validate JSON</strong>
+        <span>Instant syntax validation with precise error messages and line numbers.</span>
+      </div>
+      <div class="seo-feature">
+        <strong>Minify / Compact</strong>
+        <span>Remove whitespace and reduce payload size for production use.</span>
+      </div>
+      <div class="seo-feature">
+        <strong>Sort Keys</strong>
+        <span>Sort all object keys alphabetically at every nesting level.</span>
+      </div>
+      <div class="seo-feature">
+        <strong>JSON to CSV</strong>
+        <span>Convert a JSON array of objects to a comma-separated CSV file.</span>
+      </div>
+      <div class="seo-feature">
+        <strong>Syntax Highlighting</strong>
+        <span>Color-coded keys, strings, numbers, booleans, and null values.</span>
+      </div>
+      <div class="seo-feature">
+        <strong>Drag & Drop</strong>
+        <span>Drop a .json file directly onto the editor — no file picker needed.</span>
+      </div>
+      <div class="seo-feature">
+        <strong>Download Output</strong>
+        <span>Save the formatted result as a .json or .csv file instantly.</span>
+      </div>
+    </div>
+
+    <h2>How to use</h2>
+    <p>Paste your JSON into the input panel on the left. The formatter validates and beautifies it automatically. Use the control panel to minify, sort keys, convert to CSV, or adjust indentation. Click Copy to copy the output to your clipboard, or Download to save it as a file.</p>
+    <p>Keyboard shortcuts: <kbd>Ctrl+Enter</kbd> to beautify, <kbd>Ctrl+M</kbd> to minify, <kbd>Ctrl+K</kbd> to clear.</p>
+
+    <h2>Privacy & Security</h2>
+    <p>This tool processes all JSON client-side in your browser using the native <code>JSON.parse</code> and <code>JSON.stringify</code> APIs. No network requests are made with your data. The output panel uses DOM <code>textContent</code> exclusively — never <code>innerHTML</code> — which prevents any possibility of cross-site scripting (XSS) from malicious JSON payloads. There is no save, share, or "recent links" feature, which eliminates the primary data-exposure vector found in other online JSON formatters.</p>
+
+  </section>
+
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast" role="alert" aria-live="assertive"></div>
+
+<script>
+"use strict";
+
+const inp       = document.getElementById('input');
+const outPre    = document.getElementById('output');
+const statusEl  = document.getElementById('status-msg');
+const inSizeEl  = document.getElementById('in-size');
+const outSizeEl = document.getElementById('out-size');
+const statSize  = document.getElementById('status-size');
+const sKeys     = document.getElementById('s-keys');
+const sDepth    = document.getElementById('s-depth');
+const toastEl   = document.getElementById('toast');
+
+let toastTimer = null;
+
+/* ── HELPERS ── */
+function fmtSize(str) {
+  const b = new Blob([str]).size;
+  return b < 1024 ? b + ' B' : (b / 1024).toFixed(1) + ' KB';
+}
+function setStatus(msg, type) {
+  statusEl.textContent = msg;
+  statusEl.className   = 'status-msg ' + type;
+}
+function showToast(msg) {
+  clearTimeout(toastTimer);
+  toastEl.textContent = msg;
+  toastEl.classList.add('show');
+  toastTimer = setTimeout(() => toastEl.classList.remove('show'), 1800);
+}
+function getIndent() {
+  const v = document.getElementById('indent').value;
+  return v === '\t' ? '\t' : parseInt(v, 10);
+}
+
+/* ── SAFE SYNTAX HIGHLIGHTER (DOM only — no innerHTML) ── */
+function highlightSafe(json) {
+  outPre.textContent = '';
+  const lines = json.split('\n');
+  lines.forEach((line, i) => {
+    const keyMatch = line.match(/^(\s*)("(?:[^"\\]|\\.)*")(\s*:)(.*)/);  
+    const lineFrag = document.createDocumentFragment();
+    if (keyMatch) {
+      lineFrag.appendChild(document.createTextNode(keyMatch[1]));
+      const ks = document.createElement('span');
+      ks.className   = 't-key';
+      ks.textContent = keyMatch[2];  /* textContent — safe */
+      lineFrag.appendChild(ks);
+      const cs = document.createElement('span');
+      cs.className   = 't-punct';
+      cs.textContent = keyMatch[3];
+      lineFrag.appendChild(cs);
+      lineFrag.appendChild(tokeniseValue(keyMatch[4]));
+    } else {
+      lineFrag.appendChild(tokeniseValue(line));
+    }
+    outPre.appendChild(lineFrag);
+    if (i < lines.length - 1) outPre.appendChild(document.createTextNode('\n'));
+  });
+}
+
+function tokeniseValue(str) {
+  const frag = document.createDocumentFragment();
+  const patterns = [
+    { re: /^(\s*)("(?:[^"\\]|\\.)*")(.*)/, cls: 't-str'  },
+    { re: /^(\s*)(-?\d[\d.eE+\-]*)(.*)/, cls: 't-num'  },
+    { re: /^(\s*)(true|false)(.*)/,        cls: 't-bool' },
+    { re: /^(\s*)(null)(.*)/,              cls: 't-null' },
+    { re: /^(\s*)([{}\[\],])(.*)/,         cls: 't-punct'},
+  ];
+  let rest = str;
+  while (rest.length > 0) {
+    let matched = false;
+    for (const { re, cls } of patterns) {
+      const m = rest.match(re);
+      if (m) {
+        if (m[1]) frag.appendChild(document.createTextNode(m[1]));
+        const s = document.createElement('span');
+        s.className   = cls;
+        s.textContent = m[2]; /* textContent — safe */
+        frag.appendChild(s);
+        rest    = m[3];
+        matched = true;
+        break;
+      }
+    }
+    if (!matched) {
+      /* consume one char to avoid infinite loop on unmatched chars */
+      frag.appendChild(document.createTextNode(rest[0]));
+      rest = rest.slice(1);
+    }
+  }
+  return frag;
+}
+
+/* ── STATS ── */
+function countKeys(o) {
+  if (typeof o !== 'object' || o === null) return 0;
+  if (Array.isArray(o)) return o.reduce((a, v) => a + countKeys(v), 0);
+  return Object.keys(o).length + Object.values(o).reduce((a, v) => a + countKeys(v), 0);
+}
+function maxDepth(o) {
+  if (typeof o !== 'object' || o === null) return 0;
+  const vals = Array.isArray(o) ? o : Object.values(o);
+  return vals.length === 0 ? 1 : 1 + Math.max(...vals.map(maxDepth));
+}
+function updateStats(p) {
+  sKeys.textContent  = (p !== null && typeof p === 'object') ? countKeys(p) : '—';
+  sDepth.textContent = (p !== null && typeof p === 'object') ? maxDepth(p)  : '—';
+}
+function updateSizes(inStr, outStr) {
+  inSizeEl.textContent  = inStr  ? fmtSize(inStr)  : '';
+  outSizeEl.textContent = outStr ? fmtSize(outStr)  : '';
+  statSize.textContent  = outStr ? fmtSize(outStr) + ' output' : '';
+}
+
+/* ── PARSE ── */
+function parseInput() {
+  const v = inp.value.trim();
+  if (!v) throw new Error('Empty input');
+  return JSON.parse(v); /* native — no eval, no external lib */
+}
+
+/* ── ACTIONS ── */
+function beautify() {
+  try {
+    const o   = parseInput();
+    const str = JSON.stringify(o, null, getIndent());
+    highlightSafe(str);
+    setStatus('✓  Valid JSON', 'ok');
+    updateStats(o); updateSizes(inp.value, str);
+  } catch (e) {
+    outPre.textContent = '';
+    setStatus('✗  ' + e.message, 'err');
+    updateStats(null); updateSizes(inp.value, '');
+  }
+}
+function minify() {
+  try {
+    const o   = parseInput();
+    const str = JSON.stringify(o);
+    outPre.textContent = str; /* minified output — textContent */
+    setStatus('✓  Minified — ' + fmtSize(str), 'ok');
+    updateStats(o); updateSizes(inp.value, str);
+  } catch (e) { setStatus('✗  ' + e.message, 'err'); }
+}
+function validate_only() {
+  try   { parseInput(); setStatus('✓  Valid JSON — no errors found', 'ok'); }
+  catch (e) { setStatus('✗  ' + e.message, 'err'); }
+}
+function sort_keys() {
+  try {
+    const sortObj = v => {
+      if (Array.isArray(v)) return v.map(sortObj);
+      if (v && typeof v === 'object')
+        return Object.keys(v).sort().reduce((a, k) => { a[k] = sortObj(v[k]); return a; }, {});
+      return v;
+    };
+    const sorted = sortObj(parseInput());
+    const str    = JSON.stringify(sorted, null, getIndent());
+    highlightSafe(str);
+    setStatus('✓  Keys sorted alphabetically', 'ok');
+    updateStats(sorted); updateSizes(inp.value, str);
+  } catch (e) { setStatus('✗  ' + e.message, 'err'); }
+}
+function to_csv() {
+  try {
+    let o = parseInput();
+    if (!Array.isArray(o)) o = [o];
+    const keys = [...new Set(o.flatMap(r => r && typeof r === 'object' ? Object.keys(r) : []))];
+    const rows = o.map(r =>
+      keys.map(k => {
+        const v = (r && r[k] !== undefined) ? String(r[k]) : '';
+        return (v.includes(',') || v.includes('"') || v.includes('\n'))
+          ? '"' + v.replace(/"/g, '""') + '"' : v;
+      }).join(',')
+    );
+    const csv = [keys.join(','), ...rows].join('\n');
+    outPre.textContent = csv; /* textContent — safe */
+    setStatus('✓  Converted to CSV — ' + rows.length + ' rows', 'ok');
+    sKeys.textContent = rows.length; sDepth.textContent = keys.length;
+    updateSizes(inp.value, csv);
+  } catch (e) { setStatus('✗  ' + e.message, 'err'); }
+}
+function copy_output() {
+  const t = outPre.textContent;
+  if (!t) { showToast('Nothing to copy'); return; }
+  navigator.clipboard.writeText(t).then(() => showToast('Copied ✓'));
+}
+function download_output() {
+  const t = outPre.textContent;
+  if (!t) { showToast('Nothing to download'); return; }
+  const ext  = (t.includes(',') && !t.trimStart().startsWith('{')) ? 'csv' : 'json';
+  const blob = new Blob([t], { type: 'text/' + ext });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url; a.download = 'output.' + ext; a.click();
+  URL.revokeObjectURL(url);
+  showToast('Downloaded ✓');
+}
+function clear_all() {
+  inp.value = ''; outPre.textContent = '';
+  setStatus('Ready — paste JSON to begin', 'idle');
+  inSizeEl.textContent = outSizeEl.textContent = statSize.textContent = '';
+  sKeys.textContent = sDepth.textContent = '—';
+}
+function load_sample() {
+  inp.value = JSON.stringify({
+    isSuccess: true, code: "200", message: "OK", processNo: 1001,
+    customer: {
+      id: 42, name: "Ahmet", surname: "Yılmaz",
+      workingStatusCode: "E", monthlyIncome: 15000,
+      birthDate: "1985-03-15T00:00:00Z", birthCountryCode: "TR",
+      birthPlace: "İstanbul", email: "ahmet@example.com",
+      addressList: [{ type: 1, cityCode: "34", city: "İstanbul", district: "Kadıköy" }]
+    }
+  }, null, 2);
+  beautify();
+}
+
+/* ── AUTO-FORMAT (debounced) ── */
+inp.addEventListener('input', () => {
+  updateSizes(inp.value, outPre.textContent);
+  if (!inp.value.trim()) { setStatus('Ready — paste JSON to begin', 'idle'); return; }
+  clearTimeout(inp._t);
+  inp._t = setTimeout(beautify, 300);
+});
+
+/* ── KEYBOARD SHORTCUTS ── */
+document.addEventListener('keydown', e => {
+  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); beautify(); }
+  if ((e.ctrlKey || e.metaKey) && e.key === 'm')     { e.preventDefault(); minify(); }
+  if ((e.ctrlKey || e.metaKey) && e.key === 'k')     { e.preventDefault(); clear_all(); }
+});
+
+/* ── DRAG & DROP ── */
+inp.addEventListener('dragover',  e => { e.preventDefault(); inp.style.background = '#0f1217'; });
+inp.addEventListener('dragleave', () => { inp.style.background = ''; });
+inp.addEventListener('drop', e => {
+  e.preventDefault(); inp.style.background = '';
+  const file = e.dataTransfer.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => { inp.value = ev.target.result; beautify(); };
+  reader.readAsText(file);
+});
+</script>
+</body>
+</html>
