@@ -62,9 +62,6 @@ function page(o) {
     { "@type": "ListItem", "position": 1, "name": "Home", "item": "/" },
     { "@type": "ListItem", "position": 2, "name": "${o.name}", "item": "/${o.route}" } ] }
   </script>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/assets/app.css" />
   <style>
     #input, #output { min-height: 420px; }
@@ -114,7 +111,7 @@ ${o.optionsHtml}
             <span class="panel-meta" id="out-meta"></span>
             <button class="btn sm" id="fs" title="Fullscreen (Esc to close)" aria-label="Fullscreen ${o.outTitle}"><span aria-hidden="true">⛶</span> Fullscreen</button>
             <button class="btn sm" id="copy">Copy</button>
-            <button class="btn sm" id="dl">Download ${o.ext}</button>
+            <button class="btn sm" id="dl">Download <span class="no-caps">${o.ext}</span></button>
           </span>
         </div>
         <textarea id="output" spellcheck="false" readonly wrap="off"></textarea>

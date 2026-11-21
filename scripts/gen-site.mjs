@@ -6,8 +6,8 @@
 import fs from 'node:fs';
 import vm from 'node:vm';
 import crypto from 'node:crypto';
+import { SITE_URL, PREVIOUS_ORIGINS } from './site.mjs';
 
-const SITE_URL = 'https://devtool-moya.netlify.app';
 const root = process.argv[2] || '.';
 // --only a,b  → rewrite only these tool pages (others are read to compute _headers). Used while
 // several people edit pages in parallel; a full run (no --only) regenerates everything.
@@ -57,48 +57,33 @@ const ld = JSON.stringify({
   hasPart: tools.map(t => ({ '@type': 'WebApplication', name: t.name, url: SITE_URL + '/' + t.route, description: t.desc, applicationCategory: 'DeveloperApplication', operatingSystem: 'Any' })),
 }, null, 2);
 
-const grid = CATS.map(c => `      <section class="home-cat">
-        <h2>${esc(c.name)}</h2>
-        <div class="home-grid">
-${c.tools.map(t => `          <a class="home-card" href="/${t.route}"><span class="home-card-name">${esc(t.name)}</span><span class="home-card-desc">${esc(t.desc)}</span></a>`).join('\n')}
-        </div>
+// sheet index: every tool as a numbered drawing sheet (same numbers as the sidebar and title block)
+const sheetNo = (route) => String(tools.findIndex(t => t.route === route) + 1).padStart(2, '0');
+const grid = CATS.map(c => `      <section class="sheet-cat" aria-labelledby="cat-${c.id}">
+        <h2 id="cat-${c.id}">${esc(c.name)}</h2>
+        <ul class="sheet-list">
+${c.tools.map(t => `          <li><a class="sheet" href="/${t.route}"><span class="sheet-no" aria-hidden="true">${sheetNo(t.route)}</span><span class="sheet-name">${esc(t.name)}</span><span class="sheet-desc">${esc(t.desc)}</span></a></li>`).join('\n')}
+        </ul>
       </section>`).join('\n');
 
 const home = `${head('DevTools — Free, Private, Client-Side Developer Tools',
   `${tools.length} free developer tools: JSON formatter, Base64, hashes, JWT, regex, case converter, GUID, password generator, Mermaid diagrams and more. Everything runs in your browser.`,
   '/', `  <script type="application/ld+json">\n${ld}\n  </script>\n`)}
-  <style>
-    .hero { padding: 28px 0 8px; }
-    .hero h1 { font-size: 34px; font-weight: 800; letter-spacing: -0.8px; line-height: 1.15; }
-    .hero h1 em { font-style: normal; color: var(--accent); }
-    .hero p { color: var(--muted2); margin-top: 10px; max-width: 640px; font-size: 15px; }
-    .home-search { margin-top: 18px; width: min(460px, 100%); font-size: 14px; padding: 10px 14px; }
-    .home-cat { margin-top: 28px; }
-    .home-cat h2 { font-size: 11px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
-    .home-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; }
-    .home-card { display: flex; flex-direction: column; gap: 4px; padding: 14px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); text-decoration: none; transition: border-color .12s, transform .12s; }
-    .home-card:hover { border-color: var(--accent); transform: translateY(-1px); }
-    .home-card-name { color: var(--text); font-weight: 700; font-size: 14px; }
-    .home-card-desc { color: var(--muted2); font-size: 12px; }
-    .home-empty { color: var(--muted); margin-top: 24px; }
-    @media (max-width: 860px) { .hero h1 { font-size: 26px; } }
-  </style>
 </head>
 ${shellOpen}
   <main class="page">
     <section class="hero">
+      <p class="hero-kicker">Drawing set · ${tools.length} sheets · Drawn by <a href="https://github.com/mehmetoya" rel="author noopener">M. Oya</a> · rev. ${tools.map(t => t.rev).sort().pop()}</p>
       <h1>Developer tools that <em>never see your data</em>.</h1>
-      <p>${tools.length} utilities for text, encoding, JSON, regex and everyday development. No backend, no logging, no share links — everything runs in your browser.</p>
-      <input type="search" class="home-search" id="home-search" placeholder="Search tools…" aria-label="Search tools" />
+      <p class="hero-lede">${tools.length} utilities for text, encoding, JSON, regex and everyday development. No backend, no logging, no share links — everything runs in your browser.</p>
+      <button type="button" class="hero-find" id="home-find" aria-keyshortcuts="Control+K Meta+K /"><span>Find a tool…</span><kbd aria-hidden="true">/</kbd></button>
     </section>
-    <section class="home-cat" id="home-favs" hidden>
-      <h2>★ Favorites</h2>
-      <div class="home-grid" id="home-favs-grid"></div>
+    <section class="sheet-cat" id="home-favs" aria-labelledby="favs-title">
+      <h2 id="favs-title">★ Favorites</h2>
+      <ul class="sheet-list" id="home-favs-list"></ul>
+      <p class="sheet-empty" id="home-favs-empty">Star a tool in the sidebar to pin it here — then open it from anywhere with <kbd>g</kbd> <kbd>1</kbd>–<kbd>9</kbd>.</p>
     </section>
-    <div id="home-all">
 ${grid}
-    </div>
-    <p class="home-empty" id="home-empty" hidden>No tools match your search.</p>
     <section class="about">
       <h2>Privacy by design</h2>
       <p>Every page is static HTML served with a strict Content-Security-Policy: only the site's own scripts run, and — except for the HTTP Client — page scripts cannot open network connections (<code>connect-src 'none'</code>), so what you paste is processed locally. Fonts and libraries are self-hosted; no analytics, no third-party requests.</p>
@@ -109,27 +94,16 @@ ${shellClose}
 <script>
 (function () {
   'use strict';
-  const { $, $$, el, allTools, readFavs } = DevTools;
-  const q = $('#home-search');
-  function filter() {
-    const v = q.value.trim().toLowerCase();
-    let shown = 0;
-    $$('#home-all .home-cat').forEach(sec => {
-      let n = 0;
-      $$('.home-card', sec).forEach(a => { const hit = !v || a.textContent.toLowerCase().includes(v); a.hidden = !hit; if (hit) n++; });
-      sec.hidden = n === 0; shown += n;
-    });
-    $('#home-empty').hidden = shown > 0;
-  }
+  const { $, el, allTools, readFavs, openPalette } = DevTools;
+  $('#home-find').addEventListener('click', openPalette);
   function favs() {
     const tools = allTools();
     const list = readFavs().map(r => tools.find(t => t.route === r)).filter(Boolean);
-    $('#home-favs').hidden = list.length === 0;
-    $('#home-favs-grid').replaceChildren(...list.map(t => el('a', { class: 'home-card', href: '/' + t.route },
-      el('span', { class: 'home-card-name' }, t.name), el('span', { class: 'home-card-desc' }, t.desc))));
+    $('#home-favs-empty').hidden = list.length > 0;
+    $('#home-favs-list').replaceChildren(...list.map(t => el('li', null, el('a', { class: 'sheet', href: '/' + t.route },
+      el('span', { class: 'sheet-no', 'aria-hidden': 'true' }, String(tools.indexOf(t) + 1).padStart(2, '0')),
+      el('span', { class: 'sheet-name' }, t.name), el('span', { class: 'sheet-desc' }, t.desc)))));
   }
-  q.addEventListener('input', filter);
-  q.addEventListener('keydown', e => { if (e.key === 'Enter') { const a = $$('#home-all .home-card').find(x => !x.hidden); if (a) location.href = a.getAttribute('href'); } });
   document.addEventListener('devtools:favorites', favs);
   favs();
 })();
@@ -144,18 +118,9 @@ const notFound = `${head('Page not found — DevTools', 'This page does not exis
 ${shellOpen}
   <main class="page">
     <section class="tool-head">
-      <h1>404 — Page not found</h1>
-      <p>That page does not exist. Pick a tool below or go back to the <a href="/">home page</a>.</p>
+      <h1>404 — Sheet not found</h1>
+      <p>This drawing is not in the set. Pick one of the ${tools.length} sheets below, use <b>Find a tool</b> (<kbd>⌘K</kbd> / <kbd>Ctrl+K</kbd>), or go to <a href="/">all tools</a>.</p>
     </section>
-    <style>
-      .home-cat { margin-top: 24px; }
-      .home-cat h2 { font-size: 11px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
-      .home-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 8px; }
-      .home-card { display: flex; flex-direction: column; gap: 2px; padding: 10px 14px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); text-decoration: none; }
-      .home-card:hover { border-color: var(--accent); }
-      .home-card-name { color: var(--text); font-weight: 700; }
-      .home-card-desc { color: var(--muted2); font-size: 12px; }
-    </style>
 ${grid}
   </main>
 ${shellClose}
@@ -186,6 +151,12 @@ function syncPage(file, route) {
   // self-hosted fonts: drop Google Fonts links
   html = html.replace(/^[ \t]*<link[^>]+fonts\.(googleapis|gstatic)\.com[^>]*>\r?\n/gm, '');
   // absolute URLs for canonical / og:url / JSON-LD
+  { // rewrite old origins in <head> only (canonical, og:url, JSON-LD); page bodies are left alone
+    const end = html.indexOf('</head>');
+    let headPart = html.slice(0, end);
+    for (const o of PREVIOUS_ORIGINS) headPart = headPart.split(o + '/').join('/').split(o + '"').join('/"');
+    html = headPart + html.slice(end);
+  }
   html = html.replace(/(<link rel="canonical" href=")\/([^"]*)"/g, `$1${SITE_URL}/$2"`)
              .replace(/(<meta property="og:url"\s+content=")\/([^"]*)"/g, `$1${SITE_URL}/$2"`)
              .replace(/("(?:url|item)":\s*")\/([^"]*)"/g, `$1${SITE_URL}/$2"`)
@@ -241,21 +212,29 @@ for (const [path, policy] of policies) headers += block(path, ['Content-Security
 fs.writeFileSync(root + '/_headers', headers);
 
 // repo-only files are not part of the site
-const hidden = ['/scripts/*', '/README.md', '/LICENSE', '/netlify.toml', '/_headers'];
+const hidden = ['/scripts/*', '/docs/*', '/README.md', '/LICENSE', '/netlify.toml', '/_headers'];
 if (!ONLY) fs.writeFileSync(root + '/netlify.toml', `# ── netlify.toml ── GENERATED by scripts/gen-site.mjs
-# Static multi-tool site. No build step. Each tool lives in /<route>/index.html,
-# which Netlify serves at /<route> automatically; unknown paths get /404.html.
+# Static multi-tool site. The build runs the quality gate, then copies the public allow-list into
+# dist/ (scripts/build-dist.mjs), which is the only published folder. Each tool lives in
+# /<route>/index.html; unknown paths get /404.html.
 # Security headers live in _headers.
 
 [build]
-  publish = "."
+  publish = "dist"
   # Quality gate: registry/headers/sitemap consistency, generator drift, CSP hashes,
   # HTML-sink allow-list, vendor hashes. A failing check stops the deploy.
-  command = "node scripts/check.mjs"
+  command = "node scripts/check.mjs && node scripts/build-dist.mjs"
 
 [build.environment]
   NODE_VERSION = "22"
 
+# Old public origins move permanently to SITE_URL (deploy previews use other hosts and are unaffected).
+${PREVIOUS_ORIGINS.map(o => `[[redirects]]
+  from   = "${o}/*"
+  to     = "${SITE_URL}/:splat"
+  status = 301
+  force  = true
+`).join('\n')}
 # Serve /<route> directly (200) instead of Netlify's 301 to /<route>/, so links, canonicals
 # and the per-path CSP in _headers all use the same URL.
 ${tools.map(t => `[[redirects]]
@@ -277,5 +256,5 @@ if (!ONLY) fs.writeFileSync(root + '/sitemap.xml', `<?xml version="1.0" encoding
 ${['', ...tools.map(t => t.route)].map(r => `  <url><loc>${SITE_URL}/${r}</loc></url>`).join('\n')}
 </urlset>
 `);
-if (!ONLY) fs.writeFileSync(root + '/robots.txt', `User-agent: *\nAllow: /\nDisallow: /scripts/\n\nSitemap: ${SITE_URL}/sitemap.xml\n`);
+if (!ONLY) fs.writeFileSync(root + '/robots.txt', `User-agent: *\nAllow: /\nDisallow: /scripts/\nDisallow: /docs/\n\nSitemap: ${SITE_URL}/sitemap.xml\n`);
 console.log('tools:', tools.length, 'pages synced:', policies.length);

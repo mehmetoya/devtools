@@ -24,75 +24,66 @@
 
   <main class="page">
     <section class="tool-head">
-      <h1>404 — Page not found</h1>
-      <p>That page does not exist. Pick a tool below or go back to the <a href="/">home page</a>.</p>
+      <h1>404 — Sheet not found</h1>
+      <p>This drawing is not in the set. Pick one of the 28 sheets below, use <b>Find a tool</b> (<kbd>⌘K</kbd> / <kbd>Ctrl+K</kbd>), or go to <a href="/">all tools</a>.</p>
     </section>
-    <style>
-      .home-cat { margin-top: 24px; }
-      .home-cat h2 { font-size: 11px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
-      .home-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 8px; }
-      .home-card { display: flex; flex-direction: column; gap: 2px; padding: 10px 14px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); text-decoration: none; }
-      .home-card:hover { border-color: var(--accent); }
-      .home-card-name { color: var(--text); font-weight: 700; }
-      .home-card-desc { color: var(--muted2); font-size: 12px; }
-    </style>
-      <section class="home-cat">
-        <h2>Text Operations</h2>
-        <div class="home-grid">
-          <a class="home-card" href="/case-converter"><span class="home-card-name">Case Converter</span><span class="home-card-desc">camelCase, snake_case, PascalCase, kebab-case and more.</span></a>
-          <a class="home-card" href="/reverse"><span class="home-card-name">String Reverse</span><span class="home-card-desc">Reverse strings, lines, words or each word.</span></a>
-          <a class="home-card" href="/trim-pad"><span class="home-card-name">Trim / Pad</span><span class="home-card-desc">Trim whitespace or pad text to a width.</span></a>
-          <a class="home-card" href="/line-counter"><span class="home-card-name">Line Counter</span><span class="home-card-desc">Lines, words, characters, bytes and more.</span></a>
-          <a class="home-card" href="/line-operations"><span class="home-card-name">Line Operations</span><span class="home-card-desc">Sort, dedupe, filter, number, join lines.</span></a>
-          <a class="home-card" href="/compare"><span class="home-card-name">String Compare</span><span class="home-card-desc">Compare two strings line by line.</span></a>
-        </div>
+      <section class="sheet-cat" aria-labelledby="cat-text">
+        <h2 id="cat-text">Text Operations</h2>
+        <ul class="sheet-list">
+          <li><a class="sheet" href="/case-converter"><span class="sheet-no" aria-hidden="true">01</span><span class="sheet-name">Case Converter</span><span class="sheet-desc">camelCase, snake_case, PascalCase, kebab-case and more.</span></a></li>
+          <li><a class="sheet" href="/reverse"><span class="sheet-no" aria-hidden="true">02</span><span class="sheet-name">String Reverse</span><span class="sheet-desc">Reverse strings, lines, words or each word.</span></a></li>
+          <li><a class="sheet" href="/trim-pad"><span class="sheet-no" aria-hidden="true">03</span><span class="sheet-name">Trim / Pad</span><span class="sheet-desc">Trim whitespace or pad text to a width.</span></a></li>
+          <li><a class="sheet" href="/line-counter"><span class="sheet-no" aria-hidden="true">04</span><span class="sheet-name">Line Counter</span><span class="sheet-desc">Lines, words, characters, bytes and more.</span></a></li>
+          <li><a class="sheet" href="/line-operations"><span class="sheet-no" aria-hidden="true">05</span><span class="sheet-name">Line Operations</span><span class="sheet-desc">Sort, dedupe, filter, number, join lines.</span></a></li>
+          <li><a class="sheet" href="/compare"><span class="sheet-no" aria-hidden="true">06</span><span class="sheet-name">String Compare</span><span class="sheet-desc">Compare two strings line by line.</span></a></li>
+        </ul>
       </section>
-      <section class="home-cat">
-        <h2>Encode / Decode</h2>
-        <div class="home-grid">
-          <a class="home-card" href="/base64"><span class="home-card-name">Base64</span><span class="home-card-desc">Encode and decode Base64 (UTF-8, ASCII, UTF-16, UTF-32).</span></a>
-          <a class="home-card" href="/url-encode"><span class="home-card-name">URL Encode</span><span class="home-card-desc">Percent-encode or decode URL strings.</span></a>
-          <a class="home-card" href="/hash-generator"><span class="home-card-name">Hash Generator</span><span class="home-card-desc">MD5, SHA-1, SHA-256, SHA-384, SHA-512 + verify.</span></a>
-          <a class="home-card" href="/jwt-tool"><span class="home-card-name">JWT Tool</span><span class="home-card-desc">Generate, decode and validate JSON Web Tokens.</span></a>
-        </div>
+      <section class="sheet-cat" aria-labelledby="cat-encode">
+        <h2 id="cat-encode">Encode / Decode</h2>
+        <ul class="sheet-list">
+          <li><a class="sheet" href="/base64"><span class="sheet-no" aria-hidden="true">07</span><span class="sheet-name">Base64</span><span class="sheet-desc">Encode and decode Base64 (UTF-8, ASCII, UTF-16, UTF-32).</span></a></li>
+          <li><a class="sheet" href="/url-encode"><span class="sheet-no" aria-hidden="true">08</span><span class="sheet-name">URL Encode</span><span class="sheet-desc">Percent-encode or decode URL strings.</span></a></li>
+          <li><a class="sheet" href="/hash-generator"><span class="sheet-no" aria-hidden="true">09</span><span class="sheet-name">Hash Generator</span><span class="sheet-desc">MD5, SHA-1, SHA-256, SHA-384, SHA-512 + verify.</span></a></li>
+          <li><a class="sheet" href="/jwt-tool"><span class="sheet-no" aria-hidden="true">10</span><span class="sheet-name">JWT Tool</span><span class="sheet-desc">Generate, decode and validate JSON Web Tokens.</span></a></li>
+        </ul>
       </section>
-      <section class="home-cat">
-        <h2>JSON Tools</h2>
-        <div class="home-grid">
-          <a class="home-card" href="/json-formatter"><span class="home-card-name">JSON Formatter</span><span class="home-card-desc">Validate, beautify, minify, sort keys.</span></a>
-          <a class="home-card" href="/json-compare"><span class="home-card-name">JSON Compare</span><span class="home-card-desc">Structural diff of two JSON documents.</span></a>
-          <a class="home-card" href="/json-to-csharp"><span class="home-card-name">JSON to C#</span><span class="home-card-desc">Generate C# classes or records from JSON.</span></a>
-          <a class="home-card" href="/json-to-java"><span class="home-card-name">JSON to Java</span><span class="home-card-desc">Generate Java POJOs / records from JSON.</span></a>
-          <a class="home-card" href="/json-to-typescript"><span class="home-card-name">JSON to TypeScript</span><span class="home-card-desc">Generate TypeScript interfaces / types.</span></a>
-        </div>
+      <section class="sheet-cat" aria-labelledby="cat-json">
+        <h2 id="cat-json">JSON Tools</h2>
+        <ul class="sheet-list">
+          <li><a class="sheet" href="/json-formatter"><span class="sheet-no" aria-hidden="true">11</span><span class="sheet-name">JSON Formatter</span><span class="sheet-desc">Validate, beautify, minify, sort keys.</span></a></li>
+          <li><a class="sheet" href="/json-compare"><span class="sheet-no" aria-hidden="true">12</span><span class="sheet-name">JSON Compare</span><span class="sheet-desc">Structural diff of two JSON documents.</span></a></li>
+          <li><a class="sheet" href="/json-to-csharp"><span class="sheet-no" aria-hidden="true">13</span><span class="sheet-name">JSON to C#</span><span class="sheet-desc">Generate C# classes or records from JSON.</span></a></li>
+          <li><a class="sheet" href="/json-to-java"><span class="sheet-no" aria-hidden="true">14</span><span class="sheet-name">JSON to Java</span><span class="sheet-desc">Generate Java POJOs / records from JSON.</span></a></li>
+          <li><a class="sheet" href="/json-to-typescript"><span class="sheet-no" aria-hidden="true">15</span><span class="sheet-name">JSON to TypeScript</span><span class="sheet-desc">Generate TypeScript interfaces / types.</span></a></li>
+        </ul>
       </section>
-      <section class="home-cat">
-        <h2>Regex Tools</h2>
-        <div class="home-grid">
-          <a class="home-card" href="/regex-search"><span class="home-card-name">Regex Search</span><span class="home-card-desc">Find matches and capture groups.</span></a>
-          <a class="home-card" href="/regex-replace"><span class="home-card-name">Regex Replace</span><span class="home-card-desc">Find and replace with group references.</span></a>
-          <a class="home-card" href="/extract"><span class="home-card-name">String Extract</span><span class="home-card-desc">Extract by position, delimiters, regex or line range.</span></a>
-        </div>
+      <section class="sheet-cat" aria-labelledby="cat-regex">
+        <h2 id="cat-regex">Regex Tools</h2>
+        <ul class="sheet-list">
+          <li><a class="sheet" href="/regex-search"><span class="sheet-no" aria-hidden="true">16</span><span class="sheet-name">Regex Search</span><span class="sheet-desc">Find matches and capture groups.</span></a></li>
+          <li><a class="sheet" href="/regex-replace"><span class="sheet-no" aria-hidden="true">17</span><span class="sheet-name">Regex Replace</span><span class="sheet-desc">Find and replace with group references.</span></a></li>
+          <li><a class="sheet" href="/extract"><span class="sheet-no" aria-hidden="true">18</span><span class="sheet-name">String Extract</span><span class="sheet-desc">Extract by position, delimiters, regex or line range.</span></a></li>
+        </ul>
       </section>
-      <section class="home-cat">
-        <h2>Developer Tools</h2>
-        <div class="home-grid">
-          <a class="home-card" href="/datetime-formatter"><span class="home-card-name">DateTime Formatter</span><span class="home-card-desc">.NET-style date/time format strings.</span></a>
-          <a class="home-card" href="/string-formatter"><span class="home-card-name">String Formatter</span><span class="home-card-desc">Numeric formats, padding, composite formatting.</span></a>
-          <a class="home-card" href="/guid-generator"><span class="home-card-name">GUID Generator</span><span class="home-card-desc">Generate and parse GUIDs / UUIDs.</span></a>
-          <a class="home-card" href="/password-generator"><span class="home-card-name">Password Generator</span><span class="home-card-desc">Secure passwords with custom rules.</span></a>
-          <a class="home-card" href="/number-converter"><span class="home-card-name">Number Converter</span><span class="home-card-desc">Binary, decimal, hexadecimal, octal.</span></a>
-          <a class="home-card" href="/barcode-generator"><span class="home-card-name">Barcode Generator</span><span class="home-card-desc">QR codes, EAN-13 and EAN-8 barcodes.</span></a>
-          <a class="home-card" href="/http-client"><span class="home-card-name">HTTP Client</span><span class="home-card-desc">Build and send HTTP requests.</span></a>
-        </div>
+      <section class="sheet-cat" aria-labelledby="cat-dev">
+        <h2 id="cat-dev">Developer Tools</h2>
+        <ul class="sheet-list">
+          <li><a class="sheet" href="/datetime-formatter"><span class="sheet-no" aria-hidden="true">19</span><span class="sheet-name">DateTime Formatter</span><span class="sheet-desc">.NET-style date/time format strings.</span></a></li>
+          <li><a class="sheet" href="/string-formatter"><span class="sheet-no" aria-hidden="true">20</span><span class="sheet-name">String Formatter</span><span class="sheet-desc">Numeric formats, padding, composite formatting.</span></a></li>
+          <li><a class="sheet" href="/guid-generator"><span class="sheet-no" aria-hidden="true">21</span><span class="sheet-name">GUID Generator</span><span class="sheet-desc">Generate and parse GUIDs / UUIDs.</span></a></li>
+          <li><a class="sheet" href="/password-generator"><span class="sheet-no" aria-hidden="true">22</span><span class="sheet-name">Password Generator</span><span class="sheet-desc">Secure passwords with custom rules.</span></a></li>
+          <li><a class="sheet" href="/number-converter"><span class="sheet-no" aria-hidden="true">23</span><span class="sheet-name">Number Converter</span><span class="sheet-desc">Binary, decimal, hexadecimal, octal.</span></a></li>
+          <li><a class="sheet" href="/barcode-generator"><span class="sheet-no" aria-hidden="true">24</span><span class="sheet-name">Barcode Generator</span><span class="sheet-desc">QR codes, EAN-13 and EAN-8 barcodes.</span></a></li>
+          <li><a class="sheet" href="/http-client"><span class="sheet-no" aria-hidden="true">25</span><span class="sheet-name">HTTP Client</span><span class="sheet-desc">Build and send HTTP requests.</span></a></li>
+        </ul>
       </section>
-      <section class="home-cat">
-        <h2>Viewers</h2>
-        <div class="home-grid">
-          <a class="home-card" href="/markdown-viewer"><span class="home-card-name">Markdown Viewer</span><span class="home-card-desc">Live Markdown preview and export.</span></a>
-          <a class="home-card" href="/html-viewer"><span class="home-card-name">HTML Viewer</span><span class="home-card-desc">Sandboxed live HTML preview.</span></a>
-          <a class="home-card" href="/diagram-viewer"><span class="home-card-name">Diagram Viewer</span><span class="home-card-desc">Mermaid diagrams to SVG / PNG.</span></a>
-        </div>
+      <section class="sheet-cat" aria-labelledby="cat-viewers">
+        <h2 id="cat-viewers">Viewers</h2>
+        <ul class="sheet-list">
+          <li><a class="sheet" href="/markdown-viewer"><span class="sheet-no" aria-hidden="true">26</span><span class="sheet-name">Markdown Viewer</span><span class="sheet-desc">Live Markdown preview and export.</span></a></li>
+          <li><a class="sheet" href="/html-viewer"><span class="sheet-no" aria-hidden="true">27</span><span class="sheet-name">HTML Viewer</span><span class="sheet-desc">Sandboxed live HTML preview.</span></a></li>
+          <li><a class="sheet" href="/diagram-viewer"><span class="sheet-no" aria-hidden="true">28</span><span class="sheet-name">Diagram Viewer</span><span class="sheet-desc">Mermaid diagrams to SVG / PNG.</span></a></li>
+        </ul>
       </section>
   </main>
 </div>

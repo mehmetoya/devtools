@@ -8,11 +8,11 @@
   <meta name="description" content="Try C#/.NET DateTime format strings live: standard formats (d, D, f, F, o, R, s, u), custom patterns like yyyy-MM-dd HH:mm:ss, and culture-specific month and day names. Runs in your browser." />
   <meta name="keywords" content="c# datetime format, .net date format string, datetime tostring, yyyy-MM-dd, custom date format, date format tester" />
   <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large" />
-  <link rel="canonical" href="https://devtool-moya.netlify.app/datetime-formatter" />
+  <link rel="canonical" href="https://tool.mehmetoya.com/datetime-formatter" />
   <meta property="og:type" content="website" />
   <meta property="og:title" content="DateTime Formatter — .NET Date Format Strings Online" />
   <meta property="og:description" content="Preview .NET DateTime.ToString formats for any date and culture, right in your browser." />
-  <meta property="og:url" content="https://devtool-moya.netlify.app/datetime-formatter" />
+  <meta property="og:url" content="https://tool.mehmetoya.com/datetime-formatter" />
   <meta property="og:site_name" content="DevTools" />
   <meta name="twitter:card" content="summary" />
   <script type="application/ld+json">
@@ -20,7 +20,7 @@
     "@context": "https://schema.org",
     "@type": "WebApplication",
     "name": "DateTime Formatter",
-    "url": "https://devtool-moya.netlify.app/datetime-formatter",
+    "url": "https://tool.mehmetoya.com/datetime-formatter",
     "description": "Free online tester for C# / .NET DateTime format strings with standard and custom formats and multiple cultures. Runs client-side.",
     "applicationCategory": "DeveloperApplication",
     "operatingSystem": "Any",
@@ -31,8 +31,8 @@
   </script>
   <script type="application/ld+json">
   { "@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [
-    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://devtool-moya.netlify.app/" },
-    { "@type": "ListItem", "position": 2, "name": "DateTime Formatter", "item": "https://devtool-moya.netlify.app/datetime-formatter" } ] }
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://tool.mehmetoya.com/" },
+    { "@type": "ListItem", "position": 2, "name": "DateTime Formatter", "item": "https://tool.mehmetoya.com/datetime-formatter" } ] }
   </script>
   <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
   <link rel="stylesheet" href="/assets/app.css" />
@@ -43,11 +43,13 @@
     .parse-in { flex: 1 1 200px; min-width: 0; }
     .custom-wrap { padding: 14px; display: flex; flex-direction: column; gap: 10px; }
     .custom-wrap input { width: 100%; font-size: 15px; }
-    .custom-res { font-family: var(--mono); font-size: 18px; color: var(--accent); word-break: break-all; min-height: 28px; }
+    .custom-res { font-family: var(--mono); font-size: 18px; color: var(--text); word-break: break-all; min-height: 28px; }
     .custom-res.err { color: var(--danger); font-size: 13px; }
     .code-line { font-family: var(--mono); font-size: 12px; color: var(--muted2); word-break: break-all; }
     .tbl-wrap { overflow-x: auto; }
-    .fmt-tbl td.res { font-family: var(--mono); color: var(--accent); word-break: break-word; }
+    /* result tables read best full width: formatted values stay on one line */
+    .grid-2.sec { grid-template-columns: minmax(0, 1fr); }
+    .fmt-tbl td.res { font-family: var(--mono); color: var(--text); white-space: nowrap; }
     .fmt-tbl td.desc { color: var(--muted2); font-size: 12px; }
     .fmt-tbl td.act { width: 1%; white-space: nowrap; }
     .fmt-tbl code { cursor: pointer; white-space: nowrap; }

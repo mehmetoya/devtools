@@ -8,11 +8,11 @@
   <meta name="description" content="Write Mermaid diagram code and see flowcharts, sequence, class, state, ER, Gantt, pie, git and mind-map diagrams render live. Export SVG or PNG. Runs entirely in your browser." />
   <meta name="keywords" content="mermaid editor, mermaid live, diagram viewer, flowchart online, sequence diagram, mermaid to png, mermaid to svg" />
   <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large" />
-  <link rel="canonical" href="https://devtool-moya.netlify.app/diagram-viewer" />
+  <link rel="canonical" href="https://tool.mehmetoya.com/diagram-viewer" />
   <meta property="og:type" content="website" />
   <meta property="og:title" content="Diagram Viewer — Mermaid Editor with SVG &amp; PNG Export" />
   <meta property="og:description" content="Live Mermaid diagram editor with themes, templates and SVG/PNG export." />
-  <meta property="og:url" content="https://devtool-moya.netlify.app/diagram-viewer" />
+  <meta property="og:url" content="https://tool.mehmetoya.com/diagram-viewer" />
   <meta property="og:site_name" content="DevTools" />
   <meta name="twitter:card" content="summary" />
   <script type="application/ld+json">
@@ -20,7 +20,7 @@
     "@context": "https://schema.org",
     "@type": "WebApplication",
     "name": "Diagram Viewer",
-    "url": "https://devtool-moya.netlify.app/diagram-viewer",
+    "url": "https://tool.mehmetoya.com/diagram-viewer",
     "description": "Free online Mermaid diagram editor with live preview, themes, templates and SVG/PNG export. Runs client-side.",
     "applicationCategory": "DeveloperApplication",
     "operatingSystem": "Any",
@@ -31,8 +31,8 @@
   </script>
   <script type="application/ld+json">
   { "@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [
-    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://devtool-moya.netlify.app/" },
-    { "@type": "ListItem", "position": 2, "name": "Diagram Viewer", "item": "https://devtool-moya.netlify.app/diagram-viewer" } ] }
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://tool.mehmetoya.com/" },
+    { "@type": "ListItem", "position": 2, "name": "Diagram Viewer", "item": "https://tool.mehmetoya.com/diagram-viewer" } ] }
   </script>
   <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
   <link rel="stylesheet" href="/assets/app.css" />
@@ -46,12 +46,12 @@
     .canvas.dark { background: #1f2020; }
     .canvas svg { max-width: none !important; height: auto; flex-shrink: 0; }
     .canvas.fit svg { max-width: 100% !important; }
-    .canvas .placeholder { color: #8a8f9c; font-size: 13px; align-self: center; }
+    .canvas .placeholder { color: var(--muted); font-size: 13px; align-self: center; }
     .panel.is-fs { position: fixed; inset: 0; z-index: 500; height: auto !important; border-radius: 0; }
     #msg { white-space: pre-wrap; }
     #msg .btn { margin-left: 8px; font-family: var(--sans); }
     .canvas.stale > svg { opacity: .4; }
-    .stale-badge { font-size: 11px; font-weight: 700; color: var(--warn); background: var(--warn-dim); border: 1px solid currentColor; border-radius: 20px; padding: 1px 8px; white-space: nowrap; }
+    .stale-badge { font-size: 11px; font-weight: 500; color: var(--warn); background: var(--warn-dim); border: 1px solid currentColor; border-radius: 0; padding: 1px 8px; white-space: nowrap; }
     @media (max-width: 860px) {
       .viewer { grid-template-columns: 1fr; }
       .viewer .panel { height: 52vh; min-height: 300px; }
@@ -114,7 +114,7 @@
             <span class="panel-meta" id="in-meta"></span>
             <button class="btn sm" id="clear">Clear</button>
             <button class="btn sm" id="copy-code">Copy</button>
-            <button class="btn sm" id="dl-mmd">Download .mmd</button>
+            <button class="btn sm" id="dl-mmd">Download <span class="no-caps">.mmd</span></button>
             <button class="btn sm fs-btn" title="Fullscreen (Esc to exit)" aria-label="Fullscreen">⛶</button>
           </span>
         </div>

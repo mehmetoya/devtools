@@ -1,67 +1,83 @@
-# DevTools — Free, Private, Client-Side Developer Tools
+<div align="center">
 
-A growing collection of free online developer utilities. Every tool runs entirely in your browser — no data is sent to any server or logged. The only thing kept is local to your browser: favorites and the last draft of the Markdown, HTML and Diagram viewers (localStorage).
+# DevTools · DT‑28
 
-**Live site:** https://devtool-moya.netlify.app
+**28 developer tools that never see your data.**<br>
+JSON, Base64, hashes, JWT, regex, GUIDs, diagrams and more — running entirely in your browser, under a strict per-page Content-Security-Policy.
+
+[**tool.mehmetoya.com**](https://tool.mehmetoya.com)
+
+[![Netlify Status](https://api.netlify.com/api/v1/badges/725c29b1-347e-455b-b390-7201fd3dc69a/deploy-status)](https://app.netlify.com/projects/devtool-moya/deploys)
+[![License: MIT](https://img.shields.io/badge/license-MIT-ff7a45.svg)](LICENSE)
+![No backend](https://img.shields.io/badge/backend-none-5fd39a.svg)
+![Dependencies](https://img.shields.io/badge/npm%20dependencies-0-5fd39a.svg)
+![CSP](https://img.shields.io/badge/CSP-hash--based-6cb6ff.svg)
+
+<img src=".github/assets/home.png" alt="DevTools home page: a numbered drawing-sheet index of 28 tools with favorites, sidebar and a Find a tool command palette trigger" width="900">
+
+</div>
 
 ---
+
+## Why
+
+Most online formatters save what you paste to a public URL, log it server-side, or list it in an enumerable "recent" feed. In June 2026 researchers at BeyondMemory [documented](https://beyondmemory.io/blog/json-formatter-data-exposure) seven years of sensitive data — national IDs, IBANs, card numbers, API keys, production secrets — publicly readable on `jsonformatter.org`, plus a stored XSS in the formatter itself.
+
+This project is the answer to that pattern: **the tool should never know what you pasted.** There is no server, no database, no analytics, no share links. Pages are static files; your input stays in the tab.
 
 ## Tools
 
 | Category | Tools |
 |---|---|
-| Text | Case Converter, String Reverse, Trim / Pad, Line Counter, Line Operations, String Compare |
-| Encode / Decode | Base64, URL Encode, Hash Generator (MD5/SHA/HMAC), JWT Tool |
-| JSON | JSON Formatter, JSON Compare, JSON → C#, JSON → Java, JSON → TypeScript |
-| Regex | Regex Search, Regex Replace, String Extract |
-| Developer | DateTime Formatter, String Formatter, GUID Generator, Password Generator, Number Converter, Barcode/QR Generator, HTTP Client |
-| Viewers | Markdown Viewer, HTML Viewer (sandboxed), Diagram Viewer (Mermaid) |
+| **Text** | Case Converter · String Reverse · Trim / Pad · Line Counter · Line Operations · String Compare |
+| **Encode / Decode** | Base64 · URL Encode · Hash Generator (MD5 / SHA / HMAC + verify) · JWT Tool |
+| **JSON** | JSON Formatter (lossless big numbers) · JSON Compare · JSON → C# · JSON → Java · JSON → TypeScript |
+| **Regex** | Regex Search · Regex Replace · String Extract — user patterns run in a worker with a timeout (ReDoS-safe) |
+| **Developer** | DateTime Formatter · String Formatter (.NET-accurate) · GUID Generator · Password Generator · Number Converter · Barcode / QR · HTTP Client |
+| **Viewers** | Markdown Viewer · HTML Viewer (sandboxed iframe) · Diagram Viewer (Mermaid) |
 
-Each tool lives at `/<route>` (folder `<route>/index.html`). The registry of tools is in `assets/tools.js`.
+Every tool lives at `/<route>`; the registry (names, aliases, revisions) is in [`assets/tools.js`](assets/tools.js).
 
----
+## Built for the keyboard
 
-## Why another developer tool site?
+<table>
+<tr>
+<td width="50%"><img src=".github/assets/palette.png" alt="Command palette open over the JSON Formatter, filtering tools for 'has'"></td>
+<td width="50%"><img src=".github/assets/tool.png" alt="JSON Formatter: input and highlighted output panels lettered A and B, with a drawing title block"></td>
+</tr>
+</table>
 
-Most online JSON formatters and similar tools save your pastes to a public URL, log your data server-side, or expose it through an enumerable "recent links" feed. In June 2026, security researchers at BeyondMemory [documented](https://beyondmemory.io/blog/json-formatter-data-exposure) seven years of sensitive data — TCKNs, IBANs, payment card numbers, API keys, and production secrets — sitting publicly accessible on `jsonformatter.org`. The same research found a stored XSS vulnerability in the formatter itself.
+| Keys | Action |
+|---|---|
+| <kbd>/</kbd> or <kbd>⌘K</kbd> / <kbd>Ctrl+K</kbd> | Open the tool palette — prefix and substring match, accent-insensitive, with aliases (`b64`, `uuid`, `c#`, `md5`, `qr`, `curl`…) |
+| <kbd>↑</kbd> <kbd>↓</kbd> <kbd>↵</kbd> <kbd>Esc</kbd> | Move, open, close |
+| <kbd>g</kbd> then <kbd>1</kbd>–<kbd>9</kbd> | Jump to a favorite (★ any tool in the sidebar) |
 
-This project is a direct response to that pattern. The design principle is simple: **the tool should never know what you pasted.**
+Every tool is reachable in **≤ 4 characters** — the build gate proves it. Single-key shortcuts can be switched off in the sidebar (WCAG 2.1.4); <kbd>⌘K</kbd> always works.
 
----
+## Privacy & security model
 
-## Security model
+- **No backend, no storage of input.** Only favorites, the shortcut preference and the last draft of the Markdown / HTML / Diagram viewers are kept, in your browser's `localStorage`.
+- **Hash-based CSP on every page** — `script-src 'self' 'sha256-…'`, no `'unsafe-inline'` (except the sandboxed HTML viewer, which must run your own scripts), `connect-src 'none'` everywhere except `/http-client`, `frame-ancestors 'none'`. The same policy ships as a header and as a `<meta>` tag.
+- **No dynamic HTML from user data.** Tools write with `textContent` / `.value`. The only three HTML sinks — DOMPurify-sanitized Markdown, Mermaid's strict SVG, the sandboxed HTML preview — are pinned by exact line in the build gate.
+- **Zero third-party requests.** Fonts (IBM Plex) and libraries (mermaid, DOMPurify, marked, qrcode) are self-hosted and sha256-pinned in `VERSIONS.txt`.
+- **Only the site is published.** Netlify serves `dist/`, built from an allow-list, so repository files can't leak through case-variant URLs.
 
-### No backend
-There is no server, no database, no API. The site is 100% static HTML/CSS/JS deployed on Netlify. Nothing to breach.
-
-### No save / share / recent links
-These features are intentionally absent. They are the primary data-exposure vector in existing tools.
-
-### XSS prevention
-Tools write user data with `textContent` / `.value` only. There are exactly three reviewed HTML sinks, each allow-listed by `scripts/check.mjs`: the Markdown preview (DOMPurify-sanitized), the Mermaid SVG (`securityLevel: 'strict'`), and the HTML viewer's `srcdoc` (an `<iframe sandbox="allow-scripts">` with an opaque origin). The syntax highlighter builds DOM nodes with `document.createElement` + `textContent`, never string concatenation into HTML. This makes it structurally impossible for a malicious JSON payload to execute code.
-
-### Content Security Policy
-All pages are served with a strict `Content-Security-Policy` header:
+<details>
+<summary><b>Full policy and headers</b></summary>
 
 ```
 default-src 'self';
-script-src 'self' 'sha256-…';   ← only this page's own inline scripts, by hash (no 'unsafe-inline')
+script-src 'self' 'sha256-…';   ← only this page's own inline scripts
 style-src 'self' 'unsafe-inline';
-font-src 'self';                ← fonts are self-hosted, no third-party requests
+font-src 'self';
 img-src 'self' data:;
-connect-src 'none';             ← blocks fetch/XHR/WebSocket from JS
+connect-src 'none';             ← /http-client: http: https:
 object-src 'none';
 base-uri 'self';
 form-action 'self';
-frame-ancestors 'none';         ← prevents clickjacking
-```
+frame-ancestors 'none';
 
-Hash-based `script-src` means injected markup cannot run handlers or scripts, and `connect-src 'none'` stops page scripts from opening network connections. The same policy is also embedded as a `<meta>` tag in every page, so it applies to 404 responses too. Exception: the HTML viewer keeps `'unsafe-inline'` because its sandboxed preview runs the user's own inline scripts.
-
-**Exception:** `/http-client` exists to send requests, so only that path gets `connect-src http: https:`. CSP is therefore set per path in `_headers` rather than on `/*` (Netlify merges overlapping rules, which would make the policy impossible to relax for one page).
-
-### Additional headers
-```
 X-Frame-Options: DENY
 X-Content-Type-Options: nosniff
 Referrer-Policy: strict-origin-when-cross-origin
@@ -69,105 +85,85 @@ Permissions-Policy: geolocation=(), microphone=(), camera=(), payment=(), usb=()
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
 ```
 
----
+CSP is set per path in `_headers` (Netlify merges overlapping rules, which would make relaxing one page impossible).
 
-## Project structure
+</details>
 
-```
-/
-├── index.html              ← Home page (generated)
-├── 404.html                ← Not-found page (generated)
-├── assets/
-│   ├── app.css             ← Shared styles
-│   ├── tools.js            ← Tool registry, header, sidebar (search + favorites), helpers
-│   ├── fonts/              ← Self-hosted Syne + IBM Plex Mono (OFL)
-│   ├── regex-worker.js     ← Runs user regexes off the main thread with a timeout
-│   └── vendor/             ← Pinned third-party libs + VERSIONS.txt (versions, sources, sha256)
-├── <route>/index.html      ← One folder per tool
-├── scripts/gen-site.mjs    ← Generates index.html, 404.html, _headers, netlify.toml, sitemap.xml, robots.txt; syncs page heads + CSP hashes
-├── scripts/json-codegen/   ← Generates the three JSON → code pages from shared inference code
-├── scripts/check.mjs       ← Quality gate (Netlify build command)
-├── scripts/smoke.mjs       ← Post-deploy smoke test against a live URL
-├── _headers                ← Netlify HTTP response headers (generated)
-├── netlify.toml            ← Netlify config (generated)
-└── README.md
-```
+## Design
 
-Adding a new tool:
+A "technical drawing" system: charcoal paper with a measuring grid, one red-pencil accent, panels lettered like drawing views (A, B, C…), and a title block on every tool — *Tool · Sheet 07 / 28 · Rev. · Drawn by M. Oya*. Contrast of every text token is checked at build time (≥ 4.5 : 1), focus is always visible, and the grid turns off under `prefers-contrast` and forced colors.
 
-1. Add it to `CATEGORIES` in `assets/tools.js`
-2. Create `<route>/index.html` (copy `base64/index.html` as a template)
-3. Run `node scripts/gen-site.mjs .` to regenerate the home page, headers and CSP hashes, then `node scripts/check.mjs`
+<div align="center"><img src=".github/assets/mobile.png" alt="Base64 tool on a phone: compact header, Find button, lettered panels" width="260"></div>
 
----
+## Development
 
-## JSON Formatter — feature list
-
-- **Beautify / Pretty Print** — indent with 2 spaces, 4 spaces, or tabs
-- **Validate** — instant syntax validation with native `JSON.parse` error messages
-- **Minify** — strip all whitespace for production payloads
-- **Sort Keys** — sort object keys alphabetically at every nesting level
-- **JSON → CSV** — convert a JSON array of objects to CSV
-- **Syntax Highlighting** — keys, strings, numbers, booleans, null — all DOM text nodes, no innerHTML
-- **Drag & Drop** — drop a `.json` file directly onto the editor
-- **Download** — save formatted output as `.json` or `.csv`
-- **Keyboard shortcuts** — `Ctrl+Enter` beautify · `Ctrl+M` minify · `Ctrl+K` clear
-- **Stats** — total key count + max nesting depth
-
----
-
-## Deployment
-
-The site deploys automatically via Netlify on every push to `main`.
-
-### Manual deploy (first time)
+No bundler, no `npm install` — Node 22+ and Chrome are all you need.
 
 ```bash
-git clone https://github.com/mehmetoya/devtools.git
-cd devtools
+node scripts/serve.mjs . 8888                  # local server: _headers CSP, rewrites, hidden paths (127.0.0.1 only)
+node scripts/check.mjs                         # build gate — also the first half of the Netlify build
+node scripts/scan.mjs http://127.0.0.1:8888    # every page at 375 / 1280 px in real Chrome
 
-# make your changes, then:
-git add .
-git commit -m "your message"
-git push origin main
+# exactly what Netlify publishes:
+node scripts/build-dist.mjs && node scripts/serve.mjs dist 8889
 ```
 
-Netlify picks up the push and deploys within ~30 seconds.
+`scan.mjs` drives Chrome over the DevTools Protocol and fails on any CSP violation, console error, third-party request, horizontal overflow, or palette / drawer regression.
 
-### Environment
-
-No bundler and no `npm install`. Pages are plain static files, but asset paths are absolute (`/assets/...`), so serve the folder instead of opening files directly, e.g.:
-
-```bash
-npx serve .
-```
-
-Generated files — edit the generators, not the output:
+**Generated files — edit the generators, not the output:**
 
 ```bash
 node scripts/json-codegen/build-gen-pages.js   # json-to-csharp / java / typescript pages
 node scripts/gen-site.mjs .                    # home, 404, _headers, netlify.toml, sitemap, robots, page <head>s + CSP hashes
-node scripts/check.mjs                         # quality gate (also runs as the Netlify build command)
-node scripts/smoke.mjs https://devtool-moya.netlify.app   # post-deploy smoke test (or a deploy-preview URL)
+node scripts/build-dist.mjs                    # dist/ = exactly what Netlify publishes
+node scripts/smoke.mjs https://tool.mehmetoya.com   # post-deploy smoke test (or a deploy-preview URL)
 ```
 
-Any edit to a page's inline `<script>` changes its CSP hash, so run `gen-site` afterwards (the check fails otherwise).
+Any edit to a page's inline `<script>` changes its CSP hash — run `gen-site` afterwards (the gate fails otherwise).
 
----
+<details>
+<summary><b>What the build gate checks</b></summary>
 
-## SEO / GEO (AI Search)
+- registry ↔ folders ↔ home ↔ `_headers` ↔ sitemap; generators produce no drift
+- every page: title, description, canonical, one `h1`, meta CSP; inline script hashes present in `script-src`
+- CSP invariants per route; HTML sinks allow-listed by exact line; no inline handlers; storage access inside `try`
+- design-token contrast; every `@font-face` file exists and matches its sha256; vendor sha256
+- palette: every tool first for some query of ≤ 4 characters; `rev` is `YYYY.MM.DD`
+- deployment: publish folder is `dist/`, repo paths never in the allow-list, old-origin redirect ordered first
 
-Each tool page includes:
+</details>
 
-- Semantic HTML with `<main>`, `<section>`, `<aside>`, `aria-label` attributes
-- `<title>` and `<meta name="description">` optimised per tool
-- Open Graph + Twitter Card meta tags
-- `application/ld+json` structured data — `WebApplication` schema for AI crawlers (ChatGPT, Perplexity, Google AI Overviews)
-- `BreadcrumbList` schema for navigation context
-- A visible content section below the tool with feature descriptions, usage instructions, and a privacy statement — readable by both humans and crawlers
+<details>
+<summary><b>Project structure</b></summary>
 
----
+```
+/
+├── index.html, 404.html     ← generated
+├── <route>/index.html        ← one folder per tool
+├── assets/
+│   ├── app.css               ← design tokens and components
+│   ├── tools.js              ← registry, header, sidebar, palette, favorites, title block, helpers
+│   ├── regex-worker.js       ← user regexes off the main thread, with a timeout
+│   ├── fonts/                ← IBM Plex (OFL) + VERSIONS.txt
+│   └── vendor/               ← pinned libraries + VERSIONS.txt
+├── scripts/                  ← site.mjs, gen-site, check, build-dist, serve, scan, smoke, json-codegen/
+├── docs/                     ← specs, plans, task lists (never published)
+├── _headers, netlify.toml    ← generated
+└── .github/assets/           ← README images
+```
+
+**Adding a tool:** add it to `CATEGORIES` in `assets/tools.js` (with `aliases` and a `rev`), create `<route>/index.html` from an existing tool, then run `gen-site` and `check`. `build-dist` publishes every registered route automatically.
+
+</details>
+
+## Deployment
+
+Netlify builds every push: `node scripts/check.mjs && node scripts/build-dist.mjs`, publishing `dist/`. A failing gate stops the deploy and the previous version stays live. Pull requests get a deploy preview; run `smoke.mjs` against it before merging. `devtool-moya.netlify.app` redirects permanently to `tool.mehmetoya.com`.
+
+## SEO
+
+Semantic HTML, per-tool titles and descriptions, Open Graph / Twitter cards, `WebApplication` + `BreadcrumbList` JSON-LD, and a readable "About this tool" section on every page.
 
 ## License
 
-MIT — free to use, fork, and adapt.
+[MIT](LICENSE) © 2026 Mehmet Oya — free to use, fork and adapt.

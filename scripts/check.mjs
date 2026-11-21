@@ -2,17 +2,17 @@
 // Checks: registry ↔ folders ↔ home ↔ _headers ↔ sitemap; generated files are up to date (no drift);
 // head contract per page; CSP hashes match inline scripts; innerHTML / dangerous sinks only where
 // allow-listed; no inline on*= handlers; localStorage only inside try; internal links resolve;
-// vendor file hashes match assets/vendor/VERSIONS.txt.
+// design-token contrast; vendor and font file hashes match assets/{vendor,fonts}/VERSIONS.txt.
 import fs from 'node:fs';
 import path from 'node:path';
 import vm from 'node:vm';
 import os from 'node:os';
 import crypto from 'node:crypto';
+import { SITE_URL, PREVIOUS_ORIGINS } from './site.mjs';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const SITE_URL = 'https://devtool-moya.netlify.app';
 const errors = [];
 const fail = (where, what) => errors.push(`${where}: ${what}`);
 const read = (p) => fs.readFileSync(path.join(ROOT, p), 'utf8');
@@ -25,6 +25,9 @@ const SINK_ALLOW = new Set([
   'markdown-viewer/index.html|preview.innerHTML = lastHtml; // sanitized by DOMPurify above',
 ]);
 const SINK_RE = /\.(innerHTML|outerHTML)\s*\+?=|insertAdjacentHTML|createContextualFragment|document\.write(ln)?\(|\.srcdoc\s*=|setAttribute\(\s*['"`]on|set(Timeout|Interval)\(\s*['"`]/;
+// Repository paths that must never be served (independent of the generator's own list)
+const MUST_HIDE = ['/scripts/*', '/docs/*', '/README.md', '/LICENSE', '/netlify.toml', '/_headers'];
+
 // Route-level CSP invariants (protect against a loosened generator)
 const INLINE_OK = new Set(['html-viewer']);
 const NETWORK_OK = new Set(['http-client']);
@@ -35,9 +38,10 @@ vm.runInNewContext(read('assets/tools.js'), ctx);
 const tools = ctx.window.DevTools.CATEGORIES.flatMap(c => c.tools);
 const routes = tools.map(t => t.route);
 if (new Set(routes).size !== routes.length) fail('registry', 'duplicate routes');
+for (const t of tools) if (!/^\d{4}\.(0[1-9]|1[0-2])\.(0[1-9]|[12]\d|3[01])$/.test(t.rev || '')) fail('registry', `/${t.route}: rev must be YYYY.MM.DD (got "${t.rev || ''}")`);
 
 const dirs = fs.readdirSync(ROOT, { withFileTypes: true })
-  .filter(d => d.isDirectory() && fs.existsSync(path.join(ROOT, d.name, 'index.html'))).map(d => d.name);
+  .filter(d => d.isDirectory() && d.name !== 'dist' && fs.existsSync(path.join(ROOT, d.name, 'index.html'))).map(d => d.name);
 for (const r of routes) if (!dirs.includes(r)) fail('registry', `/${r} has no ${r}/index.html`);
 for (const d of dirs) if (!routes.includes(d)) fail(d, 'folder with index.html is not in the registry');
 
@@ -48,10 +52,36 @@ for (const r of routes) {
   if (!sitemap.includes(`${SITE_URL}/${r}<`)) fail('sitemap.xml', `missing /${r}`);
 }
 
+// ── command palette: every tool is first for some query of ≤4 characters (no favorites) ──
+{
+  const D = ctx.window.DevTools;
+  if (typeof D.rankTools !== 'function') fail('assets/tools.js', 'DevTools.rankTools is missing');
+  else {
+    const n = (q) => D.rankTools(q, D.allTools(), []).map(t => t.route).join(',');
+    if (n('İSO') !== n('iso') || n('ıso') !== n('iso')) fail('assets/tools.js', 'palette: Turkish İ/ı must fold to i');
+    if (n('basé64') !== n('base64') || !n('base64').startsWith('base64')) fail('assets/tools.js', 'palette: accents must be ignored');
+    if (n('   ') !== n('') || n('zzzzzz') !== '') fail('assets/tools.js', 'palette: blank/unknown query handling changed');
+    const all = D.allTools();
+    const prefixes = (w) => [1, 2, 3, 4].map(n => w.slice(0, n)).filter(Boolean);
+    for (const t of all) {
+      const seeds = [t.name.toLowerCase(), t.route, ...t.name.toLowerCase().split(/[^a-z0-9#+]+/), ...(t.aliases || [])];
+      const queries = [...new Set(seeds.flatMap(prefixes))];
+      const hit = queries.find(q => (D.rankTools(q, all, [])[0] || {}).route === t.route);
+      if (!hit) fail('assets/tools.js', `palette: no query of ≤4 characters ranks /${t.route} first (add an alias)`);
+    }
+  }
+}
+
+// old public origins must not survive anywhere in the published pages
+for (const f of ['index.html', '404.html', ...routes.map(r => `${r}/index.html`), 'sitemap.xml', 'robots.txt']) {
+  const src = read(f);
+  for (const o of PREVIOUS_ORIGINS) if (src.includes(o)) fail(f, `still references the old origin ${o}`);
+}
+
 // ── generator drift: run generators on a temp copy and diff ──
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'devtools-check-'));
 try {
-  fs.cpSync(ROOT, tmp, { recursive: true, filter: s => !s.includes(`${path.sep}.git`) });
+  fs.cpSync(ROOT, tmp, { recursive: true, filter: s => !s.includes(`${path.sep}.git`) && !s.startsWith(path.join(ROOT, 'dist')) });
   execFileSync(process.execPath, [path.join(tmp, 'scripts/json-codegen/build-gen-pages.js')], { stdio: 'ignore' });
   execFileSync(process.execPath, [path.join(tmp, 'scripts/gen-site.mjs'), tmp], { stdio: 'ignore' });
   const generated = ['index.html', '404.html', '_headers', 'netlify.toml', 'robots.txt', 'sitemap.xml',
@@ -127,6 +157,33 @@ function scanSinks(file, src) {
 }
 for (const f of fs.readdirSync(path.join(ROOT, 'assets')).filter(f => f.endsWith('.js'))) scanSinks('assets/' + f, read('assets/' + f));
 
+// only dist/ is published (Netlify serves files case-insensitively, so path rules alone can't hide repo files)
+{
+  const toml = read('netlify.toml');
+  if (!/^\s*publish\s*=\s*"dist"/m.test(toml)) fail('netlify.toml', 'publish must be "dist" (built by scripts/build-dist.mjs)');
+  if (!/command\s*=\s*"node scripts\/check\.mjs && node scripts\/build-dist\.mjs"/.test(toml)) fail('netlify.toml', 'build command must run check.mjs then build-dist.mjs');
+  const bd = read('scripts/build-dist.mjs');
+  for (const h of MUST_HIDE.filter(x => x !== '/_headers')) {
+    const top = h.replace(/^\//, '').replace(/\/\*$/, '');
+    if (new RegExp(`['"]${top.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}['"]`).test(bd.slice(bd.indexOf('const PUBLIC'), bd.indexOf('];', bd.indexOf('const PUBLIC'))))) fail('scripts/build-dist.mjs', `${top} must not be in the PUBLIC allow-list`);
+  }
+  if (/^\s*\[context\./m.test(toml)) fail('netlify.toml', 'context overrides are not allowed (they could change publish/command per deploy)');
+  const firstRewrite = toml.search(/to\s*=\s*"\//);
+  if (firstRewrite < 0) fail('netlify.toml', 'no path rewrites found — cannot verify redirect order');
+  for (const m of toml.matchAll(/from\s*=\s*"(https?:\/\/[^"]+)"/g)) if (firstRewrite >= 0 && m.index > firstRewrite) fail('netlify.toml', `host redirect ${m[1]} must come before the path rewrites (first match wins)`);
+}
+
+// repository files must be hidden: forced 404 redirect in netlify.toml, and not crawlable
+{
+  const toml = read('netlify.toml'), robots = read('robots.txt');
+  const blocks = toml.split('[[redirects]]').slice(1);
+  for (const h of MUST_HIDE) {
+    const ok = blocks.some(b => b.includes(`from   = "${h}"`) && /status\s*=\s*404/.test(b) && /force\s*=\s*true/.test(b));
+    if (!ok) fail('netlify.toml', `${h} is not hidden (needs a forced 404 redirect)`);
+    if (h.endsWith('/*') && !robots.includes(`Disallow: ${h.slice(0, -1)}`)) fail('robots.txt', `missing Disallow: ${h.slice(0, -1)}`);
+  }
+}
+
 // _headers invariants: every CSP header line obeys the same route rules
 {
   let current = null;
@@ -159,6 +216,34 @@ for (const f of [...pages, ...fs.readdirSync(path.join(ROOT, 'assets')).filter(f
   }
 }
 
+// colour contrast of the design tokens in assets/app.css :root (WCAG 1.4.3 text ≥4.5:1, 1.4.11 UI ≥3:1)
+{
+  const css = read('assets/app.css');
+  const rootBlock = (css.match(/:root\s*\{([^}]*)\}/) || [])[1] || '';
+  const tok = {};
+  for (const m of rootBlock.matchAll(/--([a-z0-9-]+)\s*:\s*([^;]+);/g)) tok[m[1]] = m[2].trim();
+  const lum = (hex) => {
+    const c = [1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16) / 255).map(v => v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4);
+    return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
+  };
+  const ratio = (a, b) => { const x = lum(a), y = lum(b); return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05); };
+  const need = (fg, bgs, min) => {
+    for (const bg of bgs) {
+      const a = tok[fg], b = tok[bg];
+      if (!/^#[0-9a-f]{6}$/i.test(a || '') || !/^#[0-9a-f]{6}$/i.test(b || '')) { fail('assets/app.css', `--${fg} / --${bg} must be #rrggbb tokens in :root`); continue; }
+      const r = ratio(a, b);
+      if (r < min) fail('assets/app.css', `contrast --${fg} on --${bg} is ${r.toFixed(2)}:1, needs ≥${min}:1`);
+    }
+  };
+  const SURFACES = ['bg', 'surface', 'surface2'];
+  for (const fg of ['text', 'muted', 'muted2', 'accent', 'ok', 'danger', 'warn', 'info']) need(fg, SURFACES, 4.5);
+  need('text', ['surface3'], 4.5);
+  for (const k of ['accent', 'ok', 'danger', 'warn', 'info']) need(k, [k + '-dim'], 4.5);
+  need('on-accent', ['accent'], 4.5);
+  need('border-input', ['surface', 'surface2'], 3);
+  for (const k of ['syn-key', 'syn-str', 'syn-num', 'syn-lit']) need(k, SURFACES, 4.5);
+}
+
 // vendor hashes
 const versions = read('assets/vendor/VERSIONS.txt').split('\n').filter(l => l && !l.startsWith('#'));
 for (const l of versions) {
@@ -167,9 +252,34 @@ for (const l of versions) {
   if (actual !== sha) fail(`assets/vendor/${file}`, 'sha256 does not match VERSIONS.txt');
 }
 
+// fonts: every @font-face url exists; the retired Syne face is referenced nowhere in the site
+{
+  const css = read('assets/app.css');
+  for (const m of css.matchAll(/url\((\/assets\/fonts\/[^)]+)\)/g)) {
+    if (!fs.existsSync(path.join(ROOT, m[1]))) fail('assets/app.css', `@font-face points at missing ${m[1]}`);
+  }
+  for (const f of [...pages, 'assets/app.css', 'assets/tools.js']) if (/\bSyne\b/.test(read(f))) fail(f, 'references the retired Syne font');
+}
+
+// font hashes: every woff2 is listed, every listed file exists and matches
+const fontDir = path.join(ROOT, 'assets/fonts');
+const fontVersions = read('assets/fonts/VERSIONS.txt').split('\n').filter(l => l && !l.startsWith('#'));
+const listedFonts = new Set();
+for (const l of fontVersions) {
+  const [file, , , sha] = l.split('|').map(s => s.trim());
+  listedFonts.add(file);
+  const p = path.join(fontDir, file);
+  if (!fs.existsSync(p)) { fail(`assets/fonts/${file}`, 'listed in VERSIONS.txt but missing'); continue; }
+  const actual = crypto.createHash('sha256').update(fs.readFileSync(p)).digest('hex');
+  if (actual !== sha) fail(`assets/fonts/${file}`, 'sha256 does not match VERSIONS.txt');
+}
+for (const f of fs.readdirSync(fontDir).filter(f => f.endsWith('.woff2'))) {
+  if (!listedFonts.has(f)) fail(`assets/fonts/${f}`, 'not listed in VERSIONS.txt');
+}
+
 if (errors.length) {
   console.error(errors.map(e => '✗ ' + e).join('\n'));
   console.error(`\n${errors.length} problem(s).`);
   process.exit(1);
 }
-console.log(`✓ ${pages.length} pages, ${routes.length} tools, ${versions.length} vendor files — all checks passed.`);
+console.log(`✓ ${pages.length} pages, ${routes.length} tools, ${versions.length} vendor files, ${fontVersions.length} fonts — all checks passed.`);

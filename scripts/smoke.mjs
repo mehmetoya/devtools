@@ -1,5 +1,5 @@
 // Post-deploy smoke test against a live URL (production or a Netlify deploy preview). Dependency-free.
-// Usage: node scripts/smoke.mjs https://devtool-moya.netlify.app      (exit 1 on any failure)
+// Usage: node scripts/smoke.mjs https://tool.mehmetoya.com      (exit 1 on any failure)
 // Checks: every route answers 200 without a redirect; CSP header present and obeys the route rules
 // (hash-only script-src except /html-viewer, connect-src 'none' except /http-client); the header
 // policy equals the page's <meta> policy; unknown paths 404 with a meta CSP; repository files are
@@ -45,12 +45,13 @@ for (const r of routes) {
 }
 await page('/this-page-does-not-exist', null, 404);
 
-for (const p of ['/README.md', '/LICENSE', '/netlify.toml', '/_headers', '/scripts/check.mjs', '/scripts/gen-site.mjs']) {
+for (const p of ['/README.md', '/LICENSE', '/netlify.toml', '/_headers', '/scripts/check.mjs', '/scripts/gen-site.mjs', '/docs/specs/ui-redesign.md',
+  '/Scripts/gen-site.mjs', '/Readme.md', '/README.MD', '/Docs/specs/ui-redesign.md', '/License', '/Netlify.toml', '/.git/config']) {
   const res = await get(p);
   if (res.status !== 404) fail(p, `repository file served (status ${res.status})`);
 }
 for (const p of ['/assets/tools.js', '/assets/app.css', '/assets/regex-worker.js', '/assets/favicon.svg',
-  '/assets/fonts/syne-latin-700-normal.woff2', '/assets/fonts/ibm-plex-mono-latin-400-normal.woff2',
+  '/assets/fonts/ibm-plex-sans-condensed-latin-600-normal.woff2', '/assets/fonts/ibm-plex-sans-latin-400-normal.woff2', '/assets/fonts/ibm-plex-mono-latin-400-normal.woff2',
   '/assets/vendor/mermaid.min.js', '/assets/vendor/purify.min.js', '/sitemap.xml', '/robots.txt']) {
   const res = await get(p);
   if (res.status !== 200) fail(p, `status ${res.status}`);
