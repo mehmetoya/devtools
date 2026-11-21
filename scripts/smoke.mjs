@@ -41,8 +41,7 @@ async function page(p, route, expectStatus = 200) {
 await page('/', '');
 for (const r of routes) {
   await page('/' + r, r);
-  const slash = await get('/' + r + '/');
-  if (slash.status !== 301 || (slash.headers.get('location') || '').replace(BASE, '') !== '/' + r) fail('/' + r + '/', `expected 301 → /${r}, got ${slash.status} ${slash.headers.get('location') || ''}`);
+  await page('/' + r + '/', r); // Netlify matches redirect rules slash-insensitively, so /<route>/ can't 301 to /<route> (loop); canonical covers it
 }
 await page('/this-page-does-not-exist', null, 404);
 
@@ -65,4 +64,4 @@ if (errors.length) {
   console.error(`\n${errors.length} problem(s) on ${BASE}`);
   process.exit(1);
 }
-console.log(`✓ ${BASE}: ${routes.length + 1} pages + ${routes.length} trailing-slash 301s, 404 page, repo files hidden, assets — all smoke checks passed.`);
+console.log(`✓ ${BASE}: ${routes.length * 2 + 1} pages, 404 page, repo files hidden, assets — all smoke checks passed.`);

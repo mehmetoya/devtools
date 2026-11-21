@@ -339,19 +339,6 @@ ${PREVIOUS_ORIGINS.map(o => `[[redirects]]
   status = 301
   force  = true
 `).join('\n')}
-# One URL per page: /<route>/ and /<route>/index.html move permanently to /<route>.
-${tools.map(t => `[[redirects]]
-  from   = "/${t.route}/"
-  to     = "/${t.route}"
-  status = 301
-  force  = true
-
-[[redirects]]
-  from   = "/${t.route}/index.html"
-  to     = "/${t.route}"
-  status = 301
-  force  = true
-`).join('\n')}
 # Serve /<route> directly (200) instead of Netlify's 301 to /<route>/, so links, canonicals
 # and the per-path CSP in _headers all use the same URL.
 ${tools.map(t => `[[redirects]]
