@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self';" />
+  <title>HTML Viewer — Sandboxed Live HTML Preview</title>
+  <meta name="description" content="Paste or write HTML and see it rendered live in an isolated sandbox. Optional sanitizing, templates, split view, fullscreen and download as .html — all in your browser." />
+  <meta name="keywords" content="html viewer, html preview online, live html editor, html renderer, test html snippet, html sandbox" />
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large" />
+  <link rel="canonical" href="https://devtool-moya.netlify.app/html-viewer" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="HTML Viewer — Sandboxed Live HTML Preview" />
+  <meta property="og:description" content="Render HTML snippets live in a locked-down sandbox, with templates and export." />
+  <meta property="og:url" content="https://devtool-moya.netlify.app/html-viewer" />
+  <meta property="og:site_name" content="DevTools" />
+  <meta name="twitter:card" content="summary" />
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "HTML Viewer",
+    "url": "https://devtool-moya.netlify.app/html-viewer",
+    "description": "Free online HTML viewer with a sandboxed live preview, optional sanitizing, templates and .html export. Runs client-side.",
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "Any",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+    "featureList": ["Live HTML preview", "Sandboxed iframe", "Optional HTML sanitizing", "Split / code / preview modes", "Templates", "Save as .html", "Fullscreen"],
+    "isAccessibleForFree": true
+  }
+  </script>
+  <script type="application/ld+json">
+  { "@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://devtool-moya.netlify.app/" },
+    { "@type": "ListItem", "position": 2, "name": "HTML Viewer", "item": "https://devtool-moya.netlify.app/html-viewer" } ] }
+  </script>
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="/assets/app.css" />
+  <style>
+    .viewer { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .viewer.mode-code, .viewer.mode-preview { grid-template-columns: 1fr; }
+    .viewer.mode-code .pv-panel, .viewer.mode-preview .ed-panel { display: none; }
+    .viewer .panel { height: 68vh; min-height: 360px; }
+    .viewer textarea { flex: 1; min-height: 0; height: 100%; resize: none; white-space: pre; overflow-wrap: normal; overflow-x: auto; }
+    .frame-wrap { flex: 1; min-height: 0; background: #fff; }
+    .frame-wrap iframe { width: 100%; height: 100%; border: 0; display: block; background: #fff; }
+    .panel.is-fs { position: fixed; inset: 0; z-index: 500; height: auto !important; border-radius: 0; }
+    #msg .btn { margin-left: 8px; font-family: var(--sans); }
+    .stale { font-size: 11px; color: var(--warn); font-weight: 700; }
+    @media (max-width: 860px) {
+      .viewer { grid-template-columns: 1fr; }
+      .viewer .panel { height: 52vh; min-height: 300px; }
+    }
+  </style>
+</head>
+<body>
+<div class="shell">
+  <header id="site-header"></header>
+  <aside id="sidebar"></aside>
+  <div class="nav-backdrop"></div>
+
+  <main class="page">
+    <section class="tool-head">
+      <h1>HTML Viewer</h1>
+      <p>Write or paste HTML and preview it in an isolated sandbox.</p>
+    </section>
+
+    <section class="options" aria-label="Options">
+      <span class="opt-label">View</span>
+      <div class="seg" id="mode">
+        <button data-v="split" class="on">Split</button>
+        <button data-v="code">Code</button>
+        <button data-v="preview">Preview</button>
+      </div>
+      <label class="check"><input type="checkbox" id="auto" checked /> Auto refresh</label>
+      <label class="check" title="Remove scripts, event-handler attributes and javascript: URLs before rendering"><input type="checkbox" id="sanitize" /> Sanitize HTML</label>
+      <button class="btn sm primary" id="run" title="Render now (Ctrl/⌘ + Enter)">▶ Run</button>
+      <span class="divider"></span>
+      <label class="opt"><span class="opt-label">Template</span>
+        <select id="tpl">
+          <option value="">Choose…</option>
+          <option value="basic">Basic page</option>
+          <option value="form">Sign-up form</option>
+          <option value="table">Data table</option>
+          <option value="card">Profile card</option>
+          <option value="grid">Responsive grid</option>
+          <option value="navbar">Navigation bar</option>
+        </select>
+      </label>
+    </section>
+
+    <div class="msg" id="msg" hidden></div>
+
+    <section class="viewer mode-split" id="viewer">
+      <div class="panel ed-panel" id="ed-panel">
+        <div class="panel-head">
+          <span class="panel-title">HTML</span>
+          <span class="panel-actions">
+            <span class="panel-meta" id="in-meta"></span>
+            <button class="btn sm" id="clear">Clear</button>
+            <button class="btn sm" id="copy">Copy</button>
+            <button class="btn sm" id="dl">Download</button>
+            <button class="btn sm fs-btn" title="Fullscreen (Esc to exit)" aria-label="Fullscreen">⛶</button>
+          </span>
+        </div>
+        <textarea id="input" spellcheck="false" placeholder="<h1>Hello</h1>"></textarea>
+      </div>
+      <div class="panel pv-panel" id="pv-panel">
+        <div class="panel-head">
+          <span class="panel-title">Preview</span>
+          <span class="panel-actions">
+            <span class="stale" id="stale" hidden>Not refreshed</span>
+            <span class="panel-meta" id="pv-meta"></span>
+            <button class="btn sm fs-btn" title="Fullscreen (Esc to exit)" aria-label="Fullscreen">⛶</button>
+          </span>
+        </div>
+        <div class="frame-wrap">
+          <iframe id="frame" title="HTML preview" sandbox="allow-scripts" referrerpolicy="no-referrer"></iframe>
+        </div>
+      </div>
+    </section>
+
+    <div class="stats" id="stats"></div>
+
+    <section class="about">
+      <h2>About this tool</h2>
+      <p>The preview is an <code>&lt;iframe&gt;</code> sandbox with a unique, opaque origin. Scripts inside it may run (unless you turn on <b>Sanitize HTML</b>), but they cannot read this site's storage or cookies, open pop-ups, submit forms, show alert dialogs or navigate this page.</p>
+      <p>The preview inherits this site's security policy: inline <code>&lt;style&gt;</code> and <code>&lt;script&gt;</code> work, while external scripts, stylesheets, fonts and remote images are blocked. Embed images as <code>data:</code> URLs if you need them.</p>
+      <p><b>Sanitize HTML</b> removes <code>&lt;script&gt;</code> elements, inline event handlers such as <code>onclick</code> and <code>javascript:</code> links — handy for previewing HTML from an untrusted source, such as an email body.</p>
+      <h2>Privacy</h2>
+      <p>Your HTML is rendered locally and never uploaded. A draft is kept in this browser between visits.</p>
+    </section>
+  </main>
+</div>
+
+<script src="/assets/tools.js"></script>
+<script src="/assets/vendor/purify.min.js"></script>
+<script>
+(function () {
+  'use strict';
+  const { $, $$, el, debounce, copy, download, msg } = DevTools;
+  const DRAFT_KEY = 'devtools:html-viewer:draft';
+  // Crash guard: set while the preview loads, cleared on the iframe's load event. If it is still set on page
+  // load, the last preview hung or crashed the tab, so the draft is loaded without rendering it again.
+  const GUARD_KEY = 'devtools:html-viewer:rendering';
+  function guard(on) { try { if (on) sessionStorage.setItem(GUARD_KEY, '1'); else sessionStorage.removeItem(GUARD_KEY); } catch { /* storage unavailable */ } }
+  function guarded() { try { return sessionStorage.getItem(GUARD_KEY) === '1'; } catch { return false; } }
+  const input = $('#input'), frame = $('#frame'), msgEl = $('#msg');
+
+  const BASE_STYLE = `body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; margin: 0; padding: 24px; color: #1d2330; background: #f7f8fa; }`;
+  const page = (title, style, body) => `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${title}</title>
+  <style>
+    ${BASE_STYLE}
+${style}
+  </style>
+</head>
+<body>
+${body}
+</body>
+</html>
+`;
+
+  const TEMPLATES = {
+    basic: page('My page', `    h1 { margin-top: 0; }
+    .note { padding: 12px 16px; background: #e8f3ff; border-left: 4px solid #3b82f6; border-radius: 6px; }`, `  <h1>Hello, world</h1>
+  <p>This is a minimal HTML document. Edit it and the preview updates.</p>
+  <p class="note">Tip: the button below uses an inline script.</p>
+  <button id="btn">Clicked 0 times</button>
+
+  <script>
+    let n = 0;
+    document.getElementById('btn').addEventListener('click', e => {
+      n++;
+      e.target.textContent = 'Clicked ' + n + (n === 1 ? ' time' : ' times');
+    });
+  <\/script>`),
+    form: page('Sign up', `    form { max-width: 380px; margin: 0 auto; background: #fff; padding: 24px; border-radius: 12px; box-shadow: 0 4px 18px rgba(0,0,0,.08); }
+    h2 { margin: 0 0 16px; }
+    label { display: block; font-size: 14px; font-weight: 600; margin: 12px 0 4px; }
+    input, select { width: 100%; box-sizing: border-box; padding: 9px 11px; border: 1px solid #cdd3dc; border-radius: 8px; font: inherit; }
+    .row { display: flex; gap: 8px; align-items: center; margin-top: 14px; font-size: 14px; }
+    .row input { width: auto; }
+    button { margin-top: 18px; width: 100%; padding: 11px; border: 0; border-radius: 8px; background: #2563eb; color: #fff; font-weight: 700; cursor: pointer; }`, `  <form>
+    <h2>Create an account</h2>
+    <label for="name">Full name</label>
+    <input id="name" placeholder="Jamie Doe" required>
+    <label for="email">Email</label>
+    <input id="email" type="email" placeholder="jamie@example.org" required>
+    <label for="plan">Plan</label>
+    <select id="plan"><option>Free</option><option>Team</option><option>Enterprise</option></select>
+    <div class="row"><input id="terms" type="checkbox"><label for="terms" style="margin:0">I agree to the terms</label></div>
+    <button type="button">Sign up</button>
+  </form>`),
+    table: page('Inventory', `    table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,.06); }
+    th, td { padding: 10px 14px; text-align: left; border-bottom: 1px solid #eceff3; }
+    th { background: #1f2937; color: #fff; font-size: 13px; text-transform: uppercase; letter-spacing: .5px; }
+    tbody tr:hover { background: #f2f6ff; }
+    td.num { text-align: right; font-variant-numeric: tabular-nums; }
+    .tag { padding: 2px 8px; border-radius: 99px; font-size: 12px; font-weight: 600; }
+    .ok { background: #dcfce7; color: #166534; } .low { background: #fef3c7; color: #92400e; } .out { background: #fee2e2; color: #991b1b; }`, `  <h2>Warehouse inventory</h2>
+  <table>
+    <thead><tr><th>SKU</th><th>Item</th><th>Stock</th><th>Price</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr><td>A-1001</td><td>Desk lamp</td><td class="num">142</td><td class="num">$29.00</td><td><span class="tag ok">In stock</span></td></tr>
+      <tr><td>A-1002</td><td>Monitor arm</td><td class="num">8</td><td class="num">$89.50</td><td><span class="tag low">Low</span></td></tr>
+      <tr><td>A-1003</td><td>USB-C hub</td><td class="num">0</td><td class="num">$45.00</td><td><span class="tag out">Sold out</span></td></tr>
+      <tr><td>A-1004</td><td>Keyboard</td><td class="num">57</td><td class="num">$119.00</td><td><span class="tag ok">In stock</span></td></tr>
+    </tbody>
+  </table>`),
+    card: page('Profile card', `    body { display: grid; place-items: center; min-height: 100vh; box-sizing: border-box; }
+    .card { width: 300px; background: #fff; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,.1); text-align: center; }
+    .cover { height: 90px; background: linear-gradient(135deg, #6366f1, #06b6d4); }
+    .avatar { width: 84px; height: 84px; border-radius: 50%; margin: -42px auto 0; border: 4px solid #fff; background: #f59e0b; display: grid; place-items: center; color: #fff; font-size: 30px; font-weight: 800; }
+    h3 { margin: 10px 0 2px; } p { margin: 0 20px; color: #6b7280; font-size: 14px; }
+    .stats { display: flex; justify-content: space-around; padding: 16px; margin-top: 12px; border-top: 1px solid #f0f0f0; }
+    .stats b { display: block; font-size: 18px; } .stats span { font-size: 12px; color: #6b7280; }`, `  <div class="card">
+    <div class="cover"></div>
+    <div class="avatar">AL</div>
+    <h3>Ada Lin</h3>
+    <p>Frontend engineer who likes accessible design and good coffee.</p>
+    <div class="stats">
+      <div><b>128</b><span>Posts</span></div>
+      <div><b>4.2k</b><span>Followers</span></div>
+      <div><b>310</b><span>Following</span></div>
+    </div>
+  </div>`),
+    grid: page('Responsive grid', `    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 16px; }
+    .tile { background: #fff; border-radius: 12px; padding: 18px; box-shadow: 0 2px 8px rgba(0,0,0,.06); }
+    .tile .icon { width: 40px; height: 40px; border-radius: 10px; margin-bottom: 10px; }
+    .tile h4 { margin: 0 0 4px; } .tile p { margin: 0; font-size: 13px; color: #6b7280; }`, `  <h2>Features</h2>
+  <div class="grid">
+    <div class="tile"><div class="icon" style="background:#fca5a5"></div><h4>Fast</h4><p>Loads in under a second.</p></div>
+    <div class="tile"><div class="icon" style="background:#fcd34d"></div><h4>Flexible</h4><p>Columns adapt to the width.</p></div>
+    <div class="tile"><div class="icon" style="background:#86efac"></div><h4>Accessible</h4><p>Readable at any size.</p></div>
+    <div class="tile"><div class="icon" style="background:#93c5fd"></div><h4>Private</h4><p>No tracking at all.</p></div>
+    <div class="tile"><div class="icon" style="background:#c4b5fd"></div><h4>Offline</h4><p>Works without a network.</p></div>
+    <div class="tile"><div class="icon" style="background:#f9a8d4"></div><h4>Open</h4><p>Plain HTML and CSS.</p></div>
+  </div>`),
+    navbar: page('Navigation bar', `    body { padding: 0; }
+    nav { display: flex; align-items: center; gap: 24px; padding: 14px 24px; background: #111827; color: #fff; flex-wrap: wrap; }
+    .brand { font-weight: 800; font-size: 18px; margin-right: auto; }
+    nav a { color: #d1d5db; text-decoration: none; font-size: 14px; }
+    nav a:hover, nav a.active { color: #fff; }
+    .cta { background: #22c55e; color: #052e16 !important; padding: 7px 14px; border-radius: 8px; font-weight: 700; }
+    main { padding: 32px 24px; }`, `  <nav>
+    <span class="brand">Acme</span>
+    <a href="#" class="active">Home</a>
+    <a href="#">Products</a>
+    <a href="#">Pricing</a>
+    <a href="#">Docs</a>
+    <a href="#" class="cta">Get started</a>
+  </nav>
+  <main>
+    <h1>Build something great</h1>
+    <p>The navigation bar wraps onto a second line on narrow screens.</p>
+  </main>`),
+  };
+
+  function prepare(html) {
+    if (!$('#sanitize').checked) return html;
+    if (!window.DOMPurify) throw new Error('The sanitizer failed to load — reload the page or turn off "Sanitize HTML".');
+    // Keep the whole document (head styles included) but drop scripts, handlers and javascript: URLs.
+    return '<!DOCTYPE html>\n' + DOMPurify.sanitize(html, { WHOLE_DOCUMENT: true, ADD_TAGS: ['style', 'title'], FORBID_TAGS: ['script', 'base'], FORBID_ATTR: ['srcdoc'] });
+  }
+
+  function refresh() {
+    const html = input.value;
+    try {
+      const doc = prepare(html);
+      guard(true);
+      frame.srcdoc = doc; // rendered only inside the sandboxed iframe (allow-scripts, no same-origin)
+      msg(msgEl, '');
+      $('#pv-meta').textContent = $('#sanitize').checked ? 'sanitized' : '';
+      $('#stale').hidden = true;
+    } catch (e) {
+      msg(msgEl, 'error', e.message);
+    }
+  }
+  const refreshSoon = debounce(refresh, 400);
+
+  function stats() {
+    const v = input.value;
+    $('#in-meta').textContent = v.length + ' chars';
+    const s = $('#stats');
+    s.replaceChildren();
+    [['Characters', v.length], ['Lines', v ? v.split('\n').length : 0], ['Bytes (UTF-8)', new TextEncoder().encode(v).length]]
+      .forEach(([k, n]) => s.append(DevTools.el('span', null, k + ': ', DevTools.el('b', null, String(n)))));
+  }
+
+  function onInput() {
+    stats();
+    try { localStorage.setItem(DRAFT_KEY, input.value); } catch { /* storage unavailable */ }
+    if ($('#auto').checked) refreshSoon(); else $('#stale').hidden = false;
+  }
+
+  function setMode(v) {
+    $$('#mode button').forEach(b => b.classList.toggle('on', b.dataset.v === v));
+    $('#viewer').className = 'viewer mode-' + v;
+  }
+
+  // ── fullscreen panel = modal: role=dialog + aria-modal, rest of the page inert, Esc closes, focus returns ──
+  // (The panel is not moved into a <dialog>: re-parenting the iframe would reload the preview.)
+  let fsState = null;
+  function closeFs() {
+    if (!fsState) return;
+    const { panel, inerted, opener } = fsState; fsState = null;
+    inerted.forEach(n => { n.inert = false; });
+    panel.classList.remove('is-fs');
+    ['role', 'aria-modal', 'aria-label'].forEach(a => panel.removeAttribute(a));
+    $$('.fs-btn', panel).forEach(b => { b.setAttribute('aria-label', 'Fullscreen'); b.title = 'Fullscreen (Esc to exit)'; });
+    document.body.style.overflow = '';
+    if (opener && opener.isConnected) opener.focus();
+  }
+  function openFs(panel, opener) {
+    closeFs();
+    const inerted = [];
+    for (let n = panel; n.parentElement && n !== document.body; n = n.parentElement) {
+      for (const s of n.parentElement.children) {
+        if (s === n || s.inert || /^(SCRIPT|STYLE)$/.test(s.tagName) || s.hasAttribute('aria-live')) continue;
+        s.inert = true; inerted.push(s);
+      }
+    }
+    fsState = { panel, inerted, opener };
+    panel.classList.add('is-fs');
+    panel.setAttribute('role', 'dialog');
+    panel.setAttribute('aria-modal', 'true');
+    panel.setAttribute('aria-label', $('.panel-title', panel).textContent + ' (fullscreen)');
+    $$('.fs-btn', panel).forEach(b => { b.setAttribute('aria-label', 'Exit fullscreen'); b.title = 'Exit fullscreen (Esc)'; });
+    document.body.style.overflow = 'hidden';
+    ($('textarea', panel) || opener).focus();
+  }
+  $$('.fs-btn').forEach(b => b.addEventListener('click', () => {
+    const p = b.closest('.panel');
+    if (fsState && fsState.panel === p) closeFs(); else openFs(p, b);
+  }));
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && fsState) { e.preventDefault(); closeFs(); }
+    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); refresh(); }
+  });
+
+  input.addEventListener('input', onInput);
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Tab' && !e.shiftKey && !e.ctrlKey && !e.metaKey) {
+      e.preventDefault();
+      input.setRangeText('  ', input.selectionStart, input.selectionEnd, 'end');
+      onInput();
+    }
+  });
+  $$('#mode button').forEach(b => b.addEventListener('click', () => setMode(b.dataset.v)));
+  $('#auto').addEventListener('change', e => { if (e.target.checked) refresh(); });
+  $('#sanitize').addEventListener('change', refresh);
+  $('#run').addEventListener('click', refresh);
+  $('#tpl').addEventListener('change', e => {
+    const t = TEMPLATES[e.target.value];
+    e.target.value = '';
+    if (!t) return;
+    if (input.value.trim() && !Object.values(TEMPLATES).includes(input.value) && !confirm('Replace the current HTML with this template?')) return;
+    input.value = t; onInput(); refresh();
+  });
+  $('#clear').addEventListener('click', () => { input.value = ''; onInput(); refresh(); input.focus(); });
+  $('#copy').addEventListener('click', e => copy(input.value, e.currentTarget));
+  $('#dl').addEventListener('click', () => download('page.html', input.value, 'text/html;charset=utf-8'));
+
+  let draft = null;
+  try { draft = localStorage.getItem(DRAFT_KEY); } catch { /* storage unavailable */ }
+  input.value = draft ? draft : TEMPLATES.basic;
+  stats();
+  frame.addEventListener('load', () => guard(false));
+  if (draft && guarded()) {
+    $('#stale').hidden = false;
+    msg(msgEl, 'warn', 'The last preview of your saved draft did not finish loading, so it was not rendered again. Edit the HTML (or turn on Sanitize HTML), or render it if the problem was a one-off.');
+    msgEl.append(el('button', { class: 'btn sm', type: 'button', onclick: () => { msg(msgEl, ''); refresh(); } }, 'Render anyway'));
+  } else refresh();
+})();
+</script>
+</body>
+</html>

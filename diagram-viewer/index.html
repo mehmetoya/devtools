@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-Yis5xw95hw2g3787koimrxXCQ+wvyrlEwbEfmwMsAHs='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self';" />
+  <title>Diagram Viewer — Mermaid Editor with SVG &amp; PNG Export</title>
+  <meta name="description" content="Write Mermaid diagram code and see flowcharts, sequence, class, state, ER, Gantt, pie, git and mind-map diagrams render live. Export SVG or PNG. Runs entirely in your browser." />
+  <meta name="keywords" content="mermaid editor, mermaid live, diagram viewer, flowchart online, sequence diagram, mermaid to png, mermaid to svg" />
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large" />
+  <link rel="canonical" href="https://devtool-moya.netlify.app/diagram-viewer" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Diagram Viewer — Mermaid Editor with SVG &amp; PNG Export" />
+  <meta property="og:description" content="Live Mermaid diagram editor with themes, templates and SVG/PNG export." />
+  <meta property="og:url" content="https://devtool-moya.netlify.app/diagram-viewer" />
+  <meta property="og:site_name" content="DevTools" />
+  <meta name="twitter:card" content="summary" />
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Diagram Viewer",
+    "url": "https://devtool-moya.netlify.app/diagram-viewer",
+    "description": "Free online Mermaid diagram editor with live preview, themes, templates and SVG/PNG export. Runs client-side.",
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "Any",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+    "featureList": ["Mermaid live preview", "Flowchart, sequence, class, state, ER, Gantt, pie, git graph and mind map", "Themes", "Export SVG and PNG", "Save .mmd", "Fullscreen"],
+    "isAccessibleForFree": true
+  }
+  </script>
+  <script type="application/ld+json">
+  { "@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://devtool-moya.netlify.app/" },
+    { "@type": "ListItem", "position": 2, "name": "Diagram Viewer", "item": "https://devtool-moya.netlify.app/diagram-viewer" } ] }
+  </script>
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="/assets/app.css" />
+  <style>
+    .viewer { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); gap: 16px; }
+    .viewer.mode-code, .viewer.mode-preview { grid-template-columns: 1fr; }
+    .viewer.mode-code .pv-panel, .viewer.mode-preview .ed-panel { display: none; }
+    .viewer .panel { height: 68vh; min-height: 360px; }
+    .viewer textarea { flex: 1; min-height: 0; height: 100%; resize: none; white-space: pre; overflow-wrap: normal; overflow-x: auto; }
+    .canvas { flex: 1; min-height: 0; overflow: auto; display: flex; align-items: flex-start; justify-content: center; padding: 20px; background: #fff; }
+    .canvas.dark { background: #1f2020; }
+    .canvas svg { max-width: none !important; height: auto; flex-shrink: 0; }
+    .canvas.fit svg { max-width: 100% !important; }
+    .canvas .placeholder { color: #8a8f9c; font-size: 13px; align-self: center; }
+    .panel.is-fs { position: fixed; inset: 0; z-index: 500; height: auto !important; border-radius: 0; }
+    #msg { white-space: pre-wrap; }
+    #msg .btn { margin-left: 8px; font-family: var(--sans); }
+    .canvas.stale > svg { opacity: .4; }
+    .stale-badge { font-size: 11px; font-weight: 700; color: var(--warn); background: var(--warn-dim); border: 1px solid currentColor; border-radius: 20px; padding: 1px 8px; white-space: nowrap; }
+    @media (max-width: 860px) {
+      .viewer { grid-template-columns: 1fr; }
+      .viewer .panel { height: 52vh; min-height: 300px; }
+    }
+  </style>
+</head>
+<body>
+<div class="shell">
+  <header id="site-header"></header>
+  <aside id="sidebar"></aside>
+  <div class="nav-backdrop"></div>
+
+  <main class="page">
+    <section class="tool-head">
+      <h1>Diagram Viewer</h1>
+      <p>Describe a diagram in Mermaid syntax and get a live, exportable drawing.</p>
+    </section>
+
+    <section class="options" aria-label="Options">
+      <span class="opt-label">View</span>
+      <div class="seg" id="mode">
+        <button data-v="split" class="on">Split</button>
+        <button data-v="code">Code</button>
+        <button data-v="preview">Preview</button>
+      </div>
+      <label class="opt"><span class="opt-label">Theme</span>
+        <select id="theme">
+          <option value="default">Default</option>
+          <option value="dark">Dark</option>
+          <option value="forest">Forest</option>
+          <option value="neutral">Neutral</option>
+        </select>
+      </label>
+      <label class="check"><input type="checkbox" id="auto" checked /> Auto render</label>
+      <button class="btn sm primary" id="run" title="Render now (Ctrl/⌘ + Enter)">▶ Render</button>
+      <span class="divider"></span>
+      <label class="opt"><span class="opt-label">Template</span>
+        <select id="tpl">
+          <option value="">Choose…</option>
+          <option value="flowchart">Flowchart</option>
+          <option value="sequence">Sequence diagram</option>
+          <option value="class">Class diagram</option>
+          <option value="state">State diagram</option>
+          <option value="er">Entity relationship</option>
+          <option value="gantt">Gantt chart</option>
+          <option value="pie">Pie chart</option>
+          <option value="git">Git graph</option>
+          <option value="mindmap">Mind map</option>
+        </select>
+      </label>
+    </section>
+
+    <div class="msg" id="msg" hidden></div>
+
+    <section class="viewer mode-split" id="viewer">
+      <div class="panel ed-panel" id="ed-panel">
+        <div class="panel-head">
+          <span class="panel-title">Mermaid code</span>
+          <span class="panel-actions">
+            <span class="panel-meta" id="in-meta"></span>
+            <button class="btn sm" id="clear">Clear</button>
+            <button class="btn sm" id="copy-code">Copy</button>
+            <button class="btn sm" id="dl-mmd">Download .mmd</button>
+            <button class="btn sm fs-btn" title="Fullscreen (Esc to exit)" aria-label="Fullscreen">⛶</button>
+          </span>
+        </div>
+        <textarea id="input" spellcheck="false" placeholder="flowchart LR&#10;  A --> B"></textarea>
+      </div>
+      <div class="panel pv-panel" id="pv-panel">
+        <div class="panel-head">
+          <span class="panel-title">Preview</span>
+          <span class="panel-actions">
+            <span class="stale-badge" id="stale" hidden>Showing last valid diagram</span>
+            <span class="panel-meta" id="pv-meta"></span>
+            <label class="check"><input type="checkbox" id="fit" checked /> Fit</label>
+            <button class="btn sm" id="zoom-out" title="Zoom out" aria-label="Zoom out">−</button>
+            <button class="btn sm" id="zoom-in" title="Zoom in" aria-label="Zoom in">+</button>
+            <button class="btn sm" id="copy-svg">Copy SVG</button>
+            <button class="btn sm" id="dl-svg">Download SVG</button>
+            <button class="btn sm" id="dl-png">Download PNG</button>
+            <button class="btn sm fs-btn" title="Fullscreen (Esc to exit)" aria-label="Fullscreen">⛶</button>
+          </span>
+        </div>
+        <div class="canvas fit" id="canvas"><span class="placeholder">Loading the diagram engine…</span></div>
+      </div>
+    </section>
+
+    <section class="about">
+      <h2>About this tool</h2>
+      <p>Mermaid turns short text descriptions into diagrams. Start a document with the diagram type — <code>flowchart</code>, <code>sequenceDiagram</code>, <code>classDiagram</code>, <code>stateDiagram-v2</code>, <code>erDiagram</code>, <code>gantt</code>, <code>pie</code>, <code>gitGraph</code> or <code>mindmap</code> — then add nodes and connections. Pick a template to see a working example of each.</p>
+      <p>Diagrams render in strict security mode: HTML inside labels is escaped and click handlers are disabled. PNG export is drawn at twice the diagram's size for sharp results; SVG keeps the diagram fully scalable and editable.</p>
+      <h2>Privacy</h2>
+      <p>The diagram engine runs locally in your browser. Your code is never uploaded; a draft is kept in this browser between visits.</p>
+    </section>
+  </main>
+</div>
+
+<script src="/assets/tools.js"></script>
+<script>
+(function () {
+  'use strict';
+  const { $, $$, el, debounce, copy, download, msg, invalid } = DevTools;
+  const DRAFT_KEY = 'devtools:diagram-viewer:draft';
+  // Crash guard: set while a render runs. If it is still set on load, the last render hung or crashed the
+  // tab, so the saved draft is loaded without rendering instead of bricking the page again.
+  const GUARD_KEY = 'devtools:diagram-viewer:rendering';
+  function guard(on) { try { if (on) sessionStorage.setItem(GUARD_KEY, '1'); else sessionStorage.removeItem(GUARD_KEY); } catch { /* storage unavailable */ } }
+  function guarded() { try { return sessionStorage.getItem(GUARD_KEY) === '1'; } catch { return false; } }
+  const input = $('#input'), canvas = $('#canvas'), msgEl = $('#msg'), themeSel = $('#theme');
+
+  const TEMPLATES = {
+    flowchart: `flowchart TD
+    A[Request received] --> B{Signed in?}
+    B -- Yes --> C[Load profile]
+    B -- No --> D[Show login page]
+    D --> E[Submit credentials]
+    E --> B
+    C --> F[(User database)]
+    C --> G[Render dashboard]`,
+    sequence: `sequenceDiagram
+    autonumber
+    actor U as User
+    participant W as Web app
+    participant A as Auth service
+    U->>W: Submit login form
+    W->>A: Verify credentials
+    alt credentials valid
+        A-->>W: Session token
+        W-->>U: Redirect to dashboard
+    else invalid
+        A-->>W: Error
+        W-->>U: Show error message
+    end
+    Note over W,A: All traffic uses TLS`,
+    class: `classDiagram
+    class Shape {
+        <<abstract>>
+        +String name
+        +area() double
+    }
+    class Circle {
+        +double radius
+        +area() double
+    }
+    class Rectangle {
+        +double width
+        +double height
+        +area() double
+    }
+    class Canvas {
+        +add(Shape s)
+        +render()
+    }
+    Shape <|-- Circle
+    Shape <|-- Rectangle
+    Canvas "1" o-- "*" Shape : holds`,
+    state: `stateDiagram-v2
+    [*] --> Draft
+    Draft --> InReview : submit
+    InReview --> Draft : changes requested
+    InReview --> Published : approved
+    Published --> Archived : retired
+    Archived --> [*]`,
+    er: `erDiagram
+    CUSTOMER ||--o{ ORDER : places
+    ORDER ||--|{ LINE_ITEM : contains
+    PRODUCT ||--o{ LINE_ITEM : "is listed in"
+    CUSTOMER {
+        int id PK
+        string name
+        string email
+    }
+    ORDER {
+        int id PK
+        int customer_id FK
+        date created_at
+    }
+    PRODUCT {
+        int id PK
+        string title
+        decimal price
+    }`,
+    gantt: `gantt
+    title Website relaunch
+    dateFormat YYYY-MM-DD
+    section Design
+    Wireframes        :done,   d1, 2026-01-05, 7d
+    Visual design     :active, d2, after d1, 10d
+    section Build
+    Frontend          :        b1, after d2, 14d
+    Backend API       :        b2, 2026-01-19, 18d
+    section Launch
+    Testing and fixes :        l1, after b1, 5d
+    Go live           :milestone, l2, after l1, 0d`,
+    pie: `pie showData
+    title Where the sprint went
+    "New features" : 45
+    "Bug fixes" : 25
+    "Code review" : 15
+    "Meetings" : 15`,
+    git: `gitGraph
+    commit id: "init"
+    branch feature
+    checkout feature
+    commit id: "add search"
+    commit id: "add tests"
+    checkout main
+    commit id: "hotfix"
+    merge feature
+    commit id: "v1.1" tag: "v1.1"`,
+    mindmap: `mindmap
+  root((Product launch))
+    Marketing
+      Blog post
+      Newsletter
+      Social media
+    Engineering
+      Feature freeze
+      Load testing
+    Support
+      FAQ update
+      Team training`,
+  };
+
+  // ── lazy-load the Mermaid bundle ──
+  let mermaidReady = null;
+  function loadMermaid() {
+    if (mermaidReady) return mermaidReady;
+    mermaidReady = new Promise((resolve, reject) => {
+      if (window.mermaid) return resolve(window.mermaid);
+      const s = document.createElement('script');
+      s.src = '/assets/vendor/mermaid.min.js';
+      s.onload = () => window.mermaid ? resolve(window.mermaid) : reject(new Error('Mermaid did not initialise.'));
+      s.onerror = () => { mermaidReady = null; reject(new Error('Could not load the diagram engine. Check your connection and reload.')); };
+      document.head.appendChild(s);
+    });
+    return mermaidReady;
+  }
+
+  let configuredTheme = null;
+  function configure(m) {
+    if (configuredTheme === themeSel.value) return;
+    m.initialize({
+      startOnLoad: false,
+      securityLevel: 'strict',
+      theme: themeSel.value,
+      htmlLabels: false,               // plain SVG text keeps PNG export untainted
+      flowchart: { htmlLabels: false },
+      class: { htmlLabels: false },
+      fontFamily: 'ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif',
+    });
+    configuredTheme = themeSel.value;
+  }
+
+  let seq = 0, currentSvg = '', zoom = 1;
+  /** Dim the previous drawing and label it while the code has an error (or clear that state). */
+  function setStale(on) {
+    canvas.classList.toggle('stale', on && !!currentSvg);
+    $('#stale').hidden = !(on && currentSvg);
+  }
+  async function render() {
+    const code = input.value;
+    $('#in-meta').textContent = code.length + ' chars · ' + (code ? code.split('\n').length : 0) + ' lines';
+    try { localStorage.setItem(DRAFT_KEY, code); } catch { /* storage unavailable */ }
+    const mine = ++seq;
+    if (!code.trim()) {
+      currentSvg = '';
+      canvas.replaceChildren(el('span', { class: 'placeholder' }, 'Write some Mermaid code or pick a template.'));
+      $('#pv-meta').textContent = '';
+      setStale(false); invalid(input, false);
+      msg(msgEl, '');
+      return;
+    }
+    const id = 'mmd-' + mine;
+    try {
+      const m = await loadMermaid();
+      if (mine !== seq) return;
+      configure(m);
+      guard(true);
+      await m.parse(code);
+      const { svg } = await m.render(id, code);
+      guard(false);
+      if (mine !== seq) return;
+      currentSvg = svg;
+      canvas.innerHTML = svg; // produced by mermaid.render with securityLevel 'strict'
+      canvas.classList.toggle('dark', themeSel.value === 'dark');
+      applyZoom();
+      const type = (code.trim().split(/\s/)[0] || '').replace(/-v2$/, '');
+      $('#pv-meta').textContent = type;
+      setStale(false); invalid(input, false);
+      msg(msgEl, '');
+    } catch (e) {
+      guard(false);
+      if (mine !== seq) return;
+      const text = String((e && (e.message || e.str)) || e).trim();
+      msg(msgEl, 'error', 'Diagram error — fix the Mermaid code to update the preview.\n' + text);
+      $('#pv-meta').textContent = 'error';
+      setStale(true); invalid(input, true);
+    } finally {
+      // Mermaid leaves temporary nodes in <body> when rendering fails.
+      ['d' + id, id, 'i' + id].forEach(x => { const n = document.getElementById(x); if (n && !canvas.contains(n)) n.remove(); });
+    }
+  }
+  const renderSoon = debounce(render, 500);
+
+  function svgNode() { return $('svg', canvas); }
+
+  function applyZoom() {
+    const s = svgNode(); if (!s) return;
+    const fit = $('#fit').checked;
+    canvas.classList.toggle('fit', fit);
+    const vb = s.viewBox && s.viewBox.baseVal;
+    s.style.width = !vb || !vb.width ? '' : Math.round(vb.width * (fit ? 1 : zoom)) + 'px';
+    $('#zoom-in').disabled = $('#zoom-out').disabled = fit;
+  }
+
+  /** Standalone SVG string with explicit pixel size (needed for image/canvas export). */
+  function exportSvg() {
+    const s = svgNode();
+    if (!s || !currentSvg) throw new Error('Nothing to export yet — render a diagram first.');
+    const clone = s.cloneNode(true);
+    const vb = s.viewBox && s.viewBox.baseVal;
+    let w = vb && vb.width, h = vb && vb.height;
+    if (!w || !h) { const r = s.getBoundingClientRect(); w = r.width; h = r.height; }
+    clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+    clone.setAttribute('width', Math.ceil(w));
+    clone.setAttribute('height', Math.ceil(h));
+    clone.style.removeProperty('max-width');
+    clone.style.removeProperty('width');
+    return { text: new XMLSerializer().serializeToString(clone), w: Math.ceil(w), h: Math.ceil(h) };
+  }
+
+  function exportPng() {
+    let svg;
+    try { svg = exportSvg(); } catch (e) { msg(msgEl, 'warn', e.message); return; }
+    const scale = 2, maxSide = 16000;
+    const k = Math.min(scale, maxSide / svg.w, maxSide / svg.h);
+    const img = new Image();
+    img.onload = () => {
+      try {
+        const c = document.createElement('canvas');
+        c.width = Math.round(svg.w * k); c.height = Math.round(svg.h * k);
+        const ctx = c.getContext('2d');
+        ctx.fillStyle = themeSel.value === 'dark' ? '#1f2020' : '#ffffff';
+        ctx.fillRect(0, 0, c.width, c.height);
+        ctx.drawImage(img, 0, 0, c.width, c.height);
+        c.toBlob(b => b ? download('diagram.png', b) : msg(msgEl, 'error', 'PNG export failed — use SVG export instead.'), 'image/png');
+      } catch (e) {
+        msg(msgEl, 'error', 'This browser blocked PNG export for this diagram (' + e.name + '). Export as SVG instead.');
+      }
+    };
+    img.onerror = () => msg(msgEl, 'error', 'Could not rasterise the diagram. Export as SVG instead.');
+    img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg.text);
+  }
+
+  function setMode(v) {
+    $$('#mode button').forEach(b => b.classList.toggle('on', b.dataset.v === v));
+    $('#viewer').className = 'viewer mode-' + v;
+  }
+
+  // ── fullscreen panel = modal: role=dialog + aria-modal, rest of the page inert, Esc closes, focus returns ──
+  let fsState = null;
+  function closeFs() {
+    if (!fsState) return;
+    const { panel, inerted, opener } = fsState; fsState = null;
+    inerted.forEach(n => { n.inert = false; });
+    panel.classList.remove('is-fs');
+    ['role', 'aria-modal', 'aria-label'].forEach(a => panel.removeAttribute(a));
+    $$('.fs-btn', panel).forEach(b => { b.setAttribute('aria-label', 'Fullscreen'); b.title = 'Fullscreen (Esc to exit)'; });
+    document.body.style.overflow = '';
+    if (opener && opener.isConnected) opener.focus();
+  }
+  function openFs(panel, opener) {
+    closeFs();
+    const inerted = [];
+    for (let n = panel; n.parentElement && n !== document.body; n = n.parentElement) {
+      for (const s of n.parentElement.children) {
+        if (s === n || s.inert || /^(SCRIPT|STYLE)$/.test(s.tagName) || s.hasAttribute('aria-live')) continue;
+        s.inert = true; inerted.push(s);
+      }
+    }
+    fsState = { panel, inerted, opener };
+    panel.classList.add('is-fs');
+    panel.setAttribute('role', 'dialog');
+    panel.setAttribute('aria-modal', 'true');
+    panel.setAttribute('aria-label', $('.panel-title', panel).textContent + ' (fullscreen)');
+    $$('.fs-btn', panel).forEach(b => { b.setAttribute('aria-label', 'Exit fullscreen'); b.title = 'Exit fullscreen (Esc)'; });
+    document.body.style.overflow = 'hidden';
+    ($('textarea', panel) || opener).focus();
+  }
+  $$('.fs-btn').forEach(b => b.addEventListener('click', () => {
+    const p = b.closest('.panel');
+    if (fsState && fsState.panel === p) closeFs(); else openFs(p, b);
+  }));
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && fsState) { e.preventDefault(); closeFs(); }
+    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); render(); }
+  });
+
+  input.addEventListener('input', () => { if ($('#auto').checked) renderSoon(); else $('#in-meta').textContent = input.value.length + ' chars · not rendered'; });
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Tab' && !e.shiftKey && !e.ctrlKey && !e.metaKey) {
+      e.preventDefault();
+      input.setRangeText('    ', input.selectionStart, input.selectionEnd, 'end');
+      if ($('#auto').checked) renderSoon();
+    }
+  });
+  $$('#mode button').forEach(b => b.addEventListener('click', () => setMode(b.dataset.v)));
+  themeSel.addEventListener('change', render);
+  $('#auto').addEventListener('change', e => { if (e.target.checked) render(); });
+  $('#run').addEventListener('click', render);
+  $('#fit').addEventListener('change', applyZoom);
+  $('#zoom-in').addEventListener('click', () => { zoom = Math.min(4, zoom + 0.25); applyZoom(); });
+  $('#zoom-out').addEventListener('click', () => { zoom = Math.max(0.25, zoom - 0.25); applyZoom(); });
+  $('#tpl').addEventListener('change', e => {
+    const t = TEMPLATES[e.target.value];
+    e.target.value = '';
+    if (!t) return;
+    if (input.value.trim() && !Object.values(TEMPLATES).includes(input.value) && !confirm('Replace the current code with this template?')) return;
+    input.value = t; render();
+  });
+  $('#clear').addEventListener('click', () => { input.value = ''; render(); input.focus(); });
+  $('#copy-code').addEventListener('click', e => copy(input.value, e.currentTarget));
+  $('#dl-mmd').addEventListener('click', () => download('diagram.mmd', input.value));
+  $('#copy-svg').addEventListener('click', e => { try { copy(exportSvg().text, e.currentTarget); } catch (err) { msg(msgEl, 'warn', err.message); } });
+  $('#dl-svg').addEventListener('click', () => { try { download('diagram.svg', exportSvg().text, 'image/svg+xml'); } catch (err) { msg(msgEl, 'warn', err.message); } });
+  $('#dl-png').addEventListener('click', exportPng);
+
+  let draft = null;
+  try { draft = localStorage.getItem(DRAFT_KEY); } catch { /* storage unavailable */ }
+  input.value = draft ? draft : TEMPLATES.flowchart;
+  if (draft && guarded()) {
+    $('#in-meta').textContent = draft.length + ' chars · not rendered';
+    canvas.replaceChildren(el('span', { class: 'placeholder' }, 'Not rendered — see the warning above.'));
+    msg(msgEl, 'warn', 'The last render of your saved draft did not finish, so it was loaded without rendering. Fix the code, or render it if the problem was a one-off.');
+    msgEl.append(el('button', { class: 'btn sm', type: 'button', onclick: () => { msg(msgEl, ''); render(); } }, 'Render anyway'));
+  } else render();
+})();
+</script>
+</body>
+</html>

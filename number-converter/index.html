@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-huF/fBGkv9549uDAvx+a+dyDu6vgJtn5O1Tziv3ARFc='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self';" />
+  <title>Number Base Converter — Binary, Decimal, Hex, Octal</title>
+  <meta name="description" content="Convert numbers between decimal, binary, hexadecimal and octal instantly, with arbitrary precision, negative numbers and two's complement for 8, 16, 32 and 64 bits. Runs in your browser." />
+  <meta name="keywords" content="number converter, binary to decimal, hex to decimal, decimal to binary, octal converter, base converter, two's complement" />
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large" />
+  <link rel="canonical" href="https://devtool-moya.netlify.app/number-converter" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Number Base Converter — Binary, Decimal, Hex, Octal" />
+  <meta property="og:description" content="Linked binary, decimal, hex and octal fields with arbitrary precision. Nothing leaves your machine." />
+  <meta property="og:url" content="https://devtool-moya.netlify.app/number-converter" />
+  <meta property="og:site_name" content="DevTools" />
+  <meta name="twitter:card" content="summary" />
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Number Converter",
+    "url": "https://devtool-moya.netlify.app/number-converter",
+    "description": "Free online converter between decimal, binary, hexadecimal and octal with BigInt precision and two's complement views. Runs client-side.",
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "Any",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+    "featureList": ["Decimal / binary / hex / octal", "Arbitrary precision (BigInt)", "Negative numbers", "Two's complement 8/16/32/64-bit", "Nibble grouping", "Client-side only"],
+    "isAccessibleForFree": true
+  }
+  </script>
+  <script type="application/ld+json">
+  { "@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://devtool-moya.netlify.app/" },
+    { "@type": "ListItem", "position": 2, "name": "Number Converter", "item": "https://devtool-moya.netlify.app/number-converter" } ] }
+  </script>
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="/assets/app.css" />
+  <style>
+    .fields { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .fields textarea { min-height: 84px; font-size: 15px; word-break: break-all; }
+    .fields textarea.bad { color: var(--danger); }
+    .fields textarea.stale { opacity: 0.5; }
+    .panel-title small { font-weight: 600; color: var(--muted); letter-spacing: 0; text-transform: none; margin-left: 6px; }
+    .cards { margin-top: 16px; }
+    .card .v { font-size: 18px; word-break: break-all; }
+    .tc-tbl td { font-family: var(--mono); font-size: 12px; word-break: break-all; }
+    .tc-tbl td:first-child { white-space: nowrap; font-family: var(--sans); font-weight: 700; color: var(--muted2); }
+    .tc-tbl td.na { color: var(--muted); font-family: var(--sans); }
+    .tbl-wrap { overflow-x: auto; }
+    @media (max-width: 860px) { .fields { grid-template-columns: 1fr; } }
+    @media (max-width: 600px) { table.tbl th, table.tbl td { padding: 7px 8px; } }
+  </style>
+</head>
+<body>
+<div class="shell">
+  <header id="site-header"></header>
+  <aside id="sidebar"></aside>
+  <div class="nav-backdrop"></div>
+
+  <main class="page">
+    <section class="tool-head">
+      <h1>Number Converter</h1>
+      <p>Type in any field and the other three follow. Works with integers of any size, including negatives.</p>
+    </section>
+
+    <section class="options" aria-label="Options">
+      <label class="check"><input type="checkbox" id="upper" checked /> Uppercase hex</label>
+      <label class="check"><input type="checkbox" id="nibbles" /> Group binary in nibbles</label>
+      <label class="check"><input type="checkbox" id="prefix" /> Show 0x / 0b / 0o prefixes</label>
+      <span class="spacer"></span>
+      <button class="btn sm" id="clear">Clear all</button>
+    </section>
+
+    <div class="msg" id="msg" hidden></div>
+
+    <section class="fields">
+      <div class="panel">
+        <div class="panel-head"><span class="panel-title">Decimal <small>base 10</small></span>
+          <span class="panel-actions"><button class="btn sm" data-copy="dec">Copy</button></span></div>
+        <textarea id="dec" spellcheck="false" placeholder="e.g. 255 or -42" aria-label="Decimal"></textarea>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><span class="panel-title">Hexadecimal <small>base 16</small></span>
+          <span class="panel-actions"><button class="btn sm" data-copy="hex">Copy</button></span></div>
+        <textarea id="hex" spellcheck="false" placeholder="e.g. FF or 0x1A2B" aria-label="Hexadecimal"></textarea>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><span class="panel-title">Binary <small>base 2</small></span>
+          <span class="panel-actions"><button class="btn sm" data-copy="bin">Copy</button></span></div>
+        <textarea id="bin" spellcheck="false" placeholder="e.g. 1111 1111" aria-label="Binary"></textarea>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><span class="panel-title">Octal <small>base 8</small></span>
+          <span class="panel-actions"><button class="btn sm" data-copy="oct">Copy</button></span></div>
+        <textarea id="oct" spellcheck="false" placeholder="e.g. 377 or 0o755" aria-label="Octal"></textarea>
+      </div>
+    </section>
+
+    <section class="cards" id="cards" aria-label="Number details"></section>
+
+    <section class="panel" style="margin-top:16px">
+      <div class="panel-head"><span class="panel-title">Two's complement</span><span class="panel-meta">bit pattern for fixed-width integers</span></div>
+      <div class="tbl-wrap">
+        <table class="tbl tc-tbl">
+          <thead><tr><th>Width</th><th>Hex</th><th>Binary</th><th>Signed</th><th>Unsigned</th></tr></thead>
+          <tbody id="tc-rows"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="about">
+      <h2>About number bases</h2>
+      <ul>
+        <li><b>Decimal</b> (base 10) uses digits 0–9. <b>Binary</b> (base 2) uses 0 and 1; each digit is one bit. <b>Octal</b> (base 8) uses 0–7; one digit is three bits, as in Unix permissions like <code>755</code>. <b>Hexadecimal</b> (base 16) uses 0–9 and A–F; one digit is four bits (a nibble), two digits are a byte.</li>
+        <li>Prefixes <code>0x</code>, <code>0b</code> and <code>0o</code> are accepted, as are spaces and underscores used as digit separators (<code>1111_0000</code>).</li>
+        <li>Negative numbers are shown with a minus sign in every base. The two's complement table shows how a fixed-width signed integer stores the value; a pattern such as <code>FF</code> reads as 255 unsigned or −1 as a signed byte.</li>
+        <li>All arithmetic uses JavaScript <code>BigInt</code>, so there is no precision loss for large values.</li>
+      </ul>
+      <h2>Privacy</h2>
+      <p>Everything is computed in your browser. Nothing is sent, stored or logged.</p>
+    </section>
+  </main>
+</div>
+
+<script src="/assets/tools.js"></script>
+<script>
+(function () {
+  'use strict';
+  const { el, $, $$, copy, msg } = DevTools;
+
+  /* #pure */
+  const BASES = {
+    dec: { radix: 10, re: /^[0-9]+$/, prefix: '', err: 'Invalid decimal number (only digits 0-9 and an optional leading minus allowed)' },
+    hex: { radix: 16, re: /^[0-9a-f]+$/i, prefix: '0x', err: 'Invalid hexadecimal number (only 0-9 and A-F allowed)' },
+    bin: { radix: 2, re: /^[01]+$/, prefix: '0b', err: 'Invalid binary number (only 0-1 allowed)' },
+    oct: { radix: 8, re: /^[0-7]+$/, prefix: '0o', err: 'Invalid octal number (only 0-7 allowed)' },
+  };
+
+  /** Longest accepted input (characters after removing spaces and underscores). */
+  const MAX_DIGITS = 50000;
+
+  /** Parses text in the given base. Returns BigInt, or null for empty input. Throws with a readable message. */
+  function parseIn(text, base) {
+    const b = BASES[base];
+    let t = String(text).replace(/[\s_]/g, '');
+    if (!t) return null;
+    if (t.length > MAX_DIGITS) throw new Error('Input is too long (' + t.length.toLocaleString('en-US') + ' characters). The limit is ' + MAX_DIGITS.toLocaleString('en-US') + ' digits; shorten the number.');
+    let neg = false;
+    if (t[0] === '-' || t[0] === '+') { neg = t[0] === '-'; t = t.slice(1); }
+    if (b.prefix && t.slice(0, 2).toLowerCase() === b.prefix) t = t.slice(2);
+    if (!t || !b.re.test(t)) throw new Error(b.err + '.');
+    const v = base === 'dec' ? BigInt(t) : BigInt(b.prefix + t);
+    return neg ? -v : v;
+  }
+
+  /** Formats a BigInt in a base, with optional uppercase hex, nibble grouping and prefix. */
+  function toBase(v, base, o) {
+    o = o || {};
+    const neg = v < 0n;
+    let s = (neg ? -v : v).toString(BASES[base].radix);
+    if (base === 'hex' && o.upper) s = s.toUpperCase();
+    if (base === 'bin' && o.nibbles) s = groupFromRight(s.padStart(Math.ceil(s.length / 4) * 4, '0'), 4);
+    return (neg ? '-' : '') + (o.prefix ? BASES[base].prefix : '') + s;
+  }
+
+  /** "1234567" → "1,234,567" in linear time (a lookahead regex is quadratic on long input). */
+  function groupThousands(s) {
+    const neg = s[0] === '-', d = neg ? s.slice(1) : s;
+    return (neg ? '-' : '') + groupFromRight(d, 3).replace(/ /g, ',');
+  }
+
+  function groupFromRight(s, n) {
+    const out = [];
+    for (let i = s.length; i > 0; i -= n) out.unshift(s.slice(Math.max(0, i - n), i));
+    return out.join(' ');
+  }
+
+  function bitLength(v) { const a = v < 0n ? -v : v; return a === 0n ? 0 : a.toString(2).length; }
+
+  /** Two's complement view for a fixed width; null if the value does not fit. */
+  function twos(v, bits) {
+    const B = BigInt(bits), mod = 1n << B;
+    if (v < -(1n << (B - 1n)) || v >= mod) return null;
+    const u = v < 0n ? v + mod : v;
+    const signed = u >= (1n << (B - 1n)) ? u - mod : u;
+    return {
+      hex: u.toString(16).toUpperCase().padStart(bits / 4, '0'),
+      bin: groupFromRight(u.toString(2).padStart(bits, '0'), 4),
+      signed, unsigned: u,
+    };
+  }
+  /* #endpure */
+
+  const ids = ['dec', 'hex', 'bin', 'oct'];
+  const fields = Object.fromEntries(ids.map(id => [id, $('#' + id)]));
+  let value = null, invalidId = null;
+
+  function opts() { return { upper: $('#upper').checked, nibbles: $('#nibbles').checked, prefix: $('#prefix').checked }; }
+
+  function renderDetails() {
+    const cards = $('#cards'), rows = $('#tc-rows');
+    if (value === null) { cards.replaceChildren(); rows.replaceChildren(el('tr', null, el('td', { colspan: '5', class: 'na' }, invalidId ? 'Fix the highlighted field to see the details.' : 'Enter a number above.'))); return; }
+    const bits = bitLength(value);
+    const card = (v, k) => el('div', { class: 'card' }, el('div', { class: 'v' }, v), el('div', { class: 'k' }, k));
+    cards.className = 'cards';
+    cards.replaceChildren(
+      card(String(bits), 'Bit length (magnitude)'),
+      card(String(Math.ceil(bits / 8)), 'Bytes needed'),
+      card(value < 0n ? 'Negative' : value === 0n ? 'Zero' : 'Positive', 'Sign'),
+      card(groupThousands(value.toString()), 'Grouped decimal'),
+    );
+    rows.replaceChildren(...[8, 16, 32, 64].map(w => {
+      const t = twos(value, w);
+      const label = { 8: '8-bit (sbyte/byte)', 16: '16-bit (short/ushort)', 32: '32-bit (int/uint)', 64: '64-bit (long/ulong)' }[w];
+      if (!t) return el('tr', null, el('td', null, label), el('td', { colspan: '4', class: 'na' }, 'Out of range for ' + w + ' bits'));
+      return el('tr', null, el('td', null, label), el('td', null, t.hex), el('td', null, t.bin), el('td', null, t.signed.toString()), el('td', null, t.unsigned.toString()));
+    }));
+  }
+
+  function writeAll(except) {
+    const o = opts();
+    for (const id of ids) {
+      if (id === except) continue;
+      fields[id].value = value === null ? '' : toBase(value, id, o);
+      fields[id].classList.remove('bad', 'stale');
+      DevTools.invalid(fields[id], false);
+    }
+    renderDetails();
+  }
+
+  function onInput(id) {
+    try {
+      value = parseIn(fields[id].value, id);
+      invalidId = null;
+      fields[id].classList.remove('bad', 'stale');
+      DevTools.invalid(fields[id], false);
+      msg($('#msg'), '');
+      writeAll(id);
+    } catch (e) {
+      // Do not leave the other bases showing the previous, now unrelated value.
+      value = null; invalidId = id;
+      fields[id].classList.add('bad');
+      DevTools.invalid(fields[id], true);
+      for (const other of ids) if (other !== id) { fields[other].value = ''; fields[other].classList.remove('bad'); fields[other].classList.add('stale'); DevTools.invalid(fields[other], false); }
+      renderDetails();
+      msg($('#msg'), 'error', e.message);
+    }
+  }
+
+  ids.forEach(id => fields[id].addEventListener('input', () => onInput(id)));
+  ['#upper', '#nibbles', '#prefix'].forEach(s => $(s).addEventListener('change', () => { if (!$$('.fields textarea.bad').length) writeAll(null); }));
+  $$('[data-copy]').forEach(b => b.addEventListener('click', e => copy(fields[b.dataset.copy].value, e.currentTarget)));
+  $('#clear').addEventListener('click', () => {
+    value = null;
+    invalidId = null;
+    ids.forEach(id => { fields[id].value = ''; fields[id].classList.remove('bad', 'stale'); DevTools.invalid(fields[id], false); });
+    msg($('#msg'), '');
+    renderDetails();
+    fields.dec.focus();
+  });
+
+  fields.dec.value = '255';
+  onInput('dec');
+})();
+</script>
+</body>
+</html>

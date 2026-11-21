@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://devtool-moya.netlify.app/</loc></url>
+  <url><loc>https://devtool-moya.netlify.app/case-converter</loc></url>
+  <url><loc>https://devtool-moya.netlify.app/reverse</loc></url>
+  <url><loc>https://devtool-moya.netlify.app/trim-pad</loc></url>
+  <url><loc>https://devtool-moya.netlify.app/line-counter</loc></url>
+  <url><loc>https://devtool-moya.netlify.app/line-operations</loc></url>
+  <url><loc>https://devtool-moya.netlify.app/compare</loc></url>
+  <url><loc>https://devtool-moya.netlify.app/base64</loc></url>
+  <url><loc>https://devtool-moya.netlify.app/url-encode</loc></url>
+  <url><loc>https://devtool-moya.netlify.app/hash-generator</loc></url>
+  <url><loc>https://devtool-moya.netlify.app/jwt-tool</loc></url>
+  <url><loc>https://devtool-moya.netlify.app/json-formatter</loc></url>
+  <url><loc>https://devtool-moya.netlify.app/json-compare</loc></url>
+  <url><loc>https://devtool-moya.netlify.app/json-to-csharp</loc></url>
+  <url><loc>https://devtool-moya.netlify.app/json-to-java</loc></url>
+  <url><loc>https://devtool-moya.netlify.app/json-to-typescript</loc></url>
+  <url><loc>https://devtool-moya.netlify.app/regex-search</loc></url>
+  <url><loc>https://devtool-moya.netlify.app/regex-replace</loc></url>
+  <url><loc>https://devtool-moya.netlify.app/extract</loc></url>
+  <url><loc>https://devtool-moya.netlify.app/datetime-formatter</loc></url>
+  <url><loc>https://devtool-moya.netlify.app/string-formatter</loc></url>
+  <url><loc>https://devtool-moya.netlify.app/guid-generator</loc></url>
+  <url><loc>https://devtool-moya.netlify.app/password-generator</loc></url>
+  <url><loc>https://devtool-moya.netlify.app/number-converter</loc></url>
+  <url><loc>https://devtool-moya.netlify.app/barcode-generator</loc></url>
+  <url><loc>https://devtool-moya.netlify.app/http-client</loc></url>
+  <url><loc>https://devtool-moya.netlify.app/markdown-viewer</loc></url>
+  <url><loc>https://devtool-moya.netlify.app/html-viewer</loc></url>
+  <url><loc>https://devtool-moya.netlify.app/diagram-viewer</loc></url>
+</urlset>

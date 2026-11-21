@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-socjQLl1gJMvBIodZRC0arAb1DQ25DWf2Omi3dBqMp8='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self';" />
+  <title>String Extract — Substring, Between Delimiters, Regex &amp; Line Ranges</title>
+  <meta name="description" content="Extract parts of text by position, between two delimiters, with a regex capture group, or by line ranges like 1-5, 10, 15-20. Runs entirely in your browser." />
+  <meta name="keywords" content="extract text, substring online, text between delimiters, extract regex group, extract lines, line range" />
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large" />
+  <link rel="canonical" href="https://devtool-moya.netlify.app/extract" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="String Extract — Substring, Delimiters, Regex, Lines" />
+  <meta property="og:description" content="Pull out exactly the text you need, in your browser. Nothing leaves your machine." />
+  <meta property="og:url" content="https://devtool-moya.netlify.app/extract" />
+  <meta property="og:site_name" content="DevTools" />
+  <meta name="twitter:card" content="summary" />
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "String Extract",
+    "url": "https://devtool-moya.netlify.app/extract",
+    "description": "Free online text extractor: substring by position, text between delimiters, regex capture groups and line ranges. Runs client-side.",
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "Any",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+    "featureList": ["Substring by start and length", "Text between delimiters", "Regex capture group extraction", "Line ranges", "Client-side only"],
+    "isAccessibleForFree": true
+  }
+  </script>
+  <script type="application/ld+json">
+  { "@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://devtool-moya.netlify.app/" },
+    { "@type": "ListItem", "position": 2, "name": "String Extract", "item": "https://devtool-moya.netlify.app/extract" } ] }
+  </script>
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="/assets/app.css" />
+  <style>
+    .mode-opts { display: contents; }
+    .options input[type=text] { width: 160px; }
+    .options input#ranges, .options input#re { width: 220px; }
+  </style>
+</head>
+<body>
+<div class="shell">
+  <header id="site-header"></header>
+  <aside id="sidebar"></aside>
+  <div class="nav-backdrop"></div>
+
+  <main class="page">
+    <section class="tool-head">
+      <h1>String Extract</h1>
+      <p>Pull out part of a text by position, between delimiters, with a regex group, or by line numbers.</p>
+    </section>
+
+    <section class="options" aria-label="Options">
+      <span class="opt-label">Mode</span>
+      <div class="seg" id="mode">
+        <button data-v="substring" class="on">Substring</button>
+        <button data-v="between">Between</button>
+        <button data-v="regex">Regex</button>
+        <button data-v="lines">Lines</button>
+      </div>
+      <span class="divider"></span>
+
+      <span class="mode-opts" data-mode="substring">
+        <label class="opt"><span class="opt-label">Start</span><input type="number" id="start" value="0" step="1" title="0-based; negative counts from the end" /></label>
+        <label class="opt"><span class="opt-label">Length</span><input type="number" id="length" min="0" step="1" placeholder="to end" title="Leave empty to take everything after Start" /></label>
+      </span>
+
+      <span class="mode-opts" data-mode="between" hidden>
+        <label class="opt"><span class="opt-label">Start delimiter</span><input type="text" id="d-start" spellcheck="false" value="[" /></label>
+        <label class="opt"><span class="opt-label">End delimiter</span><input type="text" id="d-end" spellcheck="false" value="]" /></label>
+        <label class="check"><input type="checkbox" id="d-include" /> Include delimiters</label>
+        <label class="check"><input type="checkbox" id="d-all" checked /> All occurrences</label>
+      </span>
+
+      <span class="mode-opts" data-mode="regex" hidden>
+        <label class="opt"><span class="opt-label">Pattern</span><input type="text" id="re" spellcheck="false" value="(\d+)" /></label>
+        <label class="opt"><span class="opt-label">Group</span><input type="number" id="group" min="0" step="1" value="1" title="0 = whole match" /></label>
+        <label class="check"><input type="checkbox" id="re-i" /> Ignore case</label>
+        <label class="check"><input type="checkbox" id="re-m" /> Multiline</label>
+        <label class="check"><input type="checkbox" id="re-u" checked /> Unicode (u)</label>
+      </span>
+
+      <span class="mode-opts" data-mode="lines" hidden>
+        <label class="opt"><span class="opt-label">Ranges</span><input type="text" id="ranges" spellcheck="false" value="1-5, 10, 15-20" title="Comma-separated: 3, 5-8, 12- (open end)" /></label>
+      </span>
+    </section>
+
+    <div class="msg" id="msg" hidden></div>
+
+    <section class="grid-2">
+      <div class="panel">
+        <div class="panel-head">
+          <span class="panel-title">Input</span>
+          <span class="panel-actions">
+            <span class="panel-meta" id="in-meta"></span>
+            <button class="btn sm" id="sample">Sample</button>
+            <button class="btn sm" id="clear">Clear</button>
+          </span>
+        </div>
+        <textarea id="input" spellcheck="false" placeholder="Paste the text to extract from…"></textarea>
+      </div>
+      <div class="panel">
+        <div class="panel-head">
+          <span class="panel-title">Extracted</span>
+          <span class="panel-actions">
+            <span class="panel-meta" id="out-meta"></span>
+            <button class="btn sm" id="copy">Copy</button>
+            <button class="btn sm" id="dl">Download</button>
+          </span>
+        </div>
+        <textarea id="output" spellcheck="false" readonly></textarea>
+      </div>
+    </section>
+
+    <div class="stats" id="stats" aria-live="polite">
+      <span>Input: <b id="st-in">0</b> chars</span>
+      <span>Output: <b id="st-out">0</b> chars</span>
+      <span>Matches found: <b id="st-n">0</b></span>
+    </div>
+
+    <section class="about">
+      <h2>About this tool</h2>
+      <p>String Extract pulls a piece of text out using one of four strategies. Multiple results are placed on separate lines.</p>
+      <h2>Modes</h2>
+      <ul>
+        <li><strong>Substring</strong> — characters from a 0-based <em>Start</em> position, for <em>Length</em> characters (empty = to the end). A negative start counts from the end, so <code>-4</code> takes the last four characters.</li>
+        <li><strong>Between</strong> — text between a start and an end delimiter, optionally including the delimiters, first occurrence or all of them. An empty start delimiter means "from the beginning", an empty end delimiter "to the end".</li>
+        <li><strong>Regex</strong> — every match of a JavaScript regular expression; choose which capture group to output (0 = the whole match). <em>Unicode (u)</em> is on by default (enables <code>\p{L}</code> and treats emoji as single characters). Matching runs in a background worker and a pattern that takes longer than 1.5 seconds is stopped.</li>
+        <li><strong>Lines</strong> — line numbers and ranges such as <code>1-5, 10, 15-20</code>. Line numbers start at 1; <code>12-</code> means line 12 to the end. Lines are output in the order the ranges are listed.</li>
+      </ul>
+      <h2>Privacy</h2>
+      <p>All processing happens in your browser. Nothing you type is sent, stored or logged.</p>
+    </section>
+  </main>
+</div>
+
+<script src="/assets/tools.js"></script>
+<script src="/assets/regex-worker.js"></script>
+<script>
+(function () {
+  'use strict';
+  const { $, $$, debounce, copy, download, msg, invalid } = DevTools;
+
+  // ==CORE==
+  const MAX_RESULTS = 100000;
+
+  /** Substring by 0-based start (negative = from end) and optional length. */
+  function extractSubstring(text, start, length) {
+    const chars = Array.from(text); // code-point safe
+    let s = Number.isFinite(start) ? Math.trunc(start) : 0;
+    if (s < 0) s = Math.max(0, chars.length + s);
+    if (s >= chars.length) return { items: [], text: '' };
+    const end = (length === null || length === undefined || length === '' || !Number.isFinite(length)) ? chars.length : s + Math.max(0, Math.trunc(length));
+    const out = chars.slice(s, end).join('');
+    return { items: out ? [out] : [], text: out };
+  }
+
+  function extractBetween(text, startDelim, endDelim, include, all) {
+    const items = [];
+    let pos = 0;
+    while (pos <= text.length && items.length < MAX_RESULTS) {
+      const a = startDelim ? text.indexOf(startDelim, pos) : (pos === 0 ? 0 : -1);
+      if (a < 0) break;
+      const innerStart = a + startDelim.length;
+      const b = endDelim ? text.indexOf(endDelim, innerStart) : text.length;
+      if (b < 0) break;
+      items.push(include ? text.slice(a, b + endDelim.length) : text.slice(innerStart, b));
+      if (!all || !startDelim) break;
+      pos = Math.max(b + endDelim.length, a + 1);
+    }
+    return { items, text: items.join('\n') };
+  }
+
+  /** Parse "1-5, 10, 15-20, 30-" into [{ from, to }] (1-based, to = Infinity for open ends). */
+  function parseRanges(spec) {
+    const parts = String(spec).split(/[,;]/).map(s => s.trim()).filter(Boolean);
+    if (!parts.length) throw new Error('Enter at least one line number or range, e.g. 1-5, 10');
+    return parts.map(p => {
+      let m = /^(\d+)$/.exec(p);
+      if (m) { const n = +m[1]; if (n < 1) throw new Error('Line numbers start at 1: "' + p + '"'); return { from: n, to: n }; }
+      m = /^(\d+)\s*-\s*(\d*)$/.exec(p);
+      if (!m) throw new Error('Invalid range: "' + p + '" (use forms like 3, 5-8 or 12-)');
+      const from = +m[1], to = m[2] === '' ? Infinity : +m[2];
+      if (from < 1) throw new Error('Line numbers start at 1: "' + p + '"');
+      if (to < from) throw new Error('Range end is before its start: "' + p + '"');
+      return { from, to };
+    });
+  }
+
+  function extractLines(text, spec) {
+    const ranges = parseRanges(spec);
+    const lines = text.split(/\r?\n/);
+    const items = [];
+    for (const r of ranges) {
+      for (let i = r.from; i <= Math.min(r.to, lines.length); i++) {
+        items.push(lines[i - 1]);
+        if (items.length >= MAX_RESULTS) break;
+      }
+    }
+    return { items, text: items.join('\n') };
+  }
+  // ==/CORE==
+
+  const input = $('#input'), output = $('#output'), msgEl = $('#msg');
+  let mode = 'substring';
+
+  function numOrNull(v) { return v.trim() === '' ? null : Number(v); }
+
+  const runner = RegexWorker.createRunner({ timeoutMs: 1500 });
+  const FIELDS = ['#start', '#length', '#d-start', '#d-end', '#re', '#group', '#ranges'];
+  let seq = 0;
+
+  function show(r, text) {
+    if (text && !r.items.length) msg(msgEl, 'info', 'Nothing matched.'); else msg(msgEl, '');
+    output.value = r.text;
+    $('#out-meta').textContent = r.items.length ? r.items.length.toLocaleString() + ' result' + (r.items.length === 1 ? '' : 's') : '';
+    $('#st-out').textContent = r.text.length.toLocaleString();
+    $('#st-n').textContent = r.items.length.toLocaleString();
+  }
+  function fail(text, field) {
+    FIELDS.forEach(s => invalid($(s), false));
+    if (field) invalid($(field), true);
+    show({ items: [], text: '' }, '');
+    msg(msgEl, 'error', text);
+  }
+  const cleanRe = m => m.replace(/^Invalid regular expression: /, '');
+
+  function run() {
+    const text = input.value;
+    const my = ++seq;
+    $('#in-meta').textContent = text ? text.length.toLocaleString() + ' chars' : '';
+    $('#st-in').textContent = text.length.toLocaleString();
+    if (mode === 'regex') {
+      const src = $('#re').value;
+      const flags = ($('#re-i').checked ? 'i' : '') + ($('#re-m').checked ? 'm' : '') + ($('#re-u').checked ? 'u' : '');
+      if (!src) { fail('Enter a regular expression.', '#re'); return; }
+      try { new RegExp(src, flags + 'g'); }
+      catch (e) { fail('Invalid regular expression: ' + cleanRe(e.message) + '. Fix the pattern or turn off a flag.', '#re'); return; }
+      $('#out-meta').textContent = 'working…';
+      runner.run('extract', { text, pattern: src, group: $('#group').value, flags, maxResults: MAX_RESULTS }).then(r => {
+        if (my !== seq) return;
+        FIELDS.forEach(s => invalid($(s), false));
+        show(r, text);
+      }, e => {
+        if (my !== seq) return;
+        if (e.name === 'GroupError') fail(e.message, '#group');
+        else fail(e.name === 'RegexTimeout' ? e.message : 'Invalid regular expression: ' + cleanRe(e.message), '#re');
+      });
+      return;
+    }
+    let r;
+    try {
+      if (mode === 'substring') r = extractSubstring(text, Number($('#start').value) || 0, numOrNull($('#length').value));
+      else if (mode === 'between') r = extractBetween(text, $('#d-start').value, $('#d-end').value, $('#d-include').checked, $('#d-all').checked);
+      else r = extractLines(text, $('#ranges').value);
+    } catch (e) {
+      fail(e.message, mode === 'lines' ? '#ranges' : null);
+      return;
+    }
+    FIELDS.forEach(s => invalid($(s), false));
+    show(r, text);
+  }
+  const runSoon = debounce(run, 200);
+
+  function setMode(v) {
+    mode = v;
+    $$('#mode button').forEach(b => b.classList.toggle('on', b.dataset.v === v));
+    $$('.mode-opts').forEach(g => { g.hidden = g.dataset.mode !== v; });
+    run();
+  }
+  $$('#mode button').forEach(b => b.addEventListener('click', () => setMode(b.dataset.v)));
+  $$('.options input').forEach(n => n.addEventListener(n.type === 'checkbox' ? 'change' : 'input', runSoon));
+  input.addEventListener('input', runSoon);
+  $('#clear').addEventListener('click', () => { input.value = ''; run(); input.focus(); });
+  $('#copy').addEventListener('click', e => copy(output.value, e.currentTarget));
+  $('#dl').addEventListener('click', () => download('extracted.txt', output.value));
+  $('#sample').addEventListener('click', () => {
+    input.value = [
+      '[2024-05-01 10:12:03] INFO  order=1042 user=alice total=19.90',
+      '[2024-05-01 10:12:09] WARN  order=1043 user=bob total=250.00',
+      '[2024-05-01 10:13:44] ERROR order=1044 user=carol total=7.50',
+      '[2024-05-01 10:15:02] INFO  order=1045 user=dave total=42.00',
+      '[2024-05-01 10:16:30] INFO  order=1046 user=erin total=13.37',
+    ].join('\n');
+    run();
+  });
+  run();
+})();
+</script>
+</body>
+</html>

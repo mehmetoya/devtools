@@ -1,0 +1,6 @@
+# Vendored third-party files — verify with: node scripts/check.mjs
+# file | package@version | source | sha256
+mermaid.min.js | mermaid@11.17.2 | https://registry.npmjs.org/ (npm pack mermaid@11.17.2 → package/dist/mermaid.min.js) | 581ed7d74bd9048d0e3a91363927d72ef22942d7722546b27f7cc29e35390eb8
+purify.min.js | dompurify@3.4.18 | https://registry.npmjs.org/ (npm pack dompurify@3.4.18 → package/dist/purify.min.js) | 8053ee2a6a09f9d50f7fcd6fb7f07072f52c7f3fa9aa12147cab4feaf65ee970
+marked.min.js | marked@15.0.6 | https://registry.npmjs.org/ (npm pack marked@15.0.6 → package/marked.min.js) | 8b10a6173d524fc6c97bc9589ba8383e0212d5c0d617e1519e5f4e6a0c9f224f
+qrcode.js | qrcode-generator@1.4.4 | https://registry.npmjs.org/ (npm pack qrcode-generator@1.4.4 → package/qrcode.js) | 18ae399f81182bc9de916e9c77b195df20cc58d6f2d55a62b085a299f1bf1780

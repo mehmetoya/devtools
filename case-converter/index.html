@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-43Gt5+Dkuwe3eUT6gnvjX7LiBBa6xDp2+FzHgX7LaUA='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self';" />
+  <title>Case Converter — camelCase, snake_case, kebab-case &amp; More</title>
+  <meta name="description" content="Convert text between camelCase, PascalCase, snake_case, kebab-case, CONSTANT_CASE, Title Case, sentence case and more. Runs entirely in your browser." />
+  <meta name="keywords" content="case converter, camelcase converter, snake case, kebab case, pascal case, title case, uppercase lowercase" />
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large" />
+  <link rel="canonical" href="https://devtool-moya.netlify.app/case-converter" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Case Converter — camelCase, snake_case, kebab-case &amp; More" />
+  <meta property="og:description" content="Switch identifiers and text between ten letter-case styles in your browser. Nothing leaves your machine." />
+  <meta property="og:url" content="https://devtool-moya.netlify.app/case-converter" />
+  <meta property="og:site_name" content="DevTools" />
+  <meta name="twitter:card" content="summary" />
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Case Converter",
+    "url": "https://devtool-moya.netlify.app/case-converter",
+    "description": "Free online case converter for camelCase, PascalCase, snake_case, kebab-case, CONSTANT_CASE, Title Case, sentence case, upper, lower and toggle case. Runs client-side.",
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "Any",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+    "featureList": ["camelCase / PascalCase", "snake_case / kebab-case / CONSTANT_CASE", "Title and sentence case", "Toggle case", "Per-line conversion", "All conversions at once", "Client-side only"],
+    "isAccessibleForFree": true
+  }
+  </script>
+  <script type="application/ld+json">
+  { "@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://devtool-moya.netlify.app/" },
+    { "@type": "ListItem", "position": 2, "name": "Case Converter", "item": "https://devtool-moya.netlify.app/case-converter" } ] }
+  </script>
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="/assets/app.css" />
+  <style>
+    .all-wrap { margin-top: 16px; }
+    .all-wrap .tbl td.res { white-space: pre-wrap; word-break: break-word; font-family: var(--mono); }
+    .all-wrap .tbl td.name { white-space: nowrap; font-weight: 600; color: var(--muted2); }
+    .all-wrap .tbl td.act { width: 1%; white-space: nowrap; }
+    .all-wrap .tbl tr.cur td.name { color: var(--accent); }
+    .seg { flex-wrap: wrap; }
+    .all-wrap > summary { cursor: pointer; list-style: none; }
+    .all-wrap > summary::-webkit-details-marker { display: none; }
+    .all-wrap > summary .panel-title::before { content: '▸ '; color: var(--muted); }
+    .all-wrap[open] > summary .panel-title::before { content: '▾ '; }
+  </style>
+</head>
+<body>
+<div class="shell">
+  <header id="site-header"></header>
+  <aside id="sidebar"></aside>
+  <div class="nav-backdrop"></div>
+
+  <main class="page">
+    <section class="tool-head">
+      <h1>Case Converter</h1>
+      <p>Turn text or identifiers into camelCase, snake_case, kebab-case, Title Case and other styles.</p>
+    </section>
+
+    <section class="options" aria-label="Options">
+      <span class="opt-label">Convert to</span>
+      <div class="seg" id="mode">
+        <button data-v="upper" class="on">UPPER</button>
+        <button data-v="lower">lower</button>
+        <button data-v="title">Title</button>
+        <button data-v="sentence">Sentence</button>
+        <button data-v="camel">camelCase</button>
+        <button data-v="pascal">PascalCase</button>
+        <button data-v="snake">snake_case</button>
+        <button data-v="kebab">kebab-case</button>
+        <button data-v="constant">CONSTANT</button>
+        <button data-v="toggle">tOGGLE</button>
+      </div>
+      <span class="divider"></span>
+      <label class="check"><input type="checkbox" id="perline" checked /> Convert each line separately</label>
+      <label class="opt"><span class="opt-label">Letter rules</span>
+        <select id="locale" title="Language rules for upper/lower case, e.g. Turkish dotted and dotless i">
+          <option value="">Browser language</option>
+          <option value="tr">Turkish (I ı / İ i)</option>
+          <option value="az">Azerbaijani (I ı / İ i)</option>
+          <option value="lt">Lithuanian</option>
+          <option value="en">English / neutral</option>
+        </select>
+      </label>
+    </section>
+
+    <div class="msg" id="msg" hidden></div>
+
+    <section class="grid-2">
+      <div class="panel">
+        <div class="panel-head">
+          <span class="panel-title">Input</span>
+          <span class="panel-actions">
+            <span class="panel-meta" id="in-meta"></span>
+            <button class="btn sm" id="clear">Clear</button>
+          </span>
+        </div>
+        <textarea id="input" spellcheck="false" placeholder="Type or paste text, e.g. parseHTTPResponse or user_first_name"></textarea>
+      </div>
+      <div class="panel">
+        <div class="panel-head">
+          <span class="panel-title">Output</span>
+          <span class="panel-actions">
+            <span class="panel-meta" id="out-meta"></span>
+            <button class="btn sm" id="swap" title="Move output to input">Use as input</button>
+            <button class="btn sm" id="copy">Copy</button>
+            <button class="btn sm" id="dl">Download</button>
+          </span>
+        </div>
+        <textarea id="output" spellcheck="false" readonly></textarea>
+      </div>
+    </section>
+
+    <details class="panel all-wrap" id="all-details">
+      <summary class="panel-head">
+        <span class="panel-title">All conversions</span>
+        <span class="panel-actions"><span class="panel-meta" id="all-meta">show every style</span></span>
+      </summary>
+      <div id="all" class="tbl-wrap"></div>
+    </details>
+
+    <section class="about">
+      <h2>About this tool</h2>
+      <p>The converter first breaks your text into words. Spaces, hyphens, underscores, dots and other punctuation count as separators, and so do lower-to-upper transitions inside identifiers. Runs of capitals are treated as acronyms, so <code>parseHTTPResponse</code> becomes the words <em>parse</em>, <em>HTTP</em> and <em>Response</em>.</p>
+      <ul>
+        <li><b>UPPER / lower / tOGGLE</b> change letters in place and keep everything else untouched.</li>
+        <li><b>Title</b> capitalises the first letter of every word; <b>Sentence</b> capitalises only the start of each sentence.</li>
+        <li><b>camelCase, PascalCase, snake_case, kebab-case, CONSTANT_CASE</b> rebuild the text from its words, dropping punctuation.</li>
+      </ul>
+      <p>With <em>Convert each line separately</em> turned on, every line is converted on its own — handy for a list of field names.</p>
+      <p><em>Letter rules</em> picks the language used for upper/lower case. Choose Turkish or Azerbaijani for dotted and dotless i: <code>ÇAĞRI ÖZTÜRK</code> becomes <code>çağrıÖztürk</code> in camelCase, not <code>çağriÖztürk</code>. The default follows your browser's language. Open <em>All conversions</em> to see every style at once.</p>
+      <h2>Privacy</h2>
+      <p>All processing happens in your browser. Nothing you type is sent, stored or logged.</p>
+    </section>
+  </main>
+</div>
+
+<script src="/assets/tools.js"></script>
+<script>
+(function () {
+  'use strict';
+  const { el, $, $$, debounce, copy, download, msg } = DevTools;
+
+  /* PURE-START */
+  const MODES = [
+    ['upper', 'UPPER CASE'], ['lower', 'lower case'], ['title', 'Title Case'], ['sentence', 'Sentence case'],
+    ['camel', 'camelCase'], ['pascal', 'PascalCase'], ['snake', 'snake_case'], ['kebab', 'kebab-case'],
+    ['constant', 'CONSTANT_CASE'], ['toggle', 'tOGGLE cASE'],
+  ];
+
+  function splitWords(s) {
+    return s
+      .replace(/([\p{Ll}\p{N}])(\p{Lu})/gu, '$1 $2')
+      .replace(/(\p{Lu}+)(\p{Lu}\p{Ll})/gu, '$1 $2')
+      .split(/[^\p{L}\p{N}\p{M}]+/u)
+      .filter(Boolean);
+  }
+  // loc: BCP 47 tag ('tr', 'en'…) or '' for the browser's language. Turkish/Azerbaijani map I↔ı and İ↔i.
+  const lo = (s, loc) => s.toLocaleLowerCase(loc || undefined);
+  const up = (s, loc) => s.toLocaleUpperCase(loc || undefined);
+  function cap(w, loc) {
+    const lower = lo(w, loc);
+    const first = String.fromCodePoint(lower.codePointAt(0));
+    return up(first, loc) + lower.slice(first.length);
+  }
+  function toggle(s, loc) {
+    return Array.from(s, c => {
+      const u = up(c, loc), l = lo(c, loc);
+      return c === u && c !== l ? l : (c === l && c !== u ? u : c);
+    }).join('');
+  }
+  function convert(s, mode, loc) {
+    switch (mode) {
+      case 'upper': return up(s, loc);
+      case 'lower': return lo(s, loc);
+      case 'toggle': return toggle(s, loc);
+      case 'title': return lo(s, loc).replace(/(^|[^\p{L}\p{N}\p{M}'’])(\p{L})/gu, (m, a, b) => a + up(b, loc));
+      case 'sentence': return lo(s, loc).replace(/(^\s*|[.!?…]["'”’)\]]*\s+|\n\s*)(\p{L})/gu, (m, a, b) => a + up(b, loc));
+    }
+    const words = splitWords(s);
+    switch (mode) {
+      case 'camel': return words.map((w, i) => i ? cap(w, loc) : lo(w, loc)).join('');
+      case 'pascal': return words.map(w => cap(w, loc)).join('');
+      case 'snake': return words.map(w => lo(w, loc)).join('_');
+      case 'kebab': return words.map(w => lo(w, loc)).join('-');
+      case 'constant': return words.map(w => up(w, loc)).join('_');
+      default: return s;
+    }
+  }
+  function convertText(text, mode, perLine, loc) {
+    return perLine ? text.split(/\r\n|\r|\n/).map(l => convert(l, mode, loc)).join('\n') : convert(text, mode, loc);
+  }
+  /* PURE-END */
+
+  const input = $('#input'), output = $('#output'), perline = $('#perline'), localeSel = $('#locale'), allBox = $('#all-details');
+  let mode = 'upper';
+  const PREVIEW_MAX = 2000;
+  let allVisible = false, allDirty = true;
+
+  // The "All conversions" table runs ten conversions, so it is only computed while the panel is open and on screen.
+  function renderAll() {
+    const box = $('#all');
+    const text = input.value;
+    if (!allBox.open || !allVisible) { allDirty = true; if (!allBox.open) $('#all-meta').textContent = 'show every style'; return; }
+    allDirty = false;
+    if (!text) {
+      box.replaceChildren(el('div', { class: 'out', style: 'min-height:0;color:var(--muted)' }, 'Every conversion of your input will be listed here.'));
+      $('#all-meta').textContent = '';
+      return;
+    }
+    const loc = localeSel.value;
+    const rows = MODES.map(([id, label]) => {
+      const res = convertText(text, id, perline.checked, loc);
+      const shown = res.length > PREVIEW_MAX ? res.slice(0, PREVIEW_MAX) + '…' : res;
+      const btn = el('button', { class: 'btn sm', onclick: e => copy(res, e.currentTarget), 'aria-label': 'Copy ' + label }, 'Copy');
+      return el('tr', { class: id === mode ? 'cur' : null },
+        el('td', { class: 'name' }, label), el('td', { class: 'res' }, shown), el('td', { class: 'act' }, btn));
+    });
+    box.replaceChildren(el('table', { class: 'tbl' }, el('tbody', null, rows)));
+    $('#all-meta').textContent = MODES.length + ' styles';
+  }
+  const renderAllLater = debounce(renderAll, 300);
+  if ('IntersectionObserver' in window) {
+    new IntersectionObserver(entries => {
+      allVisible = entries.some(e => e.isIntersecting);
+      if (allVisible && allDirty) renderAll();
+    }).observe(allBox);
+  } else allVisible = true;
+  allBox.addEventListener('toggle', () => { if (allBox.open) renderAll(); });
+
+  function run() {
+    const text = input.value;
+    $('#in-meta').textContent = text.length + ' chars';
+    msg($('#msg'), '');
+    allDirty = true;
+    if (!text) { output.value = ''; $('#out-meta').textContent = ''; renderAll(); return; }
+    output.value = convertText(text, mode, perline.checked, localeSel.value);
+    $('#out-meta').textContent = output.value.length + ' chars';
+    if (!perline.checked && /\n/.test(text) && ['camel', 'pascal', 'snake', 'kebab', 'constant'].includes(mode)) {
+      msg($('#msg'), 'info', 'Line breaks are treated as word separators. Turn on "Convert each line separately" to keep one identifier per line.');
+    }
+    if (text.length > 50000) renderAllLater(); else renderAll();
+  }
+  const runLater = debounce(run, 120);
+  function setMode(v) {
+    mode = v;
+    $$('#mode button').forEach(b => b.classList.toggle('on', b.dataset.v === v));
+    run();
+  }
+
+  $$('#mode button').forEach(b => b.addEventListener('click', () => setMode(b.dataset.v)));
+  perline.addEventListener('change', run);
+  localeSel.addEventListener('change', run);
+  input.addEventListener('input', () => input.value.length > 50000 ? runLater() : run());
+  $('#clear').addEventListener('click', () => { input.value = ''; run(); input.focus(); });
+  $('#copy').addEventListener('click', e => copy(output.value, e.currentTarget));
+  $('#dl').addEventListener('click', () => download('converted-' + mode + '.txt', output.value));
+  $('#swap').addEventListener('click', () => { input.value = output.value; run(); });
+  run();
+})();
+</script>
+</body>
+</html>

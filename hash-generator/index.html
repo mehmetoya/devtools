@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-Rn1d+vGXwdTy3phgeQHlUhCrYs9M0yeNR2SLzOR3Hsk='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self';" />
+  <title>Hash Generator — MD5, SHA-1, SHA-256, SHA-512, HMAC</title>
+  <meta name="description" content="Compute MD5, SHA-1, SHA-256, SHA-384 and SHA-512 hashes or HMACs of text and files, and check which algorithm produced a hash. Runs entirely in your browser." />
+  <meta name="keywords" content="hash generator, md5 hash, sha256 hash, sha1, sha512, hmac generator, file checksum, hash verify" />
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large" />
+  <link rel="canonical" href="https://devtool-moya.netlify.app/hash-generator" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Hash Generator — MD5, SHA-1, SHA-256, SHA-512, HMAC" />
+  <meta property="og:description" content="Hash text or files with MD5 and the SHA family, with optional HMAC key. Nothing leaves your machine." />
+  <meta property="og:url" content="https://devtool-moya.netlify.app/hash-generator" />
+  <meta property="og:site_name" content="DevTools" />
+  <meta name="twitter:card" content="summary" />
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Hash Generator",
+    "url": "https://devtool-moya.netlify.app/hash-generator",
+    "description": "Free online MD5, SHA-1, SHA-256, SHA-384 and SHA-512 hash and HMAC generator for text and files, with hash verification. Runs client-side.",
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "Any",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+    "featureList": ["MD5", "SHA-1", "SHA-256", "SHA-384", "SHA-512", "HMAC", "File hashing", "Hex or Base64 output", "Hash verification", "Client-side only"],
+    "isAccessibleForFree": true
+  }
+  </script>
+  <script type="application/ld+json">
+  { "@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://devtool-moya.netlify.app/" },
+    { "@type": "ListItem", "position": 2, "name": "Hash Generator", "item": "https://devtool-moya.netlify.app/hash-generator" } ] }
+  </script>
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="/assets/app.css" />
+  <style>
+    .drop { border: 1px dashed var(--border2); border-radius: var(--radius); margin: 14px; padding: 28px 14px; text-align: center; color: var(--muted2); font-size: 13px; cursor: pointer; }
+    .drop.over { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
+    .drop input[type=file] { display: block; margin: 10px auto 0; max-width: 100%; font-family: var(--sans); font-size: 12px; color: var(--muted2); }
+    .file-info { padding: 0 14px 14px; font-family: var(--mono); font-size: 12px; color: var(--muted2); word-break: break-all; }
+    .hash-tbl td.val { font-family: var(--mono); word-break: break-all; font-size: 12px; }
+    .hash-tbl td.algo { white-space: nowrap; font-weight: 700; }
+    .hash-tbl td.bits { white-space: nowrap; color: var(--muted2); font-family: var(--mono); font-size: 12px; }
+    .hash-tbl tr.match td { background: var(--accent-dim); }
+    .hash-tbl tr.match td.algo { color: var(--accent); }
+    .verify-row { display: flex; gap: 8px; padding: 14px; flex-wrap: wrap; }
+    .verify-row input { flex: 1; min-width: 0; }
+    #verify-msg { margin: 0 14px 14px; }
+    .key-wrap { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+    .key-wrap input { width: 220px; max-width: 100%; }
+    @media (max-width: 600px) {
+      .hash-tbl th.bits-h, .hash-tbl td.bits { display: none; }
+      .hash-tbl th, .hash-tbl td { padding: 8px 8px; }
+    }
+  </style>
+</head>
+<body>
+<div class="shell">
+  <header id="site-header"></header>
+  <aside id="sidebar"></aside>
+  <div class="nav-backdrop"></div>
+
+  <main class="page">
+    <section class="tool-head">
+      <h1>Hash Generator</h1>
+      <p>Compute MD5 and SHA digests (or HMACs) of text or a local file, and identify which algorithm produced a given hash.</p>
+    </section>
+
+    <section class="options" aria-label="Options">
+      <span class="opt-label">Source</span>
+      <div class="seg" id="src">
+        <button data-v="text" class="on">Text</button>
+        <button data-v="file">File</button>
+      </div>
+      <span class="divider"></span>
+      <span class="opt-label">Format</span>
+      <div class="seg" id="fmt">
+        <button data-v="hex" class="on">Hex</button>
+        <button data-v="base64">Base64</button>
+      </div>
+      <span class="opt-label">Case</span>
+      <div class="seg" id="case">
+        <button data-v="lower" class="on">lower</button>
+        <button data-v="upper">UPPER</button>
+      </div>
+      <span class="divider"></span>
+      <label class="check"><input type="checkbox" id="hmac" /> HMAC</label>
+      <span class="key-wrap" id="key-wrap" hidden>
+        <input type="password" id="key" placeholder="Secret key" autocomplete="off" spellcheck="false" aria-label="HMAC key" />
+        <button class="btn sm" id="key-toggle" type="button">Show</button>
+      </span>
+    </section>
+
+    <div class="msg" id="msg" hidden></div>
+
+    <section class="grid-2">
+      <div class="panel" id="text-panel">
+        <div class="panel-head">
+          <span class="panel-title">Input text (UTF-8)</span>
+          <span class="panel-actions">
+            <span class="panel-meta" id="in-meta"></span>
+            <button class="btn sm" id="clear">Clear</button>
+          </span>
+        </div>
+        <textarea id="input" spellcheck="false" placeholder="Type or paste text to hash..."></textarea>
+      </div>
+      <div class="panel" id="file-panel" hidden>
+        <div class="panel-head">
+          <span class="panel-title">Input file</span>
+          <span class="panel-actions">
+            <button class="btn sm" id="clear-file">Clear</button>
+          </span>
+        </div>
+        <label class="drop" id="drop">
+          Drop a file here, or choose one. It is read locally and never uploaded.
+          <input type="file" id="file" />
+        </label>
+        <div class="file-info" id="file-info"></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <span class="panel-title">Digests</span>
+          <span class="panel-actions">
+            <span class="panel-meta" id="out-meta"></span>
+            <button class="btn sm" id="copy-all">Copy all</button>
+            <button class="btn sm" id="dl">Download</button>
+          </span>
+        </div>
+        <table class="tbl hash-tbl">
+          <thead><tr><th>Algorithm</th><th class="bits-h">Bits</th><th>Value</th><th></th></tr></thead>
+          <tbody id="rows"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="panel" style="margin-top:16px">
+      <div class="panel-head"><span class="panel-title">Verify a hash</span></div>
+      <div class="verify-row">
+        <input type="text" id="verify" spellcheck="false" placeholder="Paste a hash (hex or Base64) to compare against the current input" aria-label="Hash to verify" />
+        <button class="btn sm" id="verify-clear">Clear</button>
+      </div>
+      <div class="msg" id="verify-msg" hidden></div>
+    </section>
+
+    <section class="about">
+      <h2>About this tool</h2>
+      <p>A cryptographic hash function maps any input to a fixed-size fingerprint. Text is encoded as UTF-8 before hashing, so the same string always produces the same digest as most command-line tools (for example <code>printf %s "text" | sha256sum</code>).</p>
+      <ul>
+        <li><b>MD5</b> (128 bits) and <b>SHA-1</b> (160 bits) are broken for collision resistance. Use them only for checksums and legacy compatibility.</li>
+        <li><b>SHA-256</b>, <b>SHA-384</b> and <b>SHA-512</b> belong to the SHA-2 family and are suitable for integrity checks and signatures.</li>
+        <li><b>HMAC</b> mixes a secret key into the hash so only key holders can produce or check the value. HMAC-MD5 is computed in JavaScript; the SHA variants use the browser's Web Crypto API.</li>
+        <li>Plain hashes are not a safe way to store passwords. Use a slow, salted algorithm such as Argon2, scrypt or bcrypt.</li>
+      </ul>
+      <h2>Verify</h2>
+      <p>Paste any digest into the verify box. It is compared (case-insensitively for hex) against every algorithm for the current input and the matching algorithm is highlighted.</p>
+      <h2>Privacy</h2>
+      <p>Text, files and keys stay in your browser. Nothing is uploaded, stored or logged.</p>
+    </section>
+  </main>
+</div>
+
+<script src="/assets/tools.js"></script>
+<script>
+(function () {
+  'use strict';
+  const { el, $, $$, debounce, copy, download, msg } = DevTools;
+
+  /* #pure */
+  const MD5_K = [
+    0xd76aa478, 0xe8c7b756, 0x242070db, 0xc1bdceee, 0xf57c0faf, 0x4787c62a, 0xa8304613, 0xfd469501,
+    0x698098d8, 0x8b44f7af, 0xffff5bb1, 0x895cd7be, 0x6b901122, 0xfd987193, 0xa679438e, 0x49b40821,
+    0xf61e2562, 0xc040b340, 0x265e5a51, 0xe9b6c7aa, 0xd62f105d, 0x02441453, 0xd8a1e681, 0xe7d3fbc8,
+    0x21e1cde6, 0xc33707d6, 0xf4d50d87, 0x455a14ed, 0xa9e3e905, 0xfcefa3f8, 0x676f02d9, 0x8d2a4c8a,
+    0xfffa3942, 0x8771f681, 0x6d9d6122, 0xfde5380c, 0xa4beea44, 0x4bdecfa9, 0xf6bb4b60, 0xbebfbc70,
+    0x289b7ec6, 0xeaa127fa, 0xd4ef3085, 0x04881d05, 0xd9d4d039, 0xe6db99e5, 0x1fa27cf8, 0xc4ac5665,
+    0xf4292244, 0x432aff97, 0xab9423a7, 0xfc93a039, 0x655b59c3, 0x8f0ccc92, 0xffeff47d, 0x85845dd1,
+    0x6fa87e4f, 0xfe2ce6e0, 0xa3014314, 0x4e0811a1, 0xf7537e82, 0xbd3af235, 0x2ad7d2bb, 0xeb86d391];
+  const MD5_S = [7, 12, 17, 22, 5, 9, 14, 20, 4, 11, 16, 23, 6, 10, 15, 21];
+
+  /** MD5 of a Uint8Array, returns a 16-byte Uint8Array. */
+  function md5(bytes) {
+    const len = bytes.length;
+    const total = (((len + 8) >>> 6) + 1) << 6;
+    const buf = new Uint8Array(total);
+    buf.set(bytes);
+    buf[len] = 0x80;
+    const dv = new DataView(buf.buffer);
+    dv.setUint32(total - 8, (len * 8) >>> 0, true);
+    dv.setUint32(total - 4, Math.floor(len / 0x20000000), true);
+    let a0 = 0x67452301, b0 = 0xefcdab89, c0 = 0x98badcfe, d0 = 0x10325476;
+    const M = new Uint32Array(16);
+    for (let off = 0; off < total; off += 64) {
+      for (let j = 0; j < 16; j++) M[j] = dv.getUint32(off + j * 4, true);
+      let A = a0, B = b0, C = c0, D = d0;
+      for (let i = 0; i < 64; i++) {
+        let F, g;
+        if (i < 16) { F = (B & C) | (~B & D); g = i; }
+        else if (i < 32) { F = (D & B) | (~D & C); g = (5 * i + 1) & 15; }
+        else if (i < 48) { F = B ^ C ^ D; g = (3 * i + 5) & 15; }
+        else { F = C ^ (B | ~D); g = (7 * i) & 15; }
+        const s = MD5_S[(i >> 4) * 4 + (i & 3)];
+        const x = (A + F + MD5_K[i] + M[g]) | 0;
+        A = D; D = C; C = B;
+        B = (B + ((x << s) | (x >>> (32 - s)))) | 0;
+      }
+      a0 = (a0 + A) | 0; b0 = (b0 + B) | 0; c0 = (c0 + C) | 0; d0 = (d0 + D) | 0;
+    }
+    const out = new Uint8Array(16);
+    const odv = new DataView(out.buffer);
+    odv.setUint32(0, a0 >>> 0, true); odv.setUint32(4, b0 >>> 0, true);
+    odv.setUint32(8, c0 >>> 0, true); odv.setUint32(12, d0 >>> 0, true);
+    return out;
+  }
+
+  /** HMAC-MD5 (RFC 2104) with a 64-byte block. */
+  function hmacMd5(key, data) {
+    if (key.length > 64) key = md5(key);
+    const k = new Uint8Array(64); k.set(key);
+    const inner = new Uint8Array(64 + data.length), outer = new Uint8Array(64 + 16);
+    for (let i = 0; i < 64; i++) { inner[i] = k[i] ^ 0x36; outer[i] = k[i] ^ 0x5c; }
+    inner.set(data, 64);
+    outer.set(md5(inner), 64);
+    return md5(outer);
+  }
+
+  const ALGOS = [
+    { id: 'MD5', bits: 128 },
+    { id: 'SHA-1', bits: 160 },
+    { id: 'SHA-256', bits: 256 },
+    { id: 'SHA-384', bits: 384 },
+    { id: 'SHA-512', bits: 512 },
+  ];
+
+  /** Returns [{id, bits, bytes}] for every algorithm. key = Uint8Array or null (plain hash). */
+  async function digestAll(data, key) {
+    const subtle = globalThis.crypto.subtle;
+    const out = [];
+    for (const a of ALGOS) {
+      let bytes;
+      if (a.id === 'MD5') bytes = key ? hmacMd5(key, data) : md5(data);
+      else if (key) {
+        const k = await subtle.importKey('raw', key, { name: 'HMAC', hash: a.id }, false, ['sign']);
+        bytes = new Uint8Array(await subtle.sign('HMAC', k, data));
+      } else bytes = new Uint8Array(await subtle.digest(a.id, data));
+      out.push({ id: a.id, bits: a.bits, bytes });
+    }
+    return out;
+  }
+
+  function toHex(bytes) {
+    let s = '';
+    for (let i = 0; i < bytes.length; i++) s += (bytes[i] < 16 ? '0' : '') + bytes[i].toString(16);
+    return s;
+  }
+  function toBase64(bytes) {
+    let bin = '';
+    for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+    return btoa(bin);
+  }
+  /** Normalise a pasted hash to lowercase hex, or null if it is neither hex nor Base64. */
+  function normaliseHash(s) {
+    s = String(s).trim().replace(/\s+/g, '').replace(/^0x/i, '');
+    if (!s) return null;
+    if (/^[0-9a-f]+$/i.test(s) && s.length % 2 === 0) return s.toLowerCase();
+    let b = s.replace(/-/g, '+').replace(/_/g, '/');
+    if (!/^[A-Za-z0-9+/]+={0,2}$/.test(b)) return null;
+    while (b.length % 4) b += '=';
+    try { const bin = atob(b); return toHex(Uint8Array.from(bin, c => c.charCodeAt(0))); } catch { return null; }
+  }
+  /* #endpure */
+
+  const input = $('#input'), rows = $('#rows'), keyInput = $('#key'), hmac = $('#hmac'), verify = $('#verify');
+  let src = 'text', fmt = 'hex', letterCase = 'lower';
+  let fileBytes = null, fileName = '';
+  let results = [];
+  let seq = 0;
+
+  function fmtValue(bytes) {
+    if (fmt === 'base64') return toBase64(bytes);
+    const h = toHex(bytes);
+    return letterCase === 'upper' ? h.toUpperCase() : h;
+  }
+
+  function currentData() {
+    if (src === 'file') return fileBytes;
+    return new TextEncoder().encode(input.value);
+  }
+
+  function render() {
+    rows.replaceChildren();
+    const want = normaliseHash(verify.value);
+    for (const r of results) {
+      const value = fmtValue(r.bytes);
+      const isMatch = want && toHex(r.bytes) === want;
+      const copyBtn = el('button', { class: 'btn sm', onclick: e => copy(value, e.currentTarget) }, 'Copy');
+      rows.appendChild(el('tr', { class: isMatch ? 'match' : null },
+        el('td', { class: 'algo' }, (hmac.checked ? 'HMAC-' : '') + r.id),
+        el('td', { class: 'bits' }, String(r.bits)),
+        el('td', { class: 'val' }, value),
+        el('td', null, copyBtn)));
+    }
+    renderVerify(want);
+  }
+
+  function renderVerify(want) {
+    const vm = $('#verify-msg');
+    const raw = verify.value.trim();
+    DevTools.invalid(verify, false);
+    if (!raw) { msg(vm, ''); return; }
+    if (!want) { msg(vm, 'error', 'This is not a valid hex or Base64 hash. Paste the digest as hex (0-9, a-f) or Base64.'); DevTools.invalid(verify, true); verify.setAttribute('aria-describedby', 'verify-msg'); return; }
+    if (!results.length) { msg(vm, 'info', 'Enter some input above to compare against.'); return; }
+    const hit = results.find(r => toHex(r.bytes) === want);
+    const prefix = hmac.checked ? 'HMAC-' : '';
+    if (hit) { msg(vm, 'ok', '✓ Match: ' + prefix + hit.id + ' of the current input.'); return; }
+    const bits = want.length * 4;
+    const same = results.find(r => r.bits === bits);
+    msg(vm, 'error', '✗ No match. ' + (same
+      ? 'The length (' + bits + ' bits) fits ' + prefix + same.id + ', but the value differs.'
+      : 'The length (' + bits + ' bits) does not fit any supported algorithm.'));
+    if (!same) { DevTools.invalid(verify, true); verify.setAttribute('aria-describedby', 'verify-msg'); }
+  }
+
+  async function run() {
+    const my = ++seq;
+    const data = currentData();
+    $('#in-meta').textContent = input.value.length + ' chars';
+    if (src === 'file' && !data) { results = []; $('#out-meta').textContent = ''; render(); msg($('#msg'), ''); return; }
+    let key = null;
+    DevTools.invalid(keyInput, hmac.checked && !keyInput.value);
+    if (hmac.checked) {
+      key = new TextEncoder().encode(keyInput.value);
+      if (!key.length) {
+        results = []; render(); $('#out-meta').textContent = '';
+        msg($('#msg'), 'warn', 'HMAC is on: enter a secret key to compute the values.');
+        return;
+      }
+    }
+    try {
+      const res = await digestAll(data, key);
+      if (my !== seq) return;
+      results = res;
+      $('#out-meta').textContent = data.length + ' bytes';
+      msg($('#msg'), '');
+      render();
+    } catch (e) {
+      if (my !== seq) return;
+      results = []; render();
+      msg($('#msg'), 'error', 'Hashing failed: ' + (e && e.message ? e.message : String(e)) + (globalThis.crypto && crypto.subtle ? '' : ' (Web Crypto is only available on HTTPS or localhost.)'));
+    }
+  }
+  const runSoon = debounce(run, 120);
+
+  function setSeg(id, v) { $$('#' + id + ' button').forEach(b => b.classList.toggle('on', b.dataset.v === v)); }
+
+  $$('#src button').forEach(b => b.addEventListener('click', () => {
+    src = b.dataset.v; setSeg('src', src);
+    $('#text-panel').hidden = src !== 'text';
+    $('#file-panel').hidden = src !== 'file';
+    run();
+  }));
+  $$('#fmt button').forEach(b => b.addEventListener('click', () => { fmt = b.dataset.v; setSeg('fmt', fmt); render(); }));
+  $$('#case button').forEach(b => b.addEventListener('click', () => { letterCase = b.dataset.v; setSeg('case', letterCase); render(); }));
+  hmac.addEventListener('change', () => { $('#key-wrap').hidden = !hmac.checked; if (hmac.checked) keyInput.focus(); run(); });
+  keyInput.addEventListener('input', runSoon);
+  $('#key-toggle').addEventListener('click', e => {
+    const show = keyInput.type === 'password';
+    keyInput.type = show ? 'text' : 'password';
+    e.currentTarget.textContent = show ? 'Hide' : 'Show';
+  });
+  input.addEventListener('input', runSoon);
+  verify.addEventListener('input', render);
+  $('#verify-clear').addEventListener('click', () => { verify.value = ''; render(); });
+  $('#clear').addEventListener('click', () => { input.value = ''; run(); input.focus(); });
+
+  async function loadFile(f) {
+    if (!f) return;
+    $('#file-info').textContent = 'Reading ' + f.name + '…';
+    try {
+      fileBytes = new Uint8Array(await f.arrayBuffer());
+      fileName = f.name;
+      $('#file-info').textContent = f.name + ' — ' + fileBytes.length.toLocaleString('en-US') + ' bytes' + (f.type ? ' — ' + f.type : '');
+      run();
+    } catch (e) {
+      fileBytes = null; fileName = '';
+      $('#file-info').textContent = '';
+      msg($('#msg'), 'error', 'Could not read the file: ' + (e && e.message ? e.message : String(e)));
+    }
+  }
+  $('#file').addEventListener('change', e => loadFile(e.target.files[0]));
+  const drop = $('#drop');
+  drop.addEventListener('dragover', e => { e.preventDefault(); drop.classList.add('over'); });
+  drop.addEventListener('dragleave', () => drop.classList.remove('over'));
+  drop.addEventListener('drop', e => {
+    e.preventDefault(); drop.classList.remove('over');
+    const f = e.dataTransfer && e.dataTransfer.files[0];
+    if (f) loadFile(f);
+  });
+  $('#clear-file').addEventListener('click', () => {
+    fileBytes = null; fileName = ''; $('#file').value = ''; $('#file-info').textContent = ''; run();
+  });
+
+  function allText() {
+    const head = src === 'file' ? 'File: ' + fileName : 'Text input (' + new TextEncoder().encode(input.value).length + ' bytes, UTF-8)';
+    return [head + (hmac.checked ? ' — HMAC' : '')].concat(results.map(r => (hmac.checked ? 'HMAC-' : '') + r.id + ': ' + fmtValue(r.bytes))).join('\n');
+  }
+  $('#copy-all').addEventListener('click', e => { if (results.length) copy(allText(), e.currentTarget); });
+  $('#dl').addEventListener('click', () => { if (results.length) download('hashes.txt', allText() + '\n'); });
+
+  run();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-WPtrYTVd2a6mXwJe753/WaTTGGoXv9GOpASmpwwcgeE='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self';" />
+  <title>Line Operations — Sort, Dedupe, Filter, Number &amp; Join Lines</title>
+  <meta name="description" content="Sort lines, remove duplicates or empty lines, trim, add prefixes and suffixes, number, join, split and filter lines by text or regex. Runs in your browser." />
+  <meta name="keywords" content="sort lines, remove duplicate lines, remove empty lines, add prefix to lines, number lines, join lines, filter lines regex, natural sort" />
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large" />
+  <link rel="canonical" href="https://devtool-moya.netlify.app/line-operations" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Line Operations — Sort, Dedupe, Filter, Number &amp; Join Lines" />
+  <meta property="og:description" content="An editor-style toolbox for lines of text: sort, dedupe, trim, wrap, number, join, split and filter. Nothing leaves your machine." />
+  <meta property="og:url" content="https://devtool-moya.netlify.app/line-operations" />
+  <meta property="og:site_name" content="DevTools" />
+  <meta name="twitter:card" content="summary" />
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Line Operations",
+    "url": "https://devtool-moya.netlify.app/line-operations",
+    "description": "Free online line toolbox: sort (alphabetical, natural, by length), shuffle, remove duplicates and blank lines, trim, prefix, suffix, wrap, number, join, split and filter by text or regular expression. Runs client-side.",
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "Any",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+    "featureList": ["Sort ascending / descending / by length", "Natural (numeric) sort", "Shuffle and reverse", "Remove duplicates, empty and blank lines", "Trim lines", "Prefix, suffix, wrap", "Number lines with a format", "Join and split with delimiters", "Filter by text or regex", "Client-side only"],
+    "isAccessibleForFree": true
+  }
+  </script>
+  <script type="application/ld+json">
+  { "@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://devtool-moya.netlify.app/" },
+    { "@type": "ListItem", "position": 2, "name": "Line Operations", "item": "https://devtool-moya.netlify.app/line-operations" } ] }
+  </script>
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="/assets/app.css" />
+  <style>
+    #text1, #text2, #custom-delim { width: 180px; }
+    #fmt { width: 110px; }
+    @media (max-width: 860px) { #text1, #text2 { width: 140px; } }
+  </style>
+</head>
+<body>
+<div class="shell">
+  <header id="site-header"></header>
+  <aside id="sidebar"></aside>
+  <div class="nav-backdrop"></div>
+
+  <main class="page">
+    <section class="tool-head">
+      <h1>Line Operations</h1>
+      <p>Sort, clean up, decorate, join, split and filter lines of text — like an editor's line menu.</p>
+    </section>
+
+    <section class="options" aria-label="Options">
+      <label class="opt"><span class="opt-label">Operation</span>
+        <select id="op">
+          <optgroup label="Order">
+            <option value="sort-asc">Sort A → Z</option>
+            <option value="sort-desc">Sort Z → A</option>
+            <option value="sort-length">Sort by length</option>
+            <option value="reverse-order">Reverse order</option>
+            <option value="shuffle">Shuffle</option>
+          </optgroup>
+          <optgroup label="Clean up">
+            <option value="remove-duplicates">Remove duplicate lines</option>
+            <option value="remove-empty">Remove empty lines</option>
+            <option value="remove-blank">Remove blank (whitespace-only) lines</option>
+            <option value="trim-lines">Trim both ends</option>
+            <option value="trim-start">Trim start</option>
+            <option value="trim-end">Trim end</option>
+            <option value="remove-numbers">Remove digits</option>
+          </optgroup>
+          <optgroup label="Decorate">
+            <option value="prefix">Add prefix</option>
+            <option value="suffix">Add suffix</option>
+            <option value="wrap">Wrap (before + after)</option>
+            <option value="trim-prefix">Remove from start</option>
+            <option value="trim-suffix">Remove from end</option>
+            <option value="number-lines">Number lines</option>
+          </optgroup>
+          <optgroup label="Join / split">
+            <option value="join">Join lines</option>
+            <option value="split">Split into lines</option>
+          </optgroup>
+          <optgroup label="Filter">
+            <option value="filter-contains">Keep lines containing</option>
+            <option value="filter-not-contains">Remove lines containing</option>
+            <option value="filter-regex">Keep lines matching regex</option>
+          </optgroup>
+        </select>
+      </label>
+      <label class="opt" data-show="text1"><span class="opt-label" id="text1-label">Text</span>
+        <input type="text" id="text1" spellcheck="false" />
+      </label>
+      <label class="opt" data-show="text2"><span class="opt-label">After</span>
+        <input type="text" id="text2" spellcheck="false" />
+      </label>
+      <label class="opt" data-show="count"><span class="opt-label">Characters</span>
+        <input type="number" id="count" min="0" value="1" />
+      </label>
+      <label class="opt" data-show="fmt"><span class="opt-label">Format</span>
+        <input type="text" id="fmt" value="{0}. " spellcheck="false" />
+      </label>
+      <label class="opt" data-show="fmt"><span class="opt-label">Start at</span>
+        <input type="number" id="start" value="1" />
+      </label>
+      <label class="opt" data-show="delim"><span class="opt-label">Delimiter</span>
+        <select id="delim">
+          <option value=",">Comma ( , )</option>
+          <option value=", ">Comma + space</option>
+          <option value=";">Semicolon ( ; )</option>
+          <option value="\t">Tab</option>
+          <option value=" ">Space</option>
+          <option value="\n">Newline</option>
+          <option value="|">Pipe ( | )</option>
+          <option value="custom">Custom…</option>
+        </select>
+      </label>
+      <label class="opt" data-show="custom"><span class="opt-label">Custom</span>
+        <input type="text" id="custom-delim" placeholder="e.g. \t or ' OR '" spellcheck="false" />
+      </label>
+      <span class="divider"></span>
+      <label class="check" data-show="case"><input type="checkbox" id="cs" checked /> Case sensitive</label>
+      <label class="check" data-show="natural"><input type="checkbox" id="natural" checked /> Natural sort (2 before 10)</label>
+    </section>
+
+    <div class="msg" id="msg" hidden></div>
+
+    <section class="grid-2">
+      <div class="panel">
+        <div class="panel-head">
+          <span class="panel-title">Input</span>
+          <span class="panel-actions">
+            <span class="panel-meta" id="in-meta"></span>
+            <button class="btn sm" id="clear">Clear</button>
+          </span>
+        </div>
+        <textarea id="input" spellcheck="false" placeholder="One item per line..."></textarea>
+      </div>
+      <div class="panel">
+        <div class="panel-head">
+          <span class="panel-title">Output</span>
+          <span class="panel-actions">
+            <span class="panel-meta" id="out-meta"></span>
+            <button class="btn sm" id="rerun" title="Run the operation again (new shuffle)">Re-run</button>
+            <button class="btn sm" id="swap" title="Move output to input to chain another operation">Use as input</button>
+            <button class="btn sm" id="copy">Copy</button>
+            <button class="btn sm" id="dl">Download</button>
+          </span>
+        </div>
+        <textarea id="output" spellcheck="false" readonly></textarea>
+      </div>
+    </section>
+
+    <div class="stats" id="stats" hidden></div>
+
+    <details class="info">
+      <summary>Operation reference</summary>
+      <div>
+        <ul style="padding-left:18px">
+          <li><b>Sort</b> uses locale-aware ordering. <em>Natural sort</em> compares digit runs as numbers, so <code>file2</code> comes before <code>file10</code>. With <em>Case sensitive</em> off, letters differing only in case are ordered together.</li>
+          <li><b>Remove duplicate lines</b> keeps the first occurrence. Turn off <em>Case sensitive</em> to treat <code>Apple</code> and <code>apple</code> as the same.</li>
+          <li><b>Empty</b> lines have no characters at all; <b>blank</b> lines may contain spaces or tabs.</li>
+          <li><b>Remove from start / end</b> strips the given text if a line begins / ends with it; leave the text empty to cut a fixed number of characters instead.</li>
+          <li><b>Number lines</b> replaces every <code>{0}</code> in the format with the line number, e.g. <code>{0}. </code>, <code>[{0}] </code> or <code>#{0}\t</code> (escapes are supported in the format).</li>
+          <li><b>Join / Split</b> delimiters accept the escapes <code>\n</code>, <code>\t</code>, <code>\r</code> and <code>\\</code>.</li>
+          <li><b>Regex</b> filters use JavaScript syntax with the Unicode flag; <em>Case sensitive</em> off adds the <code>i</code> flag. Filtering runs in a background worker; a pattern that takes longer than 1.5 seconds (catastrophic backtracking) is stopped.</li>
+          <li>A single trailing line break in the input is ignored so it does not become an extra empty line.</li>
+        </ul>
+      </div>
+    </details>
+
+    <section class="about">
+      <h2>About this tool</h2>
+      <p>Pick an operation and the output updates as you type. Use <em>Use as input</em> to chain several steps — for example trim, remove blank lines, sort and then remove duplicates.</p>
+      <h2>Privacy</h2>
+      <p>All processing happens in your browser. Nothing you type is sent, stored or logged.</p>
+    </section>
+  </main>
+</div>
+
+<script src="/assets/tools.js"></script>
+<script src="/assets/regex-worker.js"></script>
+<script>
+(function () {
+  'use strict';
+  const { el, $, $$, debounce, copy, download, msg, invalid } = DevTools;
+
+  /* PURE-START */
+  function unescapeDelim(s) {
+    return s.replace(/\\([ntr\\])/g, (m, c) => ({ n: '\n', t: '\t', r: '\r', '\\': '\\' })[c]);
+  }
+  function splitLines(text) {
+    if (text === '') return [];
+    return text.replace(/(\r\n|\r|\n)$/, '').split(/\r\n|\r|\n/);
+  }
+  function cpLen(s) { let n = 0; for (const _ of s) n++; return n; }
+  function cutStart(s, n) { return Array.from(s).slice(n).join(''); }
+  function cutEnd(s, n) { const a = Array.from(s); return a.slice(0, Math.max(0, a.length - n)).join(''); }
+  function shuffle(arr, rnd) {
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+    return a;
+  }
+  function escapeRe(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
+
+  /** o: { op, text1, text2, count, fmt, start, delim, cs, natural, rnd } → { lines, warn } ; throws Error on invalid options */
+  function processLines(text, o) {
+    const lines = splitLines(text);
+    const cs = !!o.cs;
+    const key = s => cs ? s : s.toLowerCase();
+    const contains = (s, t) => key(s).includes(key(t));
+    let warn = '';
+    let out;
+    switch (o.op) {
+      case 'sort-asc':
+      case 'sort-desc': {
+        const coll = new Intl.Collator(undefined, { numeric: !!o.natural, sensitivity: cs ? 'variant' : 'accent', caseFirst: cs ? 'upper' : 'false' });
+        out = lines.slice().sort(coll.compare);
+        if (o.op === 'sort-desc') out.reverse();
+        break;
+      }
+      case 'sort-length': out = lines.map((l, i) => [cpLen(l), i, l]).sort((a, b) => a[0] - b[0] || a[1] - b[1]).map(x => x[2]); break;
+      case 'reverse-order': out = lines.slice().reverse(); break;
+      case 'shuffle': out = shuffle(lines, o.rnd || Math.random); break;
+      case 'remove-duplicates': {
+        const seen = new Set();
+        out = lines.filter(l => { const k = key(l); if (seen.has(k)) return false; seen.add(k); return true; });
+        break;
+      }
+      case 'remove-empty': out = lines.filter(l => l !== ''); break;
+      case 'remove-blank': out = lines.filter(l => /\S/.test(l)); break;
+      case 'trim-lines': out = lines.map(l => l.trim()); break;
+      case 'trim-start': out = lines.map(l => l.trimStart()); break;
+      case 'trim-end': out = lines.map(l => l.trimEnd()); break;
+      case 'remove-numbers': out = lines.map(l => l.replace(/\p{Nd}/gu, '')); break;
+      case 'prefix': out = lines.map(l => o.text1 + l); break;
+      case 'suffix': out = lines.map(l => l + o.text1); break;
+      case 'wrap': out = lines.map(l => o.text1 + l + o.text2); break;
+      case 'trim-prefix':
+        if (o.text1) {
+          const re = new RegExp('^' + escapeRe(o.text1), cs ? 'u' : 'iu');
+          out = lines.map(l => l.replace(re, ''));
+        } else out = lines.map(l => cutStart(l, o.count));
+        break;
+      case 'trim-suffix':
+        if (o.text1) {
+          const re = new RegExp(escapeRe(o.text1) + '$', cs ? 'u' : 'iu');
+          out = lines.map(l => l.replace(re, ''));
+        } else out = lines.map(l => cutEnd(l, o.count));
+        break;
+      case 'number-lines': {
+        let f = unescapeDelim(o.fmt);
+        if (!f.includes('{0}')) { warn = 'The format has no {0} placeholder, so the number was put in front of it.'; f = '{0}' + f; }
+        const start = Number.isFinite(o.start) ? o.start : 1;
+        out = lines.map((l, i) => f.split('{0}').join(String(start + i)) + l);
+        break;
+      }
+      case 'join': out = lines.length ? [lines.join(o.delim)] : []; break;
+      case 'split':
+        if (o.delim === '') throw new Error('Choose a delimiter to split on.');
+        out = lines.flatMap(l => l.split(o.delim));
+        break;
+      case 'filter-contains': out = o.text1 === '' ? lines.slice() : lines.filter(l => contains(l, o.text1)); break;
+      case 'filter-not-contains': out = o.text1 === '' ? lines.slice() : lines.filter(l => !contains(l, o.text1)); break;
+      case 'filter-regex': {
+        if (o.text1 === '') { out = lines.slice(); break; }
+        let re;
+        try { re = new RegExp(o.text1, cs ? 'u' : 'iu'); }
+        catch (e) { throw new Error('Invalid regular expression: ' + e.message); }
+        out = lines.filter(l => re.test(l));
+        break;
+      }
+      default: out = lines.slice();
+    }
+    return { lines: out, inCount: lines.length, warn };
+  }
+  /* PURE-END */
+
+  const SHOW = {
+    'sort-asc': ['case', 'natural'], 'sort-desc': ['case', 'natural'], 'sort-length': [], 'reverse-order': [], shuffle: [],
+    'remove-duplicates': ['case'], 'remove-empty': [], 'remove-blank': [], 'trim-lines': [], 'trim-start': [], 'trim-end': [], 'remove-numbers': [],
+    prefix: ['text1'], suffix: ['text1'], wrap: ['text1', 'text2'], 'trim-prefix': ['text1', 'count', 'case'], 'trim-suffix': ['text1', 'count', 'case'],
+    'number-lines': ['fmt'], join: ['delim'], split: ['delim'],
+    'filter-contains': ['text1', 'case'], 'filter-not-contains': ['text1', 'case'], 'filter-regex': ['text1', 'case'],
+  };
+  const TEXT1_LABEL = {
+    prefix: ['Prefix', 'e.g. - '], suffix: ['Suffix', 'e.g. ,'], wrap: ['Before', 'e.g. "'],
+    'trim-prefix': ['Text', 'empty = use count'], 'trim-suffix': ['Text', 'empty = use count'],
+    'filter-contains': ['Contains', 'text to look for'], 'filter-not-contains': ['Contains', 'text to look for'], 'filter-regex': ['Pattern', 'e.g. ^\\d+$'],
+  };
+
+  const input = $('#input'), output = $('#output'), opSel = $('#op');
+
+  function delimValue() {
+    const v = $('#delim').value;
+    return unescapeDelim(v === 'custom' ? $('#custom-delim').value : v);
+  }
+
+  function opts() {
+    return {
+      op: opSel.value, text1: $('#text1').value, text2: $('#text2').value,
+      count: Math.max(0, parseInt($('#count').value, 10) || 0),
+      fmt: $('#fmt').value, start: parseInt($('#start').value, 10),
+      delim: delimValue(), cs: $('#cs').checked, natural: $('#natural').checked,
+    };
+  }
+
+  function stat(k, v) { return el('span', null, k + ' ', el('b', null, String(v))); }
+
+  const runner = RegexWorker.createRunner({ timeoutMs: 1500 });
+  let seq = 0;
+
+  function show(text, res) {
+    const st = $('#stats');
+    output.value = res.lines.join('\n');
+    const a = res.inCount, b = res.lines.length, d = b - a;
+    $('#out-meta').textContent = b + (b === 1 ? ' line' : ' lines');
+    st.replaceChildren(
+      stat('Lines:', a + ' → ' + b),
+      stat('Change:', (d > 0 ? '+' : '') + d),
+      stat('Characters:', text.length + ' → ' + output.value.length),
+    );
+    st.hidden = false;
+    if (res.warn) msg($('#msg'), 'warn', res.warn);
+  }
+  function fail(message, field) {
+    output.value = '';
+    $('#out-meta').textContent = '';
+    $('#stats').hidden = true;
+    if (field) invalid(field, true);
+    msg($('#msg'), 'error', message);
+  }
+
+  function run() {
+    const text = input.value;
+    const o = opts();
+    const st = $('#stats');
+    const my = ++seq;
+    msg($('#msg'), '');
+    invalid($('#text1'), false); invalid($('#custom-delim'), false);
+    const nIn = splitLines(text).length;
+    $('#in-meta').textContent = text ? nIn + (nIn === 1 ? ' line' : ' lines') : '';
+    if (!text) { output.value = ''; $('#out-meta').textContent = ''; st.hidden = true; return; }
+    if (o.op === 'filter-regex' && o.text1 !== '') {
+      // Compile on the main thread (fast, reports syntax errors); filter in the worker with a time limit.
+      const flags = o.cs ? 'u' : 'iu';
+      try { new RegExp(o.text1, flags); }
+      catch (e) { fail('Invalid regular expression: ' + e.message.replace(/^Invalid regular expression: /, '') + '. Fix the pattern.', $('#text1')); return; }
+      const lines = splitLines(text);
+      $('#out-meta').textContent = 'working…';
+      runner.run('filter', { lines, pattern: o.text1, flags }).then(r => {
+        if (my !== seq) return;
+        show(text, { lines: r.lines, inCount: lines.length, warn: '' });
+      }, e => {
+        if (my !== seq) return;
+        fail(e.name === 'RegexTimeout' ? e.message : 'Invalid regular expression: ' + e.message.replace(/^Invalid regular expression: /, ''), $('#text1'));
+      });
+      return;
+    }
+    try {
+      show(text, processLines(text, o));
+    } catch (e) {
+      fail(e.message, o.op === 'split' && $('#delim').value === 'custom' ? $('#custom-delim') : null);
+    }
+  }
+  const runLater = debounce(run, 150);
+
+  function updateVisibility() {
+    const op = opSel.value;
+    const show = new Set(SHOW[op] || []);
+    if (show.has('delim') && $('#delim').value === 'custom') show.add('custom');
+    $$('[data-show]').forEach(n => { n.hidden = !show.has(n.dataset.show); });
+    const lab = TEXT1_LABEL[op];
+    if (lab) { $('#text1-label').textContent = lab[0]; $('#text1').placeholder = lab[1]; }
+    $('#rerun').hidden = op !== 'shuffle';
+    // a sensible default delimiter for each direction
+    if (op === 'split' && $('#delim').value === '\\n') $('#delim').value = ',';
+  }
+
+  opSel.addEventListener('change', () => { updateVisibility(); run(); });
+  $('#delim').addEventListener('change', () => { updateVisibility(); run(); });
+  ['#text1', '#text2', '#count', '#fmt', '#start', '#custom-delim'].forEach(s => $(s).addEventListener('input', runLater));
+  ['#cs', '#natural'].forEach(s => $(s).addEventListener('change', run));
+  input.addEventListener('input', runLater);
+  $('#clear').addEventListener('click', () => { input.value = ''; run(); input.focus(); });
+  $('#rerun').addEventListener('click', run);
+  $('#copy').addEventListener('click', e => copy(output.value, e.currentTarget));
+  $('#dl').addEventListener('click', () => download('lines.txt', output.value));
+  $('#swap').addEventListener('click', () => { input.value = output.value; run(); });
+  updateVisibility();
+  run();
+})();
+</script>
+</body>
+</html>

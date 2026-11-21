@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-MpOkJcbC8DSshRT0F46dshxTCDkS1Vmiiy1otjYLIpY='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self';" />
+  <title>URL Encode/Decode — Percent-Encoding Online, Client-Side</title>
+  <meta name="description" content="Percent-encode or decode URLs and query values with encodeURIComponent or encodeURI rules, optional + for spaces, and a URL parser with a query-parameter table." />
+  <meta name="keywords" content="url encode, url decode, percent encoding, encodeURIComponent, urlencode online, query string parser" />
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large" />
+  <link rel="canonical" href="https://devtool-moya.netlify.app/url-encode" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="URL Encode/Decode — Percent-Encoding Online, Client-Side" />
+  <meta property="og:description" content="Encode and decode URL strings and inspect query parameters in your browser. Nothing leaves your machine." />
+  <meta property="og:url" content="https://devtool-moya.netlify.app/url-encode" />
+  <meta property="og:site_name" content="DevTools" />
+  <meta name="twitter:card" content="summary" />
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "URL Encode/Decode",
+    "url": "https://devtool-moya.netlify.app/url-encode",
+    "description": "Free online URL encoder and decoder supporting component and full-URL modes, form encoding with + for spaces, per-line processing and a URL / query string parser. Runs client-side.",
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "Any",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+    "featureList": ["URL encode", "URL decode", "Component or full-URL mode", "+ for spaces (form encoding)", "Each line separately", "Malformed sequence detection", "URL and query parameter parser", "Client-side only"],
+    "isAccessibleForFree": true
+  }
+  </script>
+  <script type="application/ld+json">
+  { "@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://devtool-moya.netlify.app/" },
+    { "@type": "ListItem", "position": 2, "name": "URL Encode", "item": "https://devtool-moya.netlify.app/url-encode" } ] }
+  </script>
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="/assets/app.css" />
+  <style>
+    .parse-wrap { margin-top: 16px; }
+    .parse-wrap .tbl td.k { white-space: nowrap; font-weight: 600; color: var(--muted2); width: 1%; }
+    .parse-wrap .tbl td.mono { white-space: pre-wrap; }
+    .parse-wrap h3 { font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--muted2); padding: 14px 12px 6px; }
+  </style>
+</head>
+<body>
+<div class="shell">
+  <header id="site-header"></header>
+  <aside id="sidebar"></aside>
+  <div class="nav-backdrop"></div>
+
+  <main class="page">
+    <section class="tool-head">
+      <h1>URL Encode / Decode</h1>
+      <p>Percent-encode text for safe use in URLs, decode encoded strings, and break a URL into its parts.</p>
+    </section>
+
+    <section class="options" aria-label="Options">
+      <span class="opt-label">Operation</span>
+      <div class="seg" id="op">
+        <button data-v="encode" class="on">Encode</button>
+        <button data-v="decode">Decode</button>
+      </div>
+      <span class="divider"></span>
+      <label class="opt"><span class="opt-label">Mode</span>
+        <select id="mode">
+          <option value="component">Component (query value, path segment)</option>
+          <option value="uri">Full URL (keep :/?#&amp;=)</option>
+        </select>
+      </label>
+      <label class="check"><input type="checkbox" id="plus" /> + for spaces (form encoding)</label>
+      <label class="check"><input type="checkbox" id="perline" /> Each line separately</label>
+    </section>
+
+    <div class="msg" id="msg" hidden></div>
+
+    <section class="grid-2">
+      <div class="panel">
+        <div class="panel-head">
+          <span class="panel-title">Input</span>
+          <span class="panel-actions">
+            <span class="panel-meta" id="in-meta"></span>
+            <button class="btn sm" id="clear">Clear</button>
+          </span>
+        </div>
+        <textarea id="input" spellcheck="false" placeholder="Enter text to encode..."></textarea>
+      </div>
+      <div class="panel">
+        <div class="panel-head">
+          <span class="panel-title">Output</span>
+          <span class="panel-actions">
+            <span class="panel-meta" id="out-meta"></span>
+            <button class="btn sm" id="swap" title="Move output to input and flip the operation">Use as input</button>
+            <button class="btn sm" id="copy">Copy</button>
+            <button class="btn sm" id="dl">Download</button>
+          </span>
+        </div>
+        <textarea id="output" spellcheck="false" readonly></textarea>
+      </div>
+    </section>
+
+    <section class="panel parse-wrap">
+      <div class="panel-head">
+        <span class="panel-title">URL breakdown</span>
+        <span class="panel-actions"><span class="panel-meta" id="parse-meta"></span></span>
+      </div>
+      <div id="parsed" style="overflow-x:auto"></div>
+    </section>
+
+    <section class="about">
+      <h2>About this tool</h2>
+      <p>URLs may only contain a limited set of ASCII characters. Everything else is converted to UTF-8 bytes and written as <code>%XX</code> hex pairs.</p>
+      <ul>
+        <li><b>Component</b> encodes every reserved character, including <code>/ ? # &amp; =</code>. Use it for a single query value or path segment (like <code>encodeURIComponent</code>).</li>
+        <li><b>Full URL</b> keeps the characters that give a URL its structure and only encodes the rest (like <code>encodeURI</code>). When decoding, escapes of reserved characters such as <code>%2F</code> are left in place.</li>
+        <li><b>+ for spaces</b> follows HTML form encoding (<code>application/x-www-form-urlencoded</code>): spaces become <code>+</code> and <code>! ' ( ) ~</code> are escaped too. A literal <code>+</code> is written as <code>%2B</code> in both modes, so it is not mistaken for a space. When decoding, <code>+</code> is read as a space and <code>%2B</code> as a plus sign.</li>
+      </ul>
+      <p>The breakdown panel parses the first line of the input (or the decoded output) as an absolute URL and lists its components and decoded query parameters.</p>
+      <h2>Privacy</h2>
+      <p>All processing happens in your browser. Nothing you type is sent, stored or logged — the URL is only parsed, never requested.</p>
+    </section>
+  </main>
+</div>
+
+<script src="/assets/tools.js"></script>
+<script>
+(function () {
+  'use strict';
+  const { el, $, $$, copy, download, msg, invalid } = DevTools;
+
+  /* PURE-START */
+  function urlEncode(s, mode, plus) {
+    let out;
+    try { out = mode === 'uri' ? encodeURI(s) : encodeURIComponent(s); }
+    catch (e) { throw new Error('The text contains an unpaired surrogate character that cannot be encoded as UTF-8.'); }
+    if (plus) {
+      // encodeURI keeps a literal "+"; escape it first so it is not read back as a space.
+      if (mode === 'uri') out = out.replace(/\+/g, '%2B');
+      out = out.replace(/%20/g, '+');
+      if (mode !== 'uri') out = out.replace(/[!'()~]/g, c => '%' + c.charCodeAt(0).toString(16).toUpperCase());
+    }
+    return out;
+  }
+  function describeMalformed(s) {
+    const bad = /%(?![0-9A-Fa-f]{2})/.exec(s);
+    if (bad) return 'Malformed escape "' + s.slice(bad.index, bad.index + 3) + '" at position ' + (bad.index + 1) + ' — "%" must be followed by two hex digits (write %25 for a literal percent sign).';
+    const re = /(?:%[0-9A-Fa-f]{2})+/g;
+    let m;
+    while ((m = re.exec(s))) {
+      try { decodeURIComponent(m[0]); }
+      catch (e) { return 'The bytes ' + m[0] + ' at position ' + (m.index + 1) + ' are not valid UTF-8.'; }
+    }
+    return 'The input contains an invalid percent-encoded sequence.';
+  }
+  function urlDecode(s, mode, plus) {
+    const src = plus ? s.replace(/\+/g, ' ') : s;
+    try {
+      if (mode !== 'uri') return decodeURIComponent(src);
+      // decodeURI leaves reserved escapes such as %2B alone; in form mode %2B is a literal "+".
+      return plus ? src.split(/%2B/i).map(decodeURI).join('+') : decodeURI(src);
+    }
+    catch (e) { throw new Error(describeMalformed(src)); }
+  }
+  function convertText(text, op, mode, plus, perLine) {
+    const one = s => op === 'encode' ? urlEncode(s, mode, plus) : urlDecode(s, mode, plus);
+    if (!perLine) return one(text);
+    return text.split(/\r\n|\r|\n/).map((l, i) => {
+      try { return l ? one(l) : ''; }
+      catch (e) { throw new Error('Line ' + (i + 1) + ': ' + e.message); }
+    }).join('\n');
+  }
+  function parseUrl(str) {
+    const s = str.trim();
+    if (!/^[a-z][a-z0-9+.-]*:/i.test(s)) return null;
+    let u;
+    try { u = new URL(s); } catch (e) { return null; }
+    const parts = [
+      ['Protocol', u.protocol], ['Username', u.username], ['Password', u.password ? '••••' : ''],
+      ['Host', u.host], ['Hostname', u.hostname], ['Port', u.port], ['Origin', u.origin === 'null' ? '' : u.origin],
+      ['Path', u.pathname], ['Query', u.search], ['Fragment', u.hash],
+    ].filter(p => p[1] !== '');
+    const params = Array.from(u.searchParams.entries());
+    return { parts, params };
+  }
+  /* PURE-END */
+
+  const input = $('#input'), output = $('#output'), mode = $('#mode'), plus = $('#plus'), perline = $('#perline');
+  let op = 'encode';
+
+  function renderParse() {
+    const box = $('#parsed');
+    const firstLine = s => s.split(/\r\n|\r|\n/).find(l => l.trim()) || '';
+    const candidate = op === 'decode' && output.value ? firstLine(output.value) : firstLine(input.value);
+    const res = candidate ? parseUrl(candidate) : null;
+    if (!res) {
+      $('#parse-meta').textContent = '';
+      box.replaceChildren(el('div', { class: 'out', style: 'min-height:0;color:var(--muted)' },
+        candidate ? 'The first line is not an absolute URL (e.g. https://example.com/path?x=1), so there is nothing to break down.' : 'Enter a full URL to see its components and query parameters.'));
+      return;
+    }
+    const nodes = [el('table', { class: 'tbl' }, el('tbody', null,
+      res.parts.map(([k, v]) => el('tr', null, el('td', { class: 'k' }, k), el('td', { class: 'mono' }, v)))))];
+    if (res.params.length) {
+      nodes.push(el('h3', null, 'Query parameters (' + res.params.length + ')'));
+      nodes.push(el('table', { class: 'tbl' },
+        el('thead', null, el('tr', null, el('th', null, '#'), el('th', null, 'Name'), el('th', null, 'Value (decoded)'))),
+        el('tbody', null, res.params.map(([k, v], i) => el('tr', null,
+          el('td', { class: 'k' }, String(i + 1)), el('td', { class: 'mono' }, k), el('td', { class: 'mono' }, v))))));
+    }
+    $('#parse-meta').textContent = res.params.length + ' param' + (res.params.length === 1 ? '' : 's');
+    box.replaceChildren(...nodes);
+  }
+
+  function run() {
+    const text = input.value;
+    $('#in-meta').textContent = text ? text.length + ' chars' : '';
+    invalid(input, false);
+    if (!text) { output.value = ''; $('#out-meta').textContent = ''; msg($('#msg'), ''); renderParse(); return; }
+    try {
+      output.value = convertText(text, op, mode.value, plus.checked, perline.checked);
+      $('#out-meta').textContent = output.value.length + ' chars';
+      msg($('#msg'), '');
+    } catch (e) {
+      invalid(input, true);
+      output.value = '';
+      $('#out-meta').textContent = '';
+      msg($('#msg'), 'error', (op === 'decode' ? 'Decode failed: ' : 'Encode failed: ') + e.message);
+    }
+    renderParse();
+  }
+
+  function setOp(v) {
+    op = v;
+    $$('#op button').forEach(b => b.classList.toggle('on', b.dataset.v === v));
+    input.placeholder = v === 'encode' ? 'Enter text to encode...' : 'Enter a percent-encoded string to decode...';
+    run();
+  }
+
+  $$('#op button').forEach(b => b.addEventListener('click', () => setOp(b.dataset.v)));
+  [mode, plus, perline].forEach(n => n.addEventListener('change', run));
+  input.addEventListener('input', run);
+  $('#clear').addEventListener('click', () => { input.value = ''; run(); input.focus(); });
+  $('#copy').addEventListener('click', e => copy(output.value, e.currentTarget));
+  $('#dl').addEventListener('click', () => download(op === 'encode' ? 'url-encoded.txt' : 'url-decoded.txt', output.value));
+  $('#swap').addEventListener('click', () => { input.value = output.value; setOp(op === 'encode' ? 'decode' : 'encode'); });
+  run();
+})();
+</script>
+</body>
+</html>

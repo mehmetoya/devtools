@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-QAT7qRefMw8TXx2+XHWHF/4TYzZs7yg1SFCiGzg+BVk='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self';" />
+  <title>JSON Compare — Structural JSON Diff Online, Client-Side</title>
+  <meta name="description" content="Compare two JSON documents and list every added, removed and changed value with its path. Optionally ignore array order or loose types. Runs entirely in your browser." />
+  <meta name="keywords" content="json compare, json diff, compare json online, json difference, json structural diff, jsonpath diff" />
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large" />
+  <link rel="canonical" href="https://devtool-moya.netlify.app/json-compare" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="JSON Compare — Structural JSON Diff, Client-Side" />
+  <meta property="og:description" content="Find every difference between two JSON documents, path by path. Nothing leaves your machine." />
+  <meta property="og:url" content="https://devtool-moya.netlify.app/json-compare" />
+  <meta property="og:site_name" content="DevTools" />
+  <meta name="twitter:card" content="summary" />
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "JSON Compare",
+    "url": "https://devtool-moya.netlify.app/json-compare",
+    "description": "Free online structural JSON diff. Lists added, removed and changed values with JSONPath-like paths. Runs client-side.",
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "Any",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+    "featureList": ["Structural JSON diff", "JSONPath-style paths", "Ignore array order", "Strict or loose type comparison", "Client-side only"],
+    "isAccessibleForFree": true
+  }
+  </script>
+  <script type="application/ld+json">
+  { "@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://devtool-moya.netlify.app/" },
+    { "@type": "ListItem", "position": 2, "name": "JSON Compare", "item": "https://devtool-moya.netlify.app/json-compare" } ] }
+  </script>
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="/assets/app.css" />
+  <style>
+    .result { margin-top: 16px; }
+    .result .tbl-wrap { overflow-x: auto; max-height: 70vh; overflow-y: auto; }
+    .kind { display: inline-block; font-family: var(--mono); font-size: 11px; padding: 1px 7px; border-radius: 10px; white-space: nowrap; }
+    .kind-added { background: var(--accent-dim); color: var(--accent); }
+    .kind-removed { background: var(--danger-dim); color: var(--danger); }
+    .kind-changed { background: var(--warn-dim); color: var(--warn); }
+    .kind-type { background: var(--info-dim); color: var(--info); }
+    .kind-length { background: var(--surface3); color: var(--muted2); }
+    td.val { font-family: var(--mono); font-size: 12px; white-space: pre-wrap; word-break: break-all; max-width: 320px; }
+    td.val.none { color: var(--muted); }
+    .empty-note { padding: 18px 14px; color: var(--muted); }
+  </style>
+</head>
+<body>
+<div class="shell">
+  <header id="site-header"></header>
+  <aside id="sidebar"></aside>
+  <div class="nav-backdrop"></div>
+
+  <main class="page">
+    <section class="tool-head">
+      <h1>JSON Compare</h1>
+      <p>Structural diff of two JSON documents — every addition, removal and change with its path.</p>
+    </section>
+
+    <section class="options" aria-label="Options">
+      <label class="check"><input type="checkbox" id="ignore-order" /> Ignore array order</label>
+      <label class="check" title="When off, values with equal text are treated as equal, e.g. 1 and &quot;1&quot;"><input type="checkbox" id="strict" checked /> Strict types</label>
+      <span class="divider"></span>
+      <button class="btn" id="swap" title="Swap A and B"><span aria-hidden="true">⇄</span> Swap</button>
+      <button class="btn" id="sample">Sample</button>
+    </section>
+
+    <div class="msg" id="msg" hidden></div>
+
+    <section class="grid-2">
+      <div class="panel">
+        <div class="panel-head">
+          <span class="panel-title">Original (A)</span>
+          <span class="panel-actions">
+            <span class="panel-meta" id="a-meta"></span>
+            <button class="btn sm" id="a-fmt">Format</button>
+            <button class="btn sm" id="a-clear">Clear</button>
+          </span>
+        </div>
+        <textarea id="a" spellcheck="false" placeholder='{"name": "Alice", "age": 30}'></textarea>
+      </div>
+      <div class="panel">
+        <div class="panel-head">
+          <span class="panel-title">Modified (B)</span>
+          <span class="panel-actions">
+            <span class="panel-meta" id="b-meta"></span>
+            <button class="btn sm" id="b-fmt">Format</button>
+            <button class="btn sm" id="b-clear">Clear</button>
+          </span>
+        </div>
+        <textarea id="b" spellcheck="false" placeholder='{"name": "Alice", "age": 31}'></textarea>
+      </div>
+    </section>
+
+    <section class="panel result">
+      <div class="panel-head">
+        <span class="panel-title">Differences</span>
+        <span class="panel-actions">
+          <span class="panel-meta" id="res-meta"></span>
+          <button class="btn sm" id="copy">Copy report</button>
+          <button class="btn sm" id="dl">Download</button>
+        </span>
+      </div>
+      <div class="tbl-wrap" id="result"><div class="empty-note">Paste JSON into both sides to compare.</div></div>
+    </section>
+
+    <section class="about">
+      <h2>About this tool</h2>
+      <p>JSON Compare parses both documents and walks them side by side. Instead of a line-based text diff, it reports semantic differences, so whitespace, indentation and key order inside objects never count as changes.</p>
+      <h2>Difference types</h2>
+      <ul>
+        <li><strong>added</strong> — the path exists only in B.</li>
+        <li><strong>removed</strong> — the path exists only in A.</li>
+        <li><strong>changed</strong> — same type, different value.</li>
+        <li><strong>type mismatch</strong> — e.g. a number in A and a string in B (only reported in strict mode for primitives).</li>
+        <li><strong>array length</strong> — the arrays at this path have different lengths.</li>
+      </ul>
+      <h2>Options</h2>
+      <p><strong>Ignore array order</strong> matches array items by value, so <code>[1,2,3]</code> and <code>[3,1,2]</code> are equal; it stays fast on arrays with thousands of items. <strong>Strict types</strong> off treats primitives with the same text or numeric value as equal (<code>1</code> vs <code>"1"</code>, <code>true</code> vs <code>"true"</code>).</p>
+      <h2>Numbers and duplicate keys</h2>
+      <p>Numbers are compared exactly as written, not as rounded floating-point values: <code>12345678901234567890</code> and <code>12345678901234567891</code> are different, while <code>1</code> and <code>1.0</code> are the same number. If a document repeats a key in one object, the later value is compared (as most parsers do) and a warning names the key and line.</p>
+      <h2>Privacy</h2>
+      <p>All processing happens in your browser. Nothing you paste is sent, stored or logged.</p>
+    </section>
+  </main>
+</div>
+
+<script src="/assets/tools.js"></script>
+<script>
+(function () {
+  'use strict';
+  const { $, el, debounce, copy, download, msg } = DevTools;
+
+  // ==CORE==
+  /* ── Lossless JSON parser: keeps number source text and duplicate keys ──
+     Nodes: { t: 'o', e: [[key, node], ...] }  { t: 'a', e: [node, ...] }  { t: 's', v }  { t: 'n', raw }
+            { t: 'b', v }  { t: 'z' } (null). Errors are SyntaxErrors with .pos (offset), .line and .col. */
+  const LJ_STR = /"[^"\\\u0000-\u001f]*(?:\\(?:["\\/bfnrt]|u[0-9a-fA-F]{4})[^"\\\u0000-\u001f]*)*"/y;
+  const LJ_NUM = /-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?/y;
+  function lineColAt(text, pos) {
+    let line = 1, last = -1;
+    for (let k = text.indexOf('\n'); k !== -1 && k < pos; k = text.indexOf('\n', k + 1)) { line++; last = k; }
+    return { line, col: pos - last };
+  }
+  function parseLossless(text) {
+    let i = 0;
+    const dups = [];
+    function fail(message, pos) {
+      if (pos !== undefined) i = pos;
+      const e = new SyntaxError(message);
+      const lc = lineColAt(text, i);
+      e.pos = i; e.line = lc.line; e.col = lc.col;
+      throw e;
+    }
+    function ch() { return i < text.length ? JSON.stringify(text[i]) : 'end of input'; }
+    function ws() {
+      for (;;) { const c = text.charCodeAt(i); if (c === 32 || c === 10 || c === 13 || c === 9) i++; else return; }
+    }
+    function strFail() {
+      for (let k = i + 1; k < text.length; k++) {
+        const c = text.charCodeAt(k);
+        if (c === 34) break;
+        if (c < 32) fail('Unescaped control character in a string — write it as an escape such as \\n or \\t.', k);
+        if (c === 92) {
+          const n = text[k + 1];
+          if (n === 'u') { if (!/^[0-9a-fA-F]{4}$/.test(text.substr(k + 2, 4))) fail('Invalid \\u escape — it needs exactly 4 hex digits.', k); k += 5; }
+          else if (n !== undefined && '"\\/bfnrt'.includes(n)) k++;
+          else fail('Invalid escape sequence "\\' + (n || '') + '" — only \\" \\\\ \\/ \\b \\f \\n \\r \\t and \\uXXXX are allowed.', k);
+        }
+      }
+      fail('Unterminated string — add the closing double quote (").', i);
+    }
+    function str() {
+      LJ_STR.lastIndex = i;
+      const m = LJ_STR.exec(text);
+      if (!m) strFail();
+      i = LJ_STR.lastIndex;
+      const s = m[0];
+      return s.indexOf('\\') < 0 ? s.slice(1, -1) : JSON.parse(s);
+    }
+    function badValue() {
+      const c = text[i];
+      if (i >= text.length) fail('Unexpected end of input — a value, closing bracket or brace is missing.');
+      if (c === "'") fail('Strings must use double quotes (") — single quotes are not valid JSON.');
+      if (c === '}' || c === ']') fail('Unexpected ' + ch() + ' — remove the trailing comma before it, or add a value.');
+      const word = /^[A-Za-z_$][\w$]*/.exec(text.slice(i, i + 32));
+      if (word) fail('Unexpected word "' + word[0] + '" — JSON only allows true, false, null, numbers and "strings".');
+      fail('Unexpected ' + ch() + ' — expected a value.');
+    }
+    function value() {
+      ws();
+      const c = text.charCodeAt(i);
+      if (c === 34) return { t: 's', v: str() };
+      if (c === 123) {
+        i++; ws();
+        const e = [];
+        if (text.charCodeAt(i) === 125) { i++; return { t: 'o', e }; }
+        const seen = new Set();
+        for (;;) {
+          ws();
+          if (text.charCodeAt(i) !== 34) {
+            if (text[i] === "'") fail('Property names must use double quotes (") — single quotes are not valid JSON.');
+            if (text[i] === '}') fail('Trailing comma before "}" — remove the last comma.');
+            if (i >= text.length) fail('Unexpected end of input — a closing "}" is missing.');
+            fail('Expected a double-quoted property name, found ' + ch() + '.');
+          }
+          const kpos = i, k = str();
+          ws();
+          if (text.charCodeAt(i) !== 58) fail('Expected ":" after property name ' + JSON.stringify(k) + ', found ' + ch() + '.');
+          i++;
+          const v = value();
+          if (seen.has(k)) dups.push({ key: k, pos: kpos }); else seen.add(k);
+          e.push([k, v]);
+          ws();
+          const d = text.charCodeAt(i);
+          if (d === 44) { i++; continue; }
+          if (d === 125) { i++; return { t: 'o', e }; }
+          if (i >= text.length) fail('Unexpected end of input — a closing "}" is missing.');
+          fail('Expected "," or "}" after a property value, found ' + ch() + '.');
+        }
+      }
+      if (c === 91) {
+        i++; ws();
+        const e = [];
+        if (text.charCodeAt(i) === 93) { i++; return { t: 'a', e }; }
+        for (;;) {
+          e.push(value());
+          ws();
+          const d = text.charCodeAt(i);
+          if (d === 44) { i++; continue; }
+          if (d === 93) { i++; return { t: 'a', e }; }
+          if (i >= text.length) fail('Unexpected end of input — a closing "]" is missing.');
+          fail('Expected "," or "]" after an array element, found ' + ch() + '.');
+        }
+      }
+      if (c === 45 || (c >= 48 && c <= 57)) {
+        LJ_NUM.lastIndex = i;
+        const m = LJ_NUM.exec(text);
+        if (!m) fail('Invalid number — a digit must follow "-".');
+        i = LJ_NUM.lastIndex;
+        const n = text.charCodeAt(i);
+        if (n >= 48 && n <= 57) fail('Invalid number — leading zeros are not allowed.', i - 1);
+        if (n === 46 || n === 101 || n === 69) fail('Invalid number — a digit must follow "' + text[i] + '".');
+        return { t: 'n', raw: m[0] };
+      }
+      if (text.startsWith('true', i)) { i += 4; return { t: 'b', v: true }; }
+      if (text.startsWith('false', i)) { i += 5; return { t: 'b', v: false }; }
+      if (text.startsWith('null', i)) { i += 4; return { t: 'z' }; }
+      badValue();
+    }
+    let root;
+    try {
+      root = value();
+    } catch (e) {
+      if (e instanceof RangeError) { const r = new SyntaxError('The JSON is nested too deeply to process.'); r.pos = -1; throw r; }
+      throw e;
+    }
+    ws();
+    if (i < text.length) fail('Unexpected ' + ch() + ' after the end of the JSON value — remove it, or wrap several values in an array.');
+    return { root, dups };
+  }
+  /** Describe duplicate keys for a message (null when there are none). */
+  function describeDups(text, dups, label) {
+    if (!dups.length) return null;
+    const first = dups[0], lc = lineColAt(text, first.pos);
+    return (label ? label + ': d' : 'D') + 'uplicate key ' + JSON.stringify(first.key) + ' at line ' + lc.line +
+      ' — later value wins in most parsers' + (dups.length > 1 ? ' (' + (dups.length - 1) + ' more duplicate' + (dups.length > 2 ? 's' : '') + ')' : '') + '.';
+  }
+  /** Serialize a node like JSON.stringify(value, null, indent), keeping number text and duplicate keys. */
+  function stringifyNode(node, indent, sortKeys) {
+    const ind = typeof indent === 'number' ? ' '.repeat(Math.max(0, Math.min(10, indent))) : (indent || '');
+    const colon = ind ? ': ' : ':', out = [];
+    const byKey = (a, b) => (a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0);
+    function w(n, pad) {
+      switch (n.t) {
+        case 's': out.push(JSON.stringify(n.v)); return;
+        case 'n': out.push(n.raw); return;
+        case 'b': out.push(n.v ? 'true' : 'false'); return;
+        case 'z': out.push('null'); return;
+        case 'a': case 'o': {
+          const obj = n.t === 'o', list = obj && sortKeys ? n.e.slice().sort(byKey) : n.e;
+          const open = obj ? '{' : '[', close = obj ? '}' : ']';
+          if (!list.length) { out.push(open + close); return; }
+          const p2 = pad + ind, sep = ind ? ',\n' + p2 : ',';
+          out.push(ind ? open + '\n' + p2 : open);
+          for (let k = 0; k < list.length; k++) {
+            if (k) out.push(sep);
+            if (obj) { out.push(JSON.stringify(list[k][0]) + colon); w(list[k][1], p2); } else w(list[k], p2);
+          }
+          out.push(ind ? '\n' + pad + close : close);
+        }
+      }
+    }
+    w(node, '');
+    return out.join('');
+  }
+
+  const IDENT = /^[A-Za-z_$][A-Za-z0-9_$]*$/;
+  function childPath(path, key) {
+    if (typeof key === 'number') return path + '[' + key + ']';
+    return IDENT.test(key) ? path + '.' + key : path + '[' + JSON.stringify(key) + ']';
+  }
+  const TYPE_NAME = { o: 'object', a: 'array', s: 'string', n: 'number', b: 'boolean', z: 'null' };
+  function isContainer(n) { return n.t === 'o' || n.t === 'a'; }
+  /** Object entries as a Map; with duplicate keys the later value wins (like JSON.parse). */
+  function entryMap(n) { if (!n.m) { n.m = new Map(); for (const [k, v] of n.e) n.m.set(k, v); } return n.m; }
+
+  const NUM_SYNTAX = /^-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?$/;
+  /** Exact canonical form of a JSON number's source text: 1, 1.0 and 10e-1 → "1e0"; 12345678901234567890 ≠ …891. */
+  function canonNum(raw) {
+    const m = /^(-?)(\d+)(?:\.(\d+))?(?:[eE]([+-]?\d+))?$/.exec(raw);
+    if (!m) return raw;
+    let digits = (m[2] + (m[3] || '')).replace(/^0+/, '');
+    if (!digits) return '0';
+    let exp = BigInt(m[4] || 0) - BigInt((m[3] || '').length);
+    const t = /0+$/.exec(digits);
+    if (t) { exp += BigInt(t[0].length); digits = digits.slice(0, -t[0].length); }
+    return m[1] + digits + 'e' + exp;
+  }
+  /** Equality key of a primitive. strict: type + value. loose: numbers and numeric strings compare by value,
+      booleans equal their text ("true"), other strings by text; null only equals null. */
+  function primKey(n, strict) {
+    switch (n.t) {
+      case 'z': return 'z';
+      case 'n': return (strict ? 'n' : 'N') + canonNum(n.raw);
+      case 'b': return strict ? (n.v ? 'b1' : 'b0') : 'S' + n.v;
+      default: return strict ? 's' + n.v : (NUM_SYNTAX.test(n.v) ? 'N' + canonNum(n.v) : 'S' + n.v);
+    }
+  }
+  /** Canonical string of a node: equal strings ⇔ no differences under the given options (keys sorted;
+      with ignoreOrder, array items sorted too). Linear in the size of the node. */
+  function canon(n, opts) {
+    if (n.t === 'o') {
+      const keys = [...entryMap(n).keys()].sort();
+      return '{' + keys.map(k => JSON.stringify(k) + ':' + canon(n.m.get(k), opts)).join(',') + '}';
+    }
+    if (n.t === 'a') {
+      const items = n.e.map(x => canon(x, opts));
+      if (opts.ignoreOrder) items.sort();
+      return '[' + items.join(',') + ']';
+    }
+    return JSON.stringify(primKey(n, !!opts.strict));
+  }
+
+  /** Compare two parsed nodes. opts: { ignoreOrder, strict }. Returns a list of { path, kind, old, new } (old/new are nodes). */
+  function compareJson(a, b, opts, path, out) {
+    opts = opts || {}; path = path || '$'; out = out || [];
+    const ta = a.t, tb = b.t;
+    if (ta === 'a' && tb === 'a') {
+      if (a.e.length !== b.e.length) out.push({ path, kind: 'array length', old: { t: 'n', raw: String(a.e.length) }, new: { t: 'n', raw: String(b.e.length) } });
+      if (opts.ignoreOrder) {
+        // multiset matching on canonical strings: O(n log n) instead of pairwise deep compares
+        const pool = new Map();
+        b.e.forEach((item, k) => {
+          const h = canon(item, opts), q = pool.get(h);
+          if (q) q.push(k); else pool.set(h, [k]);
+        });
+        const used = new Array(b.e.length).fill(false), unmatchedA = [];
+        a.e.forEach((item, i) => {
+          const q = pool.get(canon(item, opts));
+          if (q && q.length) used[q.shift()] = true; else unmatchedA.push(i);
+        });
+        const unmatchedB = [];
+        used.forEach((u, k) => { if (!u) unmatchedB.push(k); });
+        // pair leftovers so nested changes are shown in detail: by fewest differences when there are
+        // only a few (bounded work), otherwise in order; containers of different types are never paired
+        const pairs = [], restA = [], takenB = new Set();
+        if (unmatchedA.length * unmatchedB.length <= 400) {
+          for (const i of unmatchedA) {
+            let best = -1, bestScore = Infinity;
+            if (isContainer(a.e[i])) for (const k of unmatchedB) {
+              if (takenB.has(k) || b.e[k].t !== a.e[i].t) continue;
+              const score = compareJson(a.e[i], b.e[k], opts).length;
+              if (score < bestScore || (score === bestScore && Math.abs(k - i) < Math.abs(best - i))) { best = k; bestScore = score; }
+            }
+            if (best >= 0) { takenB.add(best); pairs.push([i, best]); } else restA.push(i);
+          }
+        } else {
+          let q = 0;
+          for (const i of unmatchedA) {
+            while (q < unmatchedB.length && takenB.has(unmatchedB[q])) q++;
+            const k = unmatchedB[q];
+            if (k !== undefined && isContainer(a.e[i]) && a.e[i].t === b.e[k].t) { takenB.add(k); pairs.push([i, k]); q++; }
+            else restA.push(i);
+          }
+        }
+        for (const [i, k] of pairs) compareJson(a.e[i], b.e[k], opts, childPath(path, i) + (i === k ? '' : ' ↔ [' + k + ']'), out);
+        restA.forEach(i => out.push({ path: childPath(path, i), kind: 'removed', old: a.e[i] }));
+        unmatchedB.forEach(k => { if (!takenB.has(k)) out.push({ path: childPath(path, k), kind: 'added', new: b.e[k] }); });
+      } else {
+        const n = Math.min(a.e.length, b.e.length);
+        for (let i = 0; i < n; i++) compareJson(a.e[i], b.e[i], opts, childPath(path, i), out);
+        for (let i = n; i < a.e.length; i++) out.push({ path: childPath(path, i), kind: 'removed', old: a.e[i] });
+        for (let i = n; i < b.e.length; i++) out.push({ path: childPath(path, i), kind: 'added', new: b.e[i] });
+      }
+      return out;
+    }
+    if (ta === 'o' && tb === 'o') {
+      const ma = entryMap(a), mb = entryMap(b);
+      for (const [k, v] of ma) {
+        if (!mb.has(k)) out.push({ path: childPath(path, k), kind: 'removed', old: v });
+        else compareJson(v, mb.get(k), opts, childPath(path, k), out);
+      }
+      for (const [k, v] of mb) if (!ma.has(k)) out.push({ path: childPath(path, k), kind: 'added', new: v });
+      return out;
+    }
+    if (ta !== tb) {
+      const prim = !isContainer(a) && !isContainer(b);
+      if (prim && !opts.strict) {
+        if (primKey(a, false) !== primKey(b, false)) out.push({ path, kind: 'changed', old: a, new: b });
+      } else out.push({ path, kind: 'type mismatch', old: a, new: b });
+      return out;
+    }
+    if (primKey(a, !!opts.strict) !== primKey(b, !!opts.strict)) out.push({ path, kind: 'changed', old: a, new: b });
+    return out;
+  }
+
+  function show(n, max) {
+    if (n === undefined) return '';
+    const s = stringifyNode(n, 0);
+    max = max || 300;
+    return s.length > max ? s.slice(0, max) + '…' : s;
+  }
+  function plural(n, word) { return n + ' ' + word + (n === 1 ? '' : 's'); }
+
+  function reportText(diffs) {
+    if (!diffs.length) return 'The two JSON documents are identical.';
+    const lines = ['Found ' + plural(diffs.length, 'difference'), ''];
+    for (const d of diffs) {
+      let line = d.kind.toUpperCase() + '  ' + d.path;
+      if ('old' in d && 'new' in d) line += ': ' + show(d.old, 1e6) + ' -> ' + show(d.new, 1e6);
+      else if ('old' in d) line += ': ' + show(d.old, 1e6);
+      else line += ': ' + show(d.new, 1e6);
+      lines.push(line);
+    }
+    return lines.join('\n');
+  }
+  // ==/CORE==
+
+  const A = $('#a'), B = $('#b'), msgEl = $('#msg'), result = $('#result');
+  let lastDiffs = null;
+
+  function parseSide(ta, label) {
+    try { const r = parseLossless(ta.value); DevTools.invalid(ta, false); return Object.assign({ ok: true }, r); }
+    catch (e) {
+      if (!(e instanceof SyntaxError)) throw e;
+      DevTools.invalid(ta, true);
+      const where = typeof e.line === 'number' && e.pos >= 0 ? ' Line ' + e.line + ', column ' + e.col + '.' : '';
+      return { ok: false, error: label + ': ' + e.message + where };
+    }
+  }
+
+  const KIND_CLASS = { added: 'kind-added', removed: 'kind-removed', changed: 'kind-changed', 'type mismatch': 'kind-type', 'array length': 'kind-length' };
+  const MAX_ROWS = 2000;
+
+  function render(diffs) {
+    if (!diffs.length) { result.replaceChildren(el('div', { class: 'empty-note' }, 'No differences.')); return; }
+    const rows = diffs.slice(0, MAX_ROWS).map(d => el('tr', null,
+      el('td', { class: 'mono' }, d.path),
+      el('td', null, el('span', { class: 'kind ' + KIND_CLASS[d.kind] }, d.kind)),
+      el('td', { class: 'val' + ('old' in d ? '' : ' none') }, 'old' in d ? show(d.old) : '—'),
+      el('td', { class: 'val' + ('new' in d ? '' : ' none') }, 'new' in d ? show(d.new) : '—')));
+    const nodes = [el('table', { class: 'tbl' },
+      el('thead', null, el('tr', null, el('th', null, 'Path'), el('th', null, 'Type'), el('th', null, 'Old (A)'), el('th', null, 'New (B)'))),
+      el('tbody', null, rows))];
+    if (diffs.length > MAX_ROWS) nodes.push(el('div', { class: 'empty-note' }, '… and ' + (diffs.length - MAX_ROWS) + ' more (use Copy report or Download for the full list).'));
+    result.replaceChildren(...nodes);
+  }
+
+  function run() {
+    $('#a-meta').textContent = A.value ? A.value.length + ' chars' : '';
+    $('#b-meta').textContent = B.value ? B.value.length + ' chars' : '';
+    lastDiffs = null; $('#res-meta').textContent = '';
+    if (!A.value.trim() || !B.value.trim()) {
+      msg(msgEl, '');
+      result.replaceChildren(el('div', { class: 'empty-note' }, 'Paste JSON into both sides to compare.'));
+      return;
+    }
+    const pa = parseSide(A, 'Original (A)'), pb = parseSide(B, 'Modified (B)');
+    if (!pa.ok || !pb.ok) {
+      msg(msgEl, 'error', '✗ Invalid JSON — ' + [pa.error, pb.error].filter(Boolean).join('  ·  '));
+      result.replaceChildren(el('div', { class: 'empty-note' }, 'Fix the JSON syntax error to compare.'));
+      return;
+    }
+    const diffs = compareJson(pa.root, pb.root, { ignoreOrder: $('#ignore-order').checked, strict: $('#strict').checked });
+    lastDiffs = diffs;
+    const notes = [describeDups(A.value, pa.dups, 'A'), describeDups(B.value, pb.dups, 'B')].filter(Boolean);
+    const summary = diffs.length ? 'Found ' + plural(diffs.length, 'difference') + '.' : 'The two JSON documents are identical.';
+    if (notes.length) msg(msgEl, 'warn', '⚠ ' + summary + ' ' + notes.join(' '));
+    else if (!diffs.length) msg(msgEl, 'ok', '✓ ' + summary);
+    else msg(msgEl, 'info', summary);
+    $('#res-meta').textContent = diffs.length ? diffs.length + ' total' : '';
+    render(diffs);
+  }
+  const runSoon = debounce(run, 300);
+
+  /** Re-indent one side without changing number text or dropping duplicate keys. */
+  function formatSide(ta, label) {
+    const p = parseSide(ta, label);
+    if (!p.ok) { msg(msgEl, 'error', '✗ Cannot format — ' + p.error); return; }
+    ta.value = stringifyNode(p.root, 2); run();
+  }
+
+  A.addEventListener('input', runSoon);
+  B.addEventListener('input', runSoon);
+  $('#ignore-order').addEventListener('change', run);
+  $('#strict').addEventListener('change', run);
+  $('#a-fmt').addEventListener('click', () => formatSide(A, 'Original (A)'));
+  $('#b-fmt').addEventListener('click', () => formatSide(B, 'Modified (B)'));
+  $('#a-clear').addEventListener('click', () => { A.value = ''; run(); A.focus(); });
+  $('#b-clear').addEventListener('click', () => { B.value = ''; run(); B.focus(); });
+  $('#swap').addEventListener('click', () => { const t = A.value; A.value = B.value; B.value = t; run(); });
+  $('#copy').addEventListener('click', e => { if (lastDiffs) copy(reportText(lastDiffs), e.currentTarget); });
+  $('#dl').addEventListener('click', () => { if (lastDiffs) download('json-diff.txt', reportText(lastDiffs)); });
+  document.addEventListener('keydown', e => { if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); run(); } });
+  $('#sample').addEventListener('click', () => {
+    A.value = JSON.stringify({ id: 7, name: 'Widget', price: 9.99, tags: ['a', 'b', 'c'], stock: { warehouse: 'north', qty: 12 }, active: true }, null, 2);
+    B.value = JSON.stringify({ id: '7', name: 'Widget Pro', tags: ['c', 'a', 'b', 'd'], stock: { warehouse: 'north', qty: 15 }, active: true, color: 'red' }, null, 2);
+    run();
+  });
+  run();
+})();
+</script>
+</body>
+</html>

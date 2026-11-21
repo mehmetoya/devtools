@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-0sjXNRLSCPZ4DlPj68npZUrRd8WcZ2v+1X4BqKYpSj8='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self';" />
+  <title>Password Generator — Strong, Random, Customizable</title>
+  <meta name="description" content="Generate strong random passwords with custom length, character sets, minimum counts and rules such as no ambiguous or sequential characters. Uses the browser's secure random generator; nothing leaves your device." />
+  <meta name="keywords" content="password generator, strong password, random password, secure password generator, passphrase, password strength" />
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large" />
+  <link rel="canonical" href="https://devtool-moya.netlify.app/password-generator" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Password Generator — Strong, Random, Customizable" />
+  <meta property="og:description" content="Secure random passwords generated locally with crypto.getRandomValues." />
+  <meta property="og:url" content="https://devtool-moya.netlify.app/password-generator" />
+  <meta property="og:site_name" content="DevTools" />
+  <meta name="twitter:card" content="summary" />
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Password Generator",
+    "url": "https://devtool-moya.netlify.app/password-generator",
+    "description": "Free secure password generator with custom character sets, minimum counts, exclusion rules and an entropy-based strength meter. Runs client-side.",
+    "applicationCategory": "SecurityApplication",
+    "operatingSystem": "Any",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+    "featureList": ["Length 4-128", "Up to 50 passwords at once", "Custom symbols", "Exclude ambiguous or similar characters", "No duplicate or sequential characters", "Minimum counts per type", "Entropy strength meter", "Client-side only"],
+    "isAccessibleForFree": true
+  }
+  </script>
+  <script type="application/ld+json">
+  { "@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://devtool-moya.netlify.app/" },
+    { "@type": "ListItem", "position": 2, "name": "Password Generator", "item": "https://devtool-moya.netlify.app/password-generator" } ] }
+  </script>
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="/assets/app.css" />
+  <style>
+    .cfg { padding: 14px; display: flex; flex-direction: column; gap: 14px; }
+    .cfg h3 { font-size: 11px; font-weight: 700; letter-spacing: 0.6px; text-transform: uppercase; color: var(--muted); }
+    .len-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .len-row input[type=range] { flex: 1; min-width: 140px; accent-color: var(--accent); }
+    .types { display: flex; flex-direction: column; gap: 8px; }
+    .type-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .type-row label.check { min-width: 120px; }
+    .preview { font-family: var(--mono); font-size: 11px; color: var(--muted2); word-break: break-all; flex: 1; min-width: 0; }
+    .type-row input[type=number] { width: 64px; }
+    .min-label { font-size: 11px; color: var(--muted); }
+    .rules { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 14px; }
+    #symbols { width: 100%; }
+    .field { display: flex; flex-direction: column; gap: 4px; }
+    .pw-list { list-style: none; max-height: 560px; overflow: auto; }
+    .pw-list li { display: flex; align-items: center; gap: 10px; padding: 8px 14px; border-bottom: 1px solid var(--border); }
+    .pw-list li:last-child { border-bottom: none; }
+    .pw-list .pw { flex: 1; min-width: 0; font-family: var(--mono); font-size: 14px; word-break: break-all; }
+    .meter { padding: 14px; border-bottom: 1px solid var(--border); }
+    .meter-bar { height: 8px; border-radius: 4px; background: var(--surface3); overflow: hidden; }
+    .meter-fill { height: 100%; width: 0; transition: width 0.2s, background 0.2s; }
+    .meter-text { display: flex; justify-content: space-between; margin-top: 6px; font-size: 12px; font-weight: 700; }
+    .meter-text .bits { font-family: var(--mono); color: var(--muted2); font-weight: 400; }
+    @media (max-width: 600px) { .rules { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+<div class="shell">
+  <header id="site-header"></header>
+  <aside id="sidebar"></aside>
+  <div class="nav-backdrop"></div>
+
+  <main class="page">
+    <section class="tool-head">
+      <h1>Password Generator</h1>
+      <p>Strong random passwords from the character sets and rules you choose, generated with a cryptographically secure source.</p>
+    </section>
+
+    <div class="msg" id="msg" hidden></div>
+
+    <section class="grid-2">
+      <div class="panel">
+        <div class="panel-head"><span class="panel-title">Settings</span>
+          <span class="panel-actions"><button class="btn sm primary" id="regen">Regenerate</button></span></div>
+        <div class="cfg">
+          <div>
+            <h3>Length</h3>
+            <div class="len-row">
+              <input type="range" id="len-range" min="4" max="128" value="16" aria-label="Length slider" />
+              <input type="number" id="len" min="4" max="128" value="16" aria-label="Length" />
+              <label class="opt"><span class="opt-label">Count</span><input type="number" id="count" min="1" max="50" value="5" /></label>
+            </div>
+          </div>
+          <div>
+            <h3>Character types &amp; minimum counts</h3>
+            <div class="types">
+              <div class="type-row"><label class="check"><input type="checkbox" id="t-lower" checked /> Lowercase</label><span class="min-label">min</span><input type="number" id="m-lower" min="0" max="128" value="0" aria-label="Minimum lowercase" /><span class="preview" id="p-lower"></span></div>
+              <div class="type-row"><label class="check"><input type="checkbox" id="t-upper" checked /> Uppercase</label><span class="min-label">min</span><input type="number" id="m-upper" min="0" max="128" value="0" aria-label="Minimum uppercase" /><span class="preview" id="p-upper"></span></div>
+              <div class="type-row"><label class="check"><input type="checkbox" id="t-digits" checked /> Numbers</label><span class="min-label">min</span><input type="number" id="m-digits" min="0" max="128" value="0" aria-label="Minimum numbers" /><span class="preview" id="p-digits"></span></div>
+              <div class="type-row"><label class="check"><input type="checkbox" id="t-symbols" checked /> Symbols</label><span class="min-label">min</span><input type="number" id="m-symbols" min="0" max="128" value="0" aria-label="Minimum symbols" /><span class="preview" id="p-symbols"></span></div>
+              <label class="field"><span class="min-label">Symbols to use</span>
+                <input type="text" id="symbols" value="!@#$%^&amp;*()-_=+[]{};:,.&lt;&gt;?/~" spellcheck="false" aria-label="Custom symbols" />
+              </label>
+            </div>
+          </div>
+          <div>
+            <h3>Rules</h3>
+            <div class="rules">
+              <label class="check" title="l 1 I O 0 o"><input type="checkbox" id="r-ambiguous" /> Exclude ambiguous (l 1 I O 0 o)</label>
+              <label class="check" title="i l 1 L o 0 O"><input type="checkbox" id="r-similar" /> Exclude similar (i l 1 L o 0 O)</label>
+              <label class="check"><input type="checkbox" id="r-nodup" /> No duplicate characters</label>
+              <label class="check"><input type="checkbox" id="r-noseq" /> No sequences (abc, 321)</label>
+              <label class="check"><input type="checkbox" id="r-letter" /> Begin with a letter</label>
+              <label class="check"><input type="checkbox" id="r-all" checked /> Include every selected type</label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <span class="panel-title">Passwords</span>
+          <span class="panel-actions">
+            <button class="btn sm" id="copy-all">Copy all</button>
+          </span>
+        </div>
+        <div class="meter">
+          <div class="meter-bar"><div class="meter-fill" id="meter-fill"></div></div>
+          <div class="meter-text"><span id="meter-label"></span><span class="bits" id="meter-bits"></span></div>
+        </div>
+        <ul class="pw-list" id="list"></ul>
+      </div>
+    </section>
+
+    <section class="about">
+      <h2>How it works</h2>
+      <ul>
+        <li>Every character is chosen with <code>crypto.getRandomValues</code>. Random numbers are drawn with rejection sampling, so no character is more likely than another (no modulo bias). <code>Math.random</code> is never used.</li>
+        <li>Required characters (minimum counts and "include every type") are placed first, the rest is filled from the whole pool, and the result is shuffled with a secure Fisher–Yates shuffle.</li>
+        <li>Strength is estimated as <code>length × log₂(pool size)</code> bits: under 28 very weak, under 36 weak, under 60 fair, under 100 strong, otherwise very strong. Rules that remove choices lower the real entropy slightly.</li>
+        <li>"No sequences" rejects three letters or digits in a row that go up or down by one, such as <code>abc</code>, <code>CBA</code> or <code>789</code>.</li>
+      </ul>
+      <h2>Privacy</h2>
+      <p>Passwords are generated in your browser and are not sent, stored or logged. Copy them into a password manager rather than a plain text file.</p>
+    </section>
+  </main>
+</div>
+
+<script src="/assets/tools.js"></script>
+<script>
+(function () {
+  'use strict';
+  const { el, $, $$, copy, msg } = DevTools;
+
+  /* #pure */
+  const BASE = { lower: 'abcdefghijklmnopqrstuvwxyz', upper: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', digits: '0123456789' };
+  const AMBIGUOUS = 'l1IO0o';
+  const SIMILAR = 'il1Lo0O';
+  const TYPES = ['lower', 'upper', 'digits', 'symbols'];
+  const TYPE_NAMES = { lower: 'lowercase', upper: 'uppercase', digits: 'numbers', symbols: 'symbols' };
+
+  /** Secure uniform integer in [0, n) using rejection sampling. rand32 returns a uint32. */
+  function randInt(n, rand32) {
+    if (!(n >= 1 && n <= 0x100000000)) throw new Error('randInt range out of bounds');
+    const limit = 0x100000000 - (0x100000000 % n);
+    for (;;) { const x = rand32(); if (x < limit) return x % n; }
+  }
+
+  function cryptoRand32() {
+    const buf = new Uint32Array(64);
+    let i = buf.length;
+    return function () {
+      if (i >= buf.length) { globalThis.crypto.getRandomValues(buf); i = 0; }
+      return buf[i++];
+    };
+  }
+
+  /** Character sets after exclusions (arrays of unique characters). */
+  function buildSets(o) {
+    const excl = new Set((o.excludeAmbiguous ? AMBIGUOUS : '') + (o.excludeSimilar ? SIMILAR : ''));
+    const sets = {};
+    for (const t of TYPES) {
+      const src = t === 'symbols' ? (o.symbols || '') : BASE[t];
+      sets[t] = Array.from(new Set(Array.from(src).filter(c => !excl.has(c) && !/\s/.test(c))));
+    }
+    // a custom symbol that is also a letter/digit belongs to its real class only
+    sets.symbols = sets.symbols.filter(c => !/[A-Za-z0-9]/.test(c));
+    return sets;
+  }
+
+  function isLetter(c) { return /[A-Za-z]/.test(c); }
+
+  function hasSequence(chars) {
+    for (let i = 0; i + 2 < chars.length; i++) {
+      const a = chars[i], b = chars[i + 1], c = chars[i + 2];
+      const kind = x => /[0-9]/.test(x) ? 'd' : /[A-Za-z]/.test(x) ? 'l' : null;
+      const k = kind(a);
+      if (!k || kind(b) !== k || kind(c) !== k) continue;
+      const x = a.toLowerCase().charCodeAt(0), y = b.toLowerCase().charCodeAt(0), z = c.toLowerCase().charCodeAt(0);
+      if ((y - x === 1 && z - y === 1) || (x - y === 1 && y - z === 1)) return true;
+    }
+    return false;
+  }
+
+  /** Error that names the offending input ids, so the page can mark them invalid. */
+  function optError(text, fields) { const e = new Error(text); e.fields = fields || []; return e; }
+
+  /** Validates options; returns {sets, pool, req} or throws a readable Error. */
+  function plan(o) {
+    const enabled = TYPES.filter(t => o.types[t]);
+    if (!enabled.length) throw optError('Please select at least one character type.');
+    if (!Number.isInteger(o.length) || o.length < 4 || o.length > 128) throw optError('Length must be a whole number from 4 to 128.', ['len']);
+    const sets = buildSets(o);
+    for (const t of enabled) if (!sets[t].length) throw optError('The ' + TYPE_NAMES[t] + ' set is empty after exclusions.' + (t === 'symbols' ? ' Add symbols to the list or untick Symbols.' : ''), t === 'symbols' ? ['symbols'] : []);
+    const req = {};
+    let total = 0;
+    for (const t of enabled) {
+      const m = Math.max(0, Math.floor(Number(o.min && o.min[t]) || 0));
+      req[t] = Math.max(m, o.requireAll ? 1 : 0);
+      total += req[t];
+    }
+    const minFields = enabled.filter(t => req[t] > 0).map(t => 'm-' + t);
+    if (total > o.length) throw optError('The minimum counts add up to ' + total + ' characters, more than the length of ' + o.length + '. Lower the minimums or increase the length.', minFields.concat('len'));
+    const pool = enabled.flatMap(t => sets[t]);
+    if (o.noDuplicates) {
+      if (o.length > pool.length) throw optError('No duplicate characters: only ' + pool.length + ' distinct characters are available for a length of ' + o.length + '.', ['len']);
+      for (const t of enabled) if (req[t] > sets[t].length) throw optError('No duplicate characters: not enough distinct ' + TYPE_NAMES[t] + ' for a minimum of ' + req[t] + '.', ['m-' + t]);
+    }
+    if (o.beginLetter) {
+      if (!enabled.some(t => t === 'lower' || t === 'upper')) throw optError('"Begin with a letter" needs lowercase or uppercase letters enabled.');
+      // Required numbers and symbols must leave at least one position for the leading letter.
+      const nonLetters = (req.digits || 0) + (req.symbols || 0);
+      if (nonLetters >= o.length) {
+        throw optError('"Begin with a letter" cannot be met: the minimum numbers and symbols (' + nonLetters + ') fill the whole length of ' + o.length + ', leaving no place for a letter. Lower those minimums or increase the length.',
+          ['m-digits', 'm-symbols'].filter(f => minFields.includes(f)).concat('len'));
+      }
+    }
+    return { sets, pool, req, enabled };
+  }
+
+  /** Generates one password. Throws when the rules cannot be satisfied. */
+  function generatePassword(o, rand32) {
+    const p = plan(o);
+    for (let attempt = 0; attempt < 1000; attempt++) {
+      const used = new Set();
+      const chars = [];
+      let ok = true;
+      const pick = arr => {
+        const cand = o.noDuplicates ? arr.filter(c => !used.has(c)) : arr;
+        if (!cand.length) { ok = false; return; }
+        const c = cand[randInt(cand.length, rand32)];
+        used.add(c); chars.push(c);
+      };
+      for (const t of p.enabled) for (let i = 0; i < p.req[t] && ok; i++) pick(p.sets[t]);
+      while (ok && chars.length < o.length) pick(p.pool);
+      if (!ok) continue;
+      for (let i = chars.length - 1; i > 0; i--) { const j = randInt(i + 1, rand32); const t = chars[i]; chars[i] = chars[j]; chars[j] = t; }
+      if (o.beginLetter && !isLetter(chars[0])) {
+        const idx = [];
+        chars.forEach((c, i) => { if (isLetter(c)) idx.push(i); });
+        if (!idx.length) continue;
+        const j = idx[randInt(idx.length, rand32)];
+        const t = chars[0]; chars[0] = chars[j]; chars[j] = t;
+      }
+      if (o.noSequential && hasSequence(chars)) continue;
+      return chars.join('');
+    }
+    throw new Error('Could not generate password with current rules. Try relaxing some constraints.');
+  }
+
+  function strength(o) {
+    const p = plan(o);
+    const bits = o.length * Math.log2(p.pool.length);
+    const label = bits < 28 ? 'Very Weak' : bits < 36 ? 'Weak' : bits < 60 ? 'Fair' : bits < 100 ? 'Strong' : 'Very Strong';
+    return { bits, label, pool: p.pool.length };
+  }
+  /* #endpure */
+
+  const rand32 = cryptoRand32();
+  const lenIn = $('#len'), lenRange = $('#len-range'), countIn = $('#count');
+  let current = [];
+
+  function options() {
+    return {
+      length: Number(lenIn.value),
+      types: { lower: $('#t-lower').checked, upper: $('#t-upper').checked, digits: $('#t-digits').checked, symbols: $('#t-symbols').checked },
+      min: { lower: $('#m-lower').value, upper: $('#m-upper').value, digits: $('#m-digits').value, symbols: $('#m-symbols').value },
+      symbols: $('#symbols').value,
+      excludeAmbiguous: $('#r-ambiguous').checked, excludeSimilar: $('#r-similar').checked,
+      noDuplicates: $('#r-nodup').checked, noSequential: $('#r-noseq').checked,
+      beginLetter: $('#r-letter').checked, requireAll: $('#r-all').checked,
+    };
+  }
+
+  const COLORS = { 'Very Weak': 'var(--danger)', 'Weak': 'var(--danger)', 'Fair': 'var(--warn)', 'Strong': 'var(--accent)', 'Very Strong': 'var(--accent)' };
+
+  function renderPreviews(o) {
+    const sets = buildSets(o);
+    for (const t of TYPES) {
+      const node = $('#p-' + t);
+      node.textContent = sets[t].join('') || '(empty)';
+      node.style.opacity = o.types[t] ? '1' : '0.4';
+    }
+  }
+
+  function renderList() {
+    $('#list').replaceChildren(...current.map(pw => el('li', null,
+      el('span', { class: 'pw' }, pw),
+      el('button', { class: 'btn sm', onclick: e => copy(pw, e.currentTarget) }, 'Copy'))));
+  }
+
+  const MARKABLE = ['len', 'count', 'symbols', 'm-lower', 'm-upper', 'm-digits', 'm-symbols'];
+  function markInvalid(ids) { MARKABLE.forEach(id => DevTools.invalid($('#' + id), ids.includes(id))); }
+
+  function generate() {
+    const o = options();
+    renderPreviews(o);
+    const n = Number(countIn.value);
+    const fill = $('#meter-fill');
+    try {
+      if (!Number.isInteger(n) || n < 1 || n > 50) throw optError('Count must be a whole number from 1 to 50.', ['count']);
+      if (!globalThis.crypto || !crypto.getRandomValues) throw new Error('Secure random numbers are not available in this browser.');
+      const s = strength(o);
+      const list = [];
+      for (let i = 0; i < n; i++) list.push(generatePassword(o, rand32));
+      current = list;
+      fill.style.width = Math.min(100, s.bits / 128 * 100) + '%';
+      fill.style.background = COLORS[s.label];
+      $('#meter-label').textContent = s.label;
+      $('#meter-label').style.color = COLORS[s.label];
+      $('#meter-bits').textContent = '≈ ' + Math.round(s.bits) + ' bits · pool of ' + s.pool;
+      markInvalid([]);
+      msg($('#msg'), '');
+    } catch (e) {
+      markInvalid(e.fields || []);
+      current = [];
+      fill.style.width = '0';
+      $('#meter-label').textContent = ''; $('#meter-bits').textContent = '';
+      msg($('#msg'), 'error', e.message);
+    }
+    renderList();
+  }
+
+  lenRange.addEventListener('input', () => { lenIn.value = lenRange.value; generate(); });
+  lenIn.addEventListener('input', () => { if (Number(lenIn.value) >= 4 && Number(lenIn.value) <= 128) lenRange.value = lenIn.value; generate(); });
+  $$('.cfg input').forEach(i => { if (i !== lenRange && i !== lenIn) i.addEventListener(i.type === 'checkbox' ? 'change' : 'input', generate); });
+  $('#regen').addEventListener('click', generate);
+  $('#copy-all').addEventListener('click', e => { if (current.length) copy(current.join('\n'), e.currentTarget); });
+
+  generate();
+})();
+</script>
+</body>
+</html>

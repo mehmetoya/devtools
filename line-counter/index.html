@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-j1ZK6lIuz7pIViT136i+s7G68NBTpWKfOE1pmydk7i8='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self';" />
+  <title>Line &amp; Word Counter — Lines, Words, Characters, Bytes</title>
+  <meta name="description" content="Count lines, non-empty lines, words, characters, UTF-8 bytes, paragraphs and sentences as you type. Free and private — runs entirely in your browser." />
+  <meta name="keywords" content="line counter, word counter, character counter, byte counter, count lines online, paragraph counter, sentence counter" />
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large" />
+  <link rel="canonical" href="https://devtool-moya.netlify.app/line-counter" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Line &amp; Word Counter — Lines, Words, Characters, Bytes" />
+  <meta property="og:description" content="Live text statistics in your browser: lines, words, characters, bytes and more. Nothing leaves your machine." />
+  <meta property="og:url" content="https://devtool-moya.netlify.app/line-counter" />
+  <meta property="og:site_name" content="DevTools" />
+  <meta name="twitter:card" content="summary" />
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Line Counter",
+    "url": "https://devtool-moya.netlify.app/line-counter",
+    "description": "Free online line, word, character and byte counter with paragraph and sentence counts. Runs client-side.",
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "Any",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+    "featureList": ["Line count", "Non-empty lines", "Word count", "Character count with and without spaces", "UTF-8 byte size", "Paragraphs and sentences", "Average word length", "Client-side only"],
+    "isAccessibleForFree": true
+  }
+  </script>
+  <script type="application/ld+json">
+  { "@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://devtool-moya.netlify.app/" },
+    { "@type": "ListItem", "position": 2, "name": "Line Counter", "item": "https://devtool-moya.netlify.app/line-counter" } ] }
+  </script>
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="/assets/app.css" />
+  <style>
+    #cards { margin-bottom: 16px; }
+    #cards .card { position: relative; }
+    #input { min-height: 320px; }
+  </style>
+</head>
+<body>
+<div class="shell">
+  <header id="site-header"></header>
+  <aside id="sidebar"></aside>
+  <div class="nav-backdrop"></div>
+
+  <main class="page">
+    <section class="tool-head">
+      <h1>Line Counter</h1>
+      <p>Live statistics for any text: lines, words, characters, bytes, paragraphs and sentences.</p>
+    </section>
+
+    <section class="cards" id="cards" aria-live="polite"></section>
+
+    <div class="msg" id="msg" hidden></div>
+
+    <div class="panel">
+      <div class="panel-head">
+        <span class="panel-title">Text</span>
+        <span class="panel-actions">
+          <span class="panel-meta" id="in-meta"></span>
+          <button class="btn sm" id="copy" title="Copy the statistics as text">Copy stats</button>
+          <button class="btn sm" id="dl" title="Download the statistics as text">Download stats</button>
+          <button class="btn sm" id="clear">Clear</button>
+        </span>
+      </div>
+      <textarea id="input" spellcheck="false" placeholder="Paste or type text to count..."></textarea>
+    </div>
+
+    <section class="about">
+      <h2>How things are counted</h2>
+      <ul>
+        <li><b>Lines</b> — every line break (<code>\n</code>, <code>\r\n</code> or <code>\r</code>) starts a new line. A trailing line break therefore adds an empty last line, just as most editors show it.</li>
+        <li><b>Non-empty lines</b> — lines that contain at least one non-whitespace character.</li>
+        <li><b>Words</b> — runs of characters separated by whitespace.</li>
+        <li><b>Characters</b> — Unicode code points, so an emoji such as 😀 counts once. <b>No spaces</b> leaves out all whitespace including line breaks.</li>
+        <li><b>Bytes</b> — the size of the text when saved as UTF-8.</li>
+        <li><b>Paragraphs</b> — blocks of text separated by one or more blank lines.</li>
+        <li><b>Sentences</b> — detected with the browser's built-in sentence segmentation.</li>
+        <li><b>Avg word length</b> — letters and digits per word, ignoring punctuation.</li>
+      </ul>
+      <h2>Privacy</h2>
+      <p>All processing happens in your browser. Nothing you type is sent, stored or logged.</p>
+    </section>
+  </main>
+</div>
+
+<script src="/assets/tools.js"></script>
+<script>
+(function () {
+  'use strict';
+  const { el, $, debounce, copy, download, msg } = DevTools;
+
+  /* PURE-START */
+  const sentenceSeg = (typeof Intl !== 'undefined' && Intl.Segmenter) ? new Intl.Segmenter(undefined, { granularity: 'sentence' }) : null;
+  const HAS_CONTENT = /[\p{L}\p{N}]/u;
+  function countSentences(text) {
+    if (!text.trim()) return 0;
+    if (sentenceSeg) {
+      let n = 0;
+      for (const s of sentenceSeg.segment(text)) if (HAS_CONTENT.test(s.segment)) n++;
+      return n;
+    }
+    return text.split(/[.!?…]+(?=\s|$)|\n+/).filter(s => HAS_CONTENT.test(s)).length;
+  }
+  function textStats(text) {
+    const lines = text === '' ? [] : text.split(/\r\n|\r|\n/);
+    const words = text.match(/\S+/gu) || [];
+    let letters = 0;
+    for (const w of words) letters += Array.from(w.replace(/[^\p{L}\p{N}\p{M}]/gu, '')).length;
+    const norm = text.replace(/\r\n?/g, '\n');
+    let longest = 0;
+    for (const l of lines) { const n = Array.from(l).length; if (n > longest) longest = n; }
+    return {
+      lines: lines.length,
+      nonEmpty: lines.filter(l => /\S/.test(l)).length,
+      words: words.length,
+      chars: Array.from(text).length,
+      charsNoSpace: Array.from(text.replace(/\s/gu, '')).length,
+      bytes: new TextEncoder().encode(text).length,
+      paragraphs: norm.split(/\n[ \t]*\n/).filter(p => /\S/.test(p)).length,
+      sentences: countSentences(text),
+      avgWord: words.length ? letters / words.length : 0,
+      longestLine: longest,
+    };
+  }
+  /* PURE-END */
+
+  const FIELDS = [
+    ['lines', 'Lines'], ['nonEmpty', 'Non-empty lines'], ['words', 'Words'], ['chars', 'Characters'],
+    ['charsNoSpace', 'Characters (no spaces)'], ['bytes', 'Bytes (UTF-8)'], ['paragraphs', 'Paragraphs'],
+    ['sentences', 'Sentences'], ['avgWord', 'Avg word length'], ['longestLine', 'Longest line (chars)'],
+  ];
+  const input = $('#input');
+  const nf = new Intl.NumberFormat();
+  let last = null;
+
+  function fmt(k, v) { return k === 'avgWord' ? v.toFixed(2) : nf.format(v); }
+
+  function run() {
+    const text = input.value;
+    last = textStats(text);
+    $('#cards').replaceChildren(...FIELDS.map(([k, label]) =>
+      el('div', { class: 'card' }, el('div', { class: 'v' }, fmt(k, last[k])), el('div', { class: 'k' }, label))));
+    $('#in-meta').textContent = text ? nf.format(text.length) + ' UTF-16 units' : '';
+    msg($('#msg'), text ? '' : 'info', 'Start typing or paste text — the counts update instantly.');
+  }
+  const runLater = debounce(run, 200);
+
+  function statsText() {
+    return FIELDS.map(([k, label]) => label + ': ' + fmt(k, last[k])).join('\n');
+  }
+
+  input.addEventListener('input', () => input.value.length > 200000 ? runLater() : run());
+  $('#clear').addEventListener('click', () => { input.value = ''; run(); input.focus(); });
+  $('#copy').addEventListener('click', e => copy(statsText(), e.currentTarget));
+  $('#dl').addEventListener('click', () => download('text-stats.txt', statsText()));
+  run();
+})();
+</script>
+</body>
+</html>

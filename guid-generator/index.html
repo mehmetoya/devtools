@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-pOdaSecTpWvPeYOM74P5pshlzxNeZ/9P8WXH+vztdoI='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self';" />
+  <title>GUID / UUID Generator — v4 &amp; v7, Bulk, Parse</title>
+  <meta name="description" content="Generate random UUID v4 or time-ordered UUID v7 values in bulk, in .NET formats D, N, B, P and X, and inspect any GUID's version, variant and timestamp. Runs in your browser." />
+  <meta name="keywords" content="guid generator, uuid generator, uuid v4, uuid v7, bulk guid, c# guid format, parse uuid" />
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large" />
+  <link rel="canonical" href="https://devtool-moya.netlify.app/guid-generator" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="GUID / UUID Generator — v4 &amp; v7, Bulk, Parse" />
+  <meta property="og:description" content="Create and inspect GUIDs/UUIDs locally with the browser's secure random generator." />
+  <meta property="og:url" content="https://devtool-moya.netlify.app/guid-generator" />
+  <meta property="og:site_name" content="DevTools" />
+  <meta name="twitter:card" content="summary" />
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "GUID Generator",
+    "url": "https://devtool-moya.netlify.app/guid-generator",
+    "description": "Free online GUID / UUID generator (v4 and v7) with .NET format options and a GUID parser. Runs client-side.",
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "Any",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+    "featureList": ["UUID v4", "UUID v7 (time-ordered)", "Bulk generation up to 1000", "Formats D, N, B, P, X", "Parse version, variant and timestamp", "Client-side only"],
+    "isAccessibleForFree": true
+  }
+  </script>
+  <script type="application/ld+json">
+  { "@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://devtool-moya.netlify.app/" },
+    { "@type": "ListItem", "position": 2, "name": "GUID Generator", "item": "https://devtool-moya.netlify.app/guid-generator" } ] }
+  </script>
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="/assets/app.css" />
+  <style>
+    .options .opt { max-width: 100%; min-width: 0; }
+    .options select { max-width: 100%; min-width: 0; text-overflow: ellipsis; }
+    .guid-list { list-style: none; max-height: 520px; overflow: auto; }
+    .guid-list li { display: flex; align-items: center; gap: 10px; padding: 6px 14px; border-bottom: 1px solid var(--border); }
+    .guid-list li:last-child { border-bottom: none; }
+    .guid-list .n { color: var(--muted); font-family: var(--mono); font-size: 11px; min-width: 32px; text-align: right; }
+    .guid-list .g { flex: 1; min-width: 0; font-family: var(--mono); font-size: 13px; word-break: break-all; }
+    .parse-row { display: flex; gap: 8px; padding: 14px; flex-wrap: wrap; }
+    .parse-row input { flex: 1; min-width: 0; }
+    .p-tbl td:first-child { white-space: nowrap; color: var(--muted2); font-size: 12px; }
+    .p-tbl td.mono { font-family: var(--mono); word-break: break-all; }
+    .p-tbl td.act { width: 1%; }
+  </style>
+</head>
+<body>
+<div class="shell">
+  <header id="site-header"></header>
+  <aside id="sidebar"></aside>
+  <div class="nav-backdrop"></div>
+
+  <main class="page">
+    <section class="tool-head">
+      <h1>GUID / UUID Generator</h1>
+      <p>Create random or time-ordered GUIDs in any .NET format, and take an existing GUID apart.</p>
+    </section>
+
+    <section class="options" aria-label="Options">
+      <label class="opt"><span class="opt-label">Count</span><input type="number" id="count" value="5" min="1" max="1000" /></label>
+      <span class="opt-label">Version</span>
+      <div class="seg" id="ver">
+        <button data-v="4" class="on" title="Random (crypto.randomUUID)">v4 random</button>
+        <button data-v="7" title="Unix-time ordered, RFC 9562">v7 time-ordered</button>
+      </div>
+      <label class="opt"><span class="opt-label">Format</span>
+        <select id="fmt">
+          <option value="D">D — 00000000-0000-0000-0000-000000000000</option>
+          <option value="N">N — 32 digits, no hyphens</option>
+          <option value="B">B — {braces}</option>
+          <option value="P">P — (parentheses)</option>
+          <option value="X">X — {0x…} C# hex</option>
+        </select>
+      </label>
+      <label class="check"><input type="checkbox" id="upper" /> Uppercase</label>
+      <button class="btn primary" id="gen">Generate</button>
+    </section>
+
+    <div class="msg" id="msg" hidden></div>
+
+    <section class="panel">
+      <div class="panel-head">
+        <span class="panel-title">Generated</span>
+        <span class="panel-actions">
+          <span class="panel-meta" id="meta"></span>
+          <button class="btn sm" id="copy-all">Copy all</button>
+          <button class="btn sm" id="dl">Download</button>
+        </span>
+      </div>
+      <ol class="guid-list" id="list"></ol>
+    </section>
+
+    <section class="panel" style="margin-top:16px">
+      <div class="panel-head"><span class="panel-title">Parse a GUID</span></div>
+      <div class="parse-row">
+        <input type="text" id="parse" spellcheck="false" placeholder="Paste a GUID in any format (D, N, B, P, X or urn:uuid:)" aria-label="GUID to parse" />
+        <button class="btn sm" id="parse-clear">Clear</button>
+      </div>
+      <div class="msg" id="parse-msg" hidden style="margin:0 14px 14px"></div>
+      <table class="tbl p-tbl"><tbody id="parse-rows"></tbody></table>
+    </section>
+
+    <section class="about">
+      <h2>About GUIDs and UUIDs</h2>
+      <p>A GUID (Microsoft's name) or UUID is a 128-bit identifier written as 32 hexadecimal digits. Four bits encode the <b>version</b> (the first digit of the third group) and two or three bits the <b>variant</b> (the first digit of the fourth group: 8, 9, a or b for standard UUIDs).</p>
+      <ul>
+        <li><b>Version 4</b> is 122 bits of randomness. This page uses <code>crypto.randomUUID()</code>, the browser's cryptographically secure generator. In .NET: <code>Guid.NewGuid()</code>.</li>
+        <li><b>Version 7</b> (RFC 9562) starts with a 48-bit Unix timestamp in milliseconds followed by random bits, so values sort by creation time and index well in databases. In .NET 9+: <code>Guid.CreateVersion7()</code>. Values generated in the same millisecond here are kept in increasing order.</li>
+        <li>.NET format letters: <code>D</code> hyphens (default), <code>N</code> digits only, <code>B</code> braces, <code>P</code> parentheses, <code>X</code> hex structure as used in C/C# initialisers.</li>
+        <li><code>Guid.ToByteArray()</code> stores the first three groups little-endian, which is why the bytes look shuffled compared to the string.</li>
+        <li>The nil GUID (<code>Guid.Empty</code>) is all zeros; the max UUID is all <code>f</code>.</li>
+      </ul>
+      <h2>Privacy</h2>
+      <p>GUIDs are generated in your browser. Nothing is sent, stored or logged.</p>
+    </section>
+  </main>
+</div>
+
+<script src="/assets/tools.js"></script>
+<script>
+(function () {
+  'use strict';
+  const { el, $, $$, copy, download, msg } = DevTools;
+
+  /* #pure */
+  const VERSIONS = {
+    1: 'Version 1 — time and node (MAC) based', 2: 'Version 2 — DCE security', 3: 'Version 3 — name based (MD5)',
+    4: 'Version 4 — random', 5: 'Version 5 — name based (SHA-1)', 6: 'Version 6 — reordered time', 7: 'Version 7 — Unix time ordered', 8: 'Version 8 — custom / vendor specific',
+  };
+
+  /** Formats 32 lowercase hex digits in a .NET format (D, N, B, P, X). */
+  function formatGuid(hex, fmt, upper) {
+    const h = upper ? hex.toUpperCase() : hex.toLowerCase();
+    const d = h.slice(0, 8) + '-' + h.slice(8, 12) + '-' + h.slice(12, 16) + '-' + h.slice(16, 20) + '-' + h.slice(20);
+    switch (fmt) {
+      case 'N': return h;
+      case 'B': return '{' + d + '}';
+      case 'P': return '(' + d + ')';
+      case 'X': {
+        const bytes = [];
+        for (let i = 16; i < 32; i += 2) bytes.push('0x' + h.slice(i, i + 2));
+        return '{0x' + h.slice(0, 8) + ',0x' + h.slice(8, 12) + ',0x' + h.slice(12, 16) + ',{' + bytes.join(',') + '}}';
+      }
+      default: return d;
+    }
+  }
+
+  /** Parses any common GUID notation; returns 32 lowercase hex digits or throws. */
+  function parseGuid(input) {
+    let s = String(input).trim().replace(/^urn:uuid:/i, '');
+    const x = s.replace(/\s+/g, '').match(/^\{0x([0-9a-f]{1,8}),0x([0-9a-f]{1,4}),0x([0-9a-f]{1,4}),\{((?:0x[0-9a-f]{1,2},){7}0x[0-9a-f]{1,2})\}\}$/i);
+    if (x) {
+      const tail = x[4].split(',').map(b => b.slice(2).padStart(2, '0')).join('');
+      return (x[1].padStart(8, '0') + x[2].padStart(4, '0') + x[3].padStart(4, '0') + tail).toLowerCase();
+    }
+    if (/^\{.*\}$/.test(s) || /^\(.*\)$/.test(s)) {
+      s = s.slice(1, -1);
+      if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(s)) throw new Error('Braces and parentheses must wrap the hyphenated 8-4-4-4-12 form.');
+    }
+    if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(s)) return s.replace(/-/g, '').toLowerCase();
+    if (/^[0-9a-f]{32}$/i.test(s)) return s.toLowerCase();
+    const digits = s.replace(/[^0-9a-f]/gi, '').length;
+    throw new Error('Unrecognized GUID format. Expected 32 hex digits (found ' + digits + '), optionally with hyphens, braces, parentheses or the X notation.');
+  }
+
+  /** Version, variant and embedded timestamp of a GUID given as 32 hex digits. */
+  function inspectGuid(hex) {
+    const verNib = parseInt(hex[12], 16);
+    const varNib = parseInt(hex[16], 16);
+    let variant;
+    if ((varNib & 0x8) === 0) variant = 'NCS (reserved, backward compatibility)';
+    else if ((varNib & 0xc) === 0x8) variant = 'RFC 9562 / RFC 4122 (standard)';
+    else if ((varNib & 0xe) === 0xc) variant = 'Microsoft (reserved, legacy COM)';
+    else variant = 'Reserved for future definition';
+    const res = { version: verNib, variant, versionName: VERSIONS[verNib] || 'Unknown version ' + verNib, time: null };
+    if (/^0{32}$/.test(hex)) { res.versionName = 'Nil UUID (Guid.Empty)'; return res; }
+    if (/^f{32}$/.test(hex)) { res.versionName = 'Max UUID'; return res; }
+    const standard = (varNib & 0xc) === 0x8;
+    if (standard && verNib === 7) res.time = parseInt(hex.slice(0, 12), 16);
+    if (standard && (verNib === 1 || verNib === 6)) {
+      let ts;
+      if (verNib === 1) ts = (BigInt('0x' + hex.slice(13, 16)) << 48n) | (BigInt('0x' + hex.slice(8, 12)) << 32n) | BigInt('0x' + hex.slice(0, 8));
+      else ts = (BigInt('0x' + hex.slice(0, 12)) << 12n) | BigInt('0x' + hex.slice(13, 16));
+      res.time = Number(ts / 10000n) - 12219292800000;
+    }
+    return res;
+  }
+
+  /** .NET Guid.ToByteArray() order (first three groups little-endian). */
+  function dotnetBytes(hex) {
+    const b = [];
+    for (let i = 0; i < 32; i += 2) b.push(hex.slice(i, i + 2));
+    return [b[3], b[2], b[1], b[0], b[5], b[4], b[7], b[6]].concat(b.slice(8));
+  }
+
+  function randomBigInt(bits) {
+    const bytes = new Uint8Array(Math.ceil(bits / 8));
+    globalThis.crypto.getRandomValues(bytes);
+    let n = 0n;
+    for (const x of bytes) n = (n << 8n) | BigInt(x);
+    return n & ((1n << BigInt(bits)) - 1n);
+  }
+
+  /** UUID v7 from a millisecond timestamp and 74 random bits. */
+  function uuidV7Hex(ms, rand74) {
+    const randA = (rand74 >> 62n) & 0xfffn;
+    const randB = (rand74 & ((1n << 62n) - 1n)) | (2n << 62n);
+    return ms.toString(16).padStart(12, '0').slice(-12) + '7' + randA.toString(16).padStart(3, '0') + randB.toString(16).padStart(16, '0');
+  }
+
+  /** Monotonic v7 generator: same-millisecond values increment the random part. */
+  function makeV7Generator(now) {
+    let lastMs = -1, last = 0n;
+    return function () {
+      let ms = now();
+      let r;
+      if (ms > lastMs) { r = randomBigInt(73); lastMs = ms; } // top bit clear leaves room to increment
+      else { ms = lastMs; r = last + 1n + (randomBigInt(16)); if (r >= (1n << 74n)) { lastMs++; ms = lastMs; r = randomBigInt(73); } }
+      last = r;
+      return uuidV7Hex(ms, r);
+    };
+  }
+
+  function uuidV4Hex() {
+    if (globalThis.crypto.randomUUID) return globalThis.crypto.randomUUID().replace(/-/g, '');
+    const b = new Uint8Array(16);
+    globalThis.crypto.getRandomValues(b);
+    b[6] = (b[6] & 0x0f) | 0x40; b[8] = (b[8] & 0x3f) | 0x80;
+    return Array.from(b, x => x.toString(16).padStart(2, '0')).join('');
+  }
+  /* #endpure */
+
+  const countIn = $('#count'), fmtSel = $('#fmt'), upper = $('#upper'), list = $('#list');
+  let version = '4';
+  let guids = [];
+  const v7 = makeV7Generator(() => Date.now());
+
+  function shown() { return guids.map(h => formatGuid(h, fmtSel.value, upper.checked)); }
+
+  function render() {
+    const items = shown();
+    list.replaceChildren(...items.map((g, i) => el('li', null,
+      el('span', { class: 'n' }, String(i + 1)),
+      el('span', { class: 'g' }, g),
+      el('button', { class: 'btn sm', onclick: e => copy(g, e.currentTarget) }, 'Copy'))));
+    $('#meta').textContent = items.length + (items.length === 1 ? ' GUID' : ' GUIDs');
+  }
+
+  function generate() {
+    const n = Number(countIn.value);
+    const badCount = !Number.isInteger(n) || n < 1 || n > 1000;
+    DevTools.invalid(countIn, badCount);
+    if (badCount) { msg($('#msg'), 'error', 'Count must be a whole number between 1 and 1000.'); return; }
+    if (!globalThis.crypto || !crypto.getRandomValues) { msg($('#msg'), 'error', 'Secure random numbers are not available in this browser.'); return; }
+    msg($('#msg'), '');
+    guids = [];
+    for (let i = 0; i < n; i++) guids.push(version === '7' ? v7() : uuidV4Hex());
+    render();
+  }
+
+  $$('#ver button').forEach(b => b.addEventListener('click', () => {
+    version = b.dataset.v;
+    $$('#ver button').forEach(x => x.classList.toggle('on', x === b));
+    generate();
+  }));
+  $('#gen').addEventListener('click', generate);
+  countIn.addEventListener('change', generate);
+  fmtSel.addEventListener('change', render);
+  upper.addEventListener('change', render);
+  $('#copy-all').addEventListener('click', e => { if (guids.length) copy(shown().join('\n'), e.currentTarget); });
+  $('#dl').addEventListener('click', () => { if (guids.length) download('guids.txt', shown().join('\n') + '\n'); });
+
+  function parseView() {
+    const rows = $('#parse-rows'), pm = $('#parse-msg');
+    rows.replaceChildren();
+    const raw = $('#parse').value.trim();
+    DevTools.invalid($('#parse'), false);
+    if (!raw) { msg(pm, ''); return; }
+    let hex;
+    try { hex = parseGuid(raw); } catch (e) { DevTools.invalid($('#parse'), true); msg(pm, 'error', e.message); return; }
+    const info = inspectGuid(hex);
+    msg(pm, 'ok', 'Valid GUID — ' + info.versionName + '.');
+    const d = formatGuid(hex, 'D', false);
+    const add = (label, value) => rows.appendChild(el('tr', null, el('td', null, label), el('td', { class: 'mono' }, value),
+      el('td', { class: 'act' }, el('button', { class: 'btn sm', onclick: e => copy(value, e.currentTarget) }, 'Copy'))));
+    add('D (standard)', d);
+    add('N (digits)', formatGuid(hex, 'N', false));
+    add('B (braces)', formatGuid(hex, 'B', false));
+    add('P (parentheses)', formatGuid(hex, 'P', false));
+    add('X (hex)', formatGuid(hex, 'X', false));
+    add('Uppercase', formatGuid(hex, 'D', true));
+    add('C#', 'Guid.Parse("' + d + '")');
+    add('C# constructor', 'new Guid("' + d + '")');
+    add('URN', 'urn:uuid:' + d);
+    add('ToByteArray()', '{ ' + dotnetBytes(hex).map(b => '0x' + b.toUpperCase()).join(', ') + ' }');
+    add('Version', info.versionName);
+    add('Variant', info.variant);
+    if (info.time != null) {
+      const dt = new Date(info.time);
+      add('Embedded time', isNaN(dt) ? 'out of range' : dt.toISOString() + '  (' + dt.toLocaleString() + ')');
+    }
+  }
+  $('#parse').addEventListener('input', parseView);
+  $('#parse-clear').addEventListener('click', () => { $('#parse').value = ''; parseView(); });
+
+  generate();
+})();
+</script>
+</body>
+</html>
