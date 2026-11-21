@@ -1,19 +1,23 @@
 # DevTools — Free, Private, Client-Side Developer Tools
 
-A growing collection of free online developer utilities. Every tool runs entirely in your browser — no data is sent to any server, stored, or logged.
+A growing collection of free online developer utilities. Every tool runs entirely in your browser — no data is sent to any server or logged. The only thing kept is local to your browser: favorites and the last draft of the Markdown, HTML and Diagram viewers (localStorage).
 
-**Live site:** `https://`
+**Live site:** https://devtool-moya.netlify.app
 
 ---
 
 ## Tools
 
-| Tool | Status | Path |
-|---|---|---|
-| JSON Formatter | ✅ Live | `/json-formatter` |
-| Base64 Encode/Decode | 🔜 Planned | `/base64` |
-| URL Encoder/Decoder | 🔜 Planned | `/url-encoder` |
-| Regex Tester | 🔜 Planned | `/regex-tester` |
+| Category | Tools |
+|---|---|
+| Text | Case Converter, String Reverse, Trim / Pad, Line Counter, Line Operations, String Compare |
+| Encode / Decode | Base64, URL Encode, Hash Generator (MD5/SHA/HMAC), JWT Tool |
+| JSON | JSON Formatter, JSON Compare, JSON → C#, JSON → Java, JSON → TypeScript |
+| Regex | Regex Search, Regex Replace, String Extract |
+| Developer | DateTime Formatter, String Formatter, GUID Generator, Password Generator, Number Converter, Barcode/QR Generator, HTTP Client |
+| Viewers | Markdown Viewer, HTML Viewer (sandboxed), Diagram Viewer (Mermaid) |
+
+Each tool lives at `/<route>` (folder `<route>/index.html`). The registry of tools is in `assets/tools.js`.
 
 ---
 
@@ -34,32 +38,34 @@ There is no server, no database, no API. The site is 100% static HTML/CSS/JS dep
 These features are intentionally absent. They are the primary data-exposure vector in existing tools.
 
 ### XSS prevention
-The output panel uses `textContent` exclusively — `innerHTML` is never used on user-supplied data. The syntax highlighter builds DOM nodes with `document.createElement` + `textContent`, never string concatenation into HTML. This makes it structurally impossible for a malicious JSON payload to execute code.
+Tools write user data with `textContent` / `.value` only. There are exactly three reviewed HTML sinks, each allow-listed by `scripts/check.mjs`: the Markdown preview (DOMPurify-sanitized), the Mermaid SVG (`securityLevel: 'strict'`), and the HTML viewer's `srcdoc` (an `<iframe sandbox="allow-scripts">` with an opaque origin). The syntax highlighter builds DOM nodes with `document.createElement` + `textContent`, never string concatenation into HTML. This makes it structurally impossible for a malicious JSON payload to execute code.
 
 ### Content Security Policy
 All pages are served with a strict `Content-Security-Policy` header:
 
 ```
 default-src 'self';
-script-src 'self' 'unsafe-inline';
-style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
-font-src https://fonts.gstatic.com;
+script-src 'self' 'sha256-…';   ← only this page's own inline scripts, by hash (no 'unsafe-inline')
+style-src 'self' 'unsafe-inline';
+font-src 'self';                ← fonts are self-hosted, no third-party requests
 img-src 'self' data:;
-connect-src 'none';        ← blocks all outbound network from JS
+connect-src 'none';             ← blocks fetch/XHR/WebSocket from JS
 object-src 'none';
 base-uri 'self';
 form-action 'self';
-frame-ancestors 'none';    ← prevents clickjacking
+frame-ancestors 'none';         ← prevents clickjacking
 ```
 
-`connect-src 'none'` is the key line: even if malicious JS somehow ran, it could not exfiltrate data over the network.
+Hash-based `script-src` means injected markup cannot run handlers or scripts, and `connect-src 'none'` stops page scripts from opening network connections. The same policy is also embedded as a `<meta>` tag in every page, so it applies to 404 responses too. Exception: the HTML viewer keeps `'unsafe-inline'` because its sandboxed preview runs the user's own inline scripts.
+
+**Exception:** `/http-client` exists to send requests, so only that path gets `connect-src http: https:`. CSP is therefore set per path in `_headers` rather than on `/*` (Netlify merges overlapping rules, which would make the policy impossible to relax for one page).
 
 ### Additional headers
 ```
 X-Frame-Options: DENY
 X-Content-Type-Options: nosniff
 Referrer-Policy: strict-origin-when-cross-origin
-Permissions-Policy: geolocation=(), microphone=(), camera=(), payment=()
+Permissions-Policy: geolocation=(), microphone=(), camera=(), payment=(), usb=(), interest-cohort=()
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
 ```
 
@@ -69,20 +75,29 @@ Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
 
 ```
 /
-├── index.html              ← Site root (redirects to /json-formatter)
-├── json-formatter/
-│   └── index.html          ← JSON Formatter tool
-├── _headers                ← Netlify HTTP response headers
-├── netlify.toml            ← Netlify routing + build config
+├── index.html              ← Home page (generated)
+├── 404.html                ← Not-found page (generated)
+├── assets/
+│   ├── app.css             ← Shared styles
+│   ├── tools.js            ← Tool registry, header, sidebar (search + favorites), helpers
+│   ├── fonts/              ← Self-hosted Syne + IBM Plex Mono (OFL)
+│   ├── regex-worker.js     ← Runs user regexes off the main thread with a timeout
+│   └── vendor/             ← Pinned third-party libs + VERSIONS.txt (versions, sources, sha256)
+├── <route>/index.html      ← One folder per tool
+├── scripts/gen-site.mjs    ← Generates index.html, 404.html, _headers, netlify.toml, sitemap.xml, robots.txt; syncs page heads + CSP hashes
+├── scripts/json-codegen/   ← Generates the three JSON → code pages from shared inference code
+├── scripts/check.mjs       ← Quality gate (Netlify build command)
+├── scripts/smoke.mjs       ← Post-deploy smoke test against a live URL
+├── _headers                ← Netlify HTTP response headers (generated)
+├── netlify.toml            ← Netlify config (generated)
 └── README.md
 ```
 
 Adding a new tool:
 
-1. Create a folder: `mkdir base64`
-2. Add `base64/index.html`
-3. Uncomment the relevant `[[redirects]]` block in `netlify.toml`
-4. Add the nav link in all existing tool pages
+1. Add it to `CATEGORIES` in `assets/tools.js`
+2. Create `<route>/index.html` (copy `base64/index.html` as a template)
+3. Run `node scripts/gen-site.mjs .` to regenerate the home page, headers and CSP hashes, then `node scripts/check.mjs`
 
 ---
 
@@ -121,7 +136,22 @@ Netlify picks up the push and deploys within ~30 seconds.
 
 ### Environment
 
-No build step. No `npm install`. No Node.js required. Pure static files — open `index.html` directly in a browser for local development.
+No bundler and no `npm install`. Pages are plain static files, but asset paths are absolute (`/assets/...`), so serve the folder instead of opening files directly, e.g.:
+
+```bash
+npx serve .
+```
+
+Generated files — edit the generators, not the output:
+
+```bash
+node scripts/json-codegen/build-gen-pages.js   # json-to-csharp / java / typescript pages
+node scripts/gen-site.mjs .                    # home, 404, _headers, netlify.toml, sitemap, robots, page <head>s + CSP hashes
+node scripts/check.mjs                         # quality gate (also runs as the Netlify build command)
+node scripts/smoke.mjs https://devtool-moya.netlify.app   # post-deploy smoke test (or a deploy-preview URL)
+```
+
+Any edit to a page's inline `<script>` changes its CSP hash, so run `gen-site` afterwards (the check fails otherwise).
 
 ---
 

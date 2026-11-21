@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-NpECSmOIDHO7YiUVBLrpofBrIpZflRhuRhGYemyfDpk='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self';" />
+  <title>String Reverse — Reverse Text, Lines or Words Online</title>
+  <meta name="description" content="Reverse a whole string, the order of lines or words, or the characters inside each line or word. Emoji-safe and runs entirely in your browser." />
+  <meta name="keywords" content="reverse string, reverse text, reverse lines, reverse words, backwards text, string reverser" />
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large" />
+  <link rel="canonical" href="https://devtool-moya.netlify.app/reverse" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="String Reverse — Reverse Text, Lines or Words Online" />
+  <meta property="og:description" content="Flip text, lines or words in your browser. Emoji and accents stay intact. Nothing leaves your machine." />
+  <meta property="og:url" content="https://devtool-moya.netlify.app/reverse" />
+  <meta property="og:site_name" content="DevTools" />
+  <meta name="twitter:card" content="summary" />
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "String Reverse",
+    "url": "https://devtool-moya.netlify.app/reverse",
+    "description": "Free online string reverser: reverse whole text, line order, word order, characters of each line or each word. Unicode and emoji safe. Runs client-side.",
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "Any",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+    "featureList": ["Reverse whole string", "Reverse line order", "Reverse word order", "Reverse each line", "Reverse each word", "Grapheme-aware (emoji safe)", "Client-side only"],
+    "isAccessibleForFree": true
+  }
+  </script>
+  <script type="application/ld+json">
+  { "@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://devtool-moya.netlify.app/" },
+    { "@type": "ListItem", "position": 2, "name": "String Reverse", "item": "https://devtool-moya.netlify.app/reverse" } ] }
+  </script>
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="/assets/app.css" />
+  <style>.seg { flex-wrap: wrap; }</style>
+</head>
+<body>
+<div class="shell">
+  <header id="site-header"></header>
+  <aside id="sidebar"></aside>
+  <div class="nav-backdrop"></div>
+
+  <main class="page">
+    <section class="tool-head">
+      <h1>String Reverse</h1>
+      <p>Flip characters, lines or words — emoji and accented letters stay in one piece.</p>
+    </section>
+
+    <section class="options" aria-label="Options">
+      <span class="opt-label">Reverse</span>
+      <div class="seg" id="mode">
+        <button data-v="full" class="on">Whole text</button>
+        <button data-v="lines">Line order</button>
+        <button data-v="words">Word order</button>
+        <button data-v="eachline">Each line</button>
+        <button data-v="eachword">Each word</button>
+      </div>
+    </section>
+
+    <div class="msg" id="msg" hidden></div>
+
+    <section class="grid-2">
+      <div class="panel">
+        <div class="panel-head">
+          <span class="panel-title">Input</span>
+          <span class="panel-actions">
+            <span class="panel-meta" id="in-meta"></span>
+            <button class="btn sm" id="clear">Clear</button>
+          </span>
+        </div>
+        <textarea id="input" spellcheck="false" placeholder="Type or paste text to reverse..."></textarea>
+      </div>
+      <div class="panel">
+        <div class="panel-head">
+          <span class="panel-title">Output</span>
+          <span class="panel-actions">
+            <span class="panel-meta" id="out-meta"></span>
+            <button class="btn sm" id="swap" title="Move output to input">Use as input</button>
+            <button class="btn sm" id="copy">Copy</button>
+            <button class="btn sm" id="dl">Download</button>
+          </span>
+        </div>
+        <textarea id="output" spellcheck="false" readonly></textarea>
+      </div>
+    </section>
+
+    <section class="about">
+      <h2>About this tool</h2>
+      <ul>
+        <li><b>Whole text</b> — mirrors the entire input, so the last character comes first.</li>
+        <li><b>Line order</b> — keeps every line as-is but lists them bottom to top.</li>
+        <li><b>Word order</b> — reverses the sequence of words on each line while leaving the spacing in place.</li>
+        <li><b>Each line</b> — mirrors the characters of every line but keeps the lines in their original order.</li>
+        <li><b>Each word</b> — mirrors the letters inside every word without moving the words.</li>
+      </ul>
+      <p>Reversal works on user-perceived characters (grapheme clusters), so flags, skin-tone emoji and letters with combining accents are not torn apart. Windows line endings are normalised to <code>\n</code>.</p>
+      <h2>Privacy</h2>
+      <p>All processing happens in your browser. Nothing you type is sent, stored or logged.</p>
+    </section>
+  </main>
+</div>
+
+<script src="/assets/tools.js"></script>
+<script>
+(function () {
+  'use strict';
+  const { $, $$, debounce, copy, download, msg } = DevTools;
+
+  /* PURE-START */
+  const segmenter = (typeof Intl !== 'undefined' && Intl.Segmenter) ? new Intl.Segmenter(undefined, { granularity: 'grapheme' }) : null;
+  function graphemes(s) {
+    return segmenter ? Array.from(segmenter.segment(s), x => x.segment) : Array.from(s);
+  }
+  function revStr(s) { return graphemes(s).reverse().join(''); }
+  function revWordOrder(line) {
+    const parts = line.split(/(\s+)/);
+    const slots = [];
+    for (let i = 0; i < parts.length; i += 2) if (parts[i] !== '') slots.push(i);
+    const words = slots.map(i => parts[i]).reverse();
+    slots.forEach((idx, n) => { parts[idx] = words[n]; });
+    return parts.join('');
+  }
+  function reverseText(text, mode) {
+    const s = text.replace(/\r\n?/g, '\n');
+    const lines = () => s.split('\n');
+    switch (mode) {
+      case 'lines': return lines().reverse().join('\n');
+      case 'words': return lines().map(revWordOrder).join('\n');
+      case 'eachline': return lines().map(revStr).join('\n');
+      case 'eachword': return s.replace(/\S+/g, revStr);
+      default: return revStr(s);
+    }
+  }
+  /* PURE-END */
+
+  const input = $('#input'), output = $('#output');
+  let mode = 'full';
+
+  function meta(s) {
+    if (!s) return '';
+    return s.length + ' chars · ' + s.split(/\r\n|\r|\n/).length + ' lines';
+  }
+  function run() {
+    const text = input.value;
+    $('#in-meta').textContent = meta(text);
+    msg($('#msg'), '');
+    if (!text) { output.value = ''; $('#out-meta').textContent = ''; return; }
+    output.value = reverseText(text, mode);
+    $('#out-meta').textContent = meta(output.value);
+  }
+  const runLater = debounce(run, 150);
+
+  function setMode(v) {
+    mode = v;
+    $$('#mode button').forEach(b => b.classList.toggle('on', b.dataset.v === v));
+    run();
+  }
+
+  $$('#mode button').forEach(b => b.addEventListener('click', () => setMode(b.dataset.v)));
+  input.addEventListener('input', () => input.value.length > 100000 ? runLater() : run());
+  $('#clear').addEventListener('click', () => { input.value = ''; run(); input.focus(); });
+  $('#copy').addEventListener('click', e => copy(output.value, e.currentTarget));
+  $('#dl').addEventListener('click', () => download('reversed.txt', output.value));
+  $('#swap').addEventListener('click', () => { input.value = output.value; run(); });
+  run();
+})();
+</script>
+</body>
+</html>

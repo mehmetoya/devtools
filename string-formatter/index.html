@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-Cnj2Kx6iELLQF3vRWDV0dxe5hHG+jqdh7fBNzJSeKLY='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self';" />
+  <title>C# String Formatter — Numeric Formats, Padding, Composite</title>
+  <meta name="description" content="Preview C#/.NET numeric format strings (N2, C, P, E2, X8, D8, custom #,##0.00), padding and alignment, composite formatting and common string methods. Runs in your browser." />
+  <meta name="keywords" content="c# string format, .net number format, tostring n2, composite formatting, string padding, format specifiers, c# string methods" />
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large" />
+  <link rel="canonical" href="https://devtool-moya.netlify.app/string-formatter" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="C# String Formatter — Numeric Formats, Padding, Composite" />
+  <meta property="og:description" content="Try .NET format strings live: standard and custom numeric formats, alignment, composite formatting." />
+  <meta property="og:url" content="https://devtool-moya.netlify.app/string-formatter" />
+  <meta property="og:site_name" content="DevTools" />
+  <meta name="twitter:card" content="summary" />
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "String Formatter",
+    "url": "https://devtool-moya.netlify.app/string-formatter",
+    "description": "Free online playground for C# / .NET numeric format strings, padding and alignment, composite formatting and string methods. Runs client-side.",
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "Any",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+    "featureList": ["Standard numeric formats (C, D, E, F, G, N, P, R, X)", "Custom numeric formats", "Culture-aware separators", "Padding and alignment", "Composite formatting", "String method preview", "Client-side only"],
+    "isAccessibleForFree": true
+  }
+  </script>
+  <script type="application/ld+json">
+  { "@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://devtool-moya.netlify.app/" },
+    { "@type": "ListItem", "position": 2, "name": "String Formatter", "item": "https://devtool-moya.netlify.app/string-formatter" } ] }
+  </script>
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="/assets/app.css" />
+  <style>
+    .sec { margin-bottom: 16px; }
+    .row-in { display: flex; flex-wrap: wrap; gap: 10px 14px; align-items: center; padding: 12px 14px; border-bottom: 1px solid var(--border); }
+    .row-in input[type=text] { min-width: 0; flex: 1 1 180px; }
+    .tbl-wrap { overflow-x: auto; }
+    .fmt-tbl td:first-child { white-space: nowrap; }
+    .fmt-tbl td.res { font-family: var(--mono); word-break: break-all; color: var(--accent); }
+    .fmt-tbl td.res.err { color: var(--danger); }
+    .fmt-tbl td.desc { color: var(--muted2); font-size: 12px; }
+    .fmt-tbl td.act { width: 1%; }
+    .box { font-family: var(--mono); white-space: pre; background: var(--surface3); outline: 1px dashed var(--muted); padding: 1px 0; color: var(--accent); }
+    .custom-res { font-family: var(--mono); font-size: 15px; padding: 12px 14px; color: var(--accent); word-break: break-all; min-height: 46px; }
+    .custom-res.err { color: var(--danger); font-size: 13px; }
+    .type-tag { font-family: var(--mono); font-size: 11px; color: var(--muted2); }
+    @media (max-width: 600px) {
+      .fmt-tbl td.desc, .fmt-tbl th.desc { display: none; }
+      table.tbl th, table.tbl td { padding: 7px 8px; }
+    }
+  </style>
+</head>
+<body>
+<div class="shell">
+  <header id="site-header"></header>
+  <aside id="sidebar"></aside>
+  <div class="nav-backdrop"></div>
+
+  <main class="page">
+    <section class="tool-head">
+      <h1>String Formatter</h1>
+      <p>See what C# / .NET format strings produce: numeric formats, alignment, composite formatting and everyday string methods.</p>
+    </section>
+
+    <section class="options" aria-label="Options">
+      <label class="opt"><span class="opt-label">Culture</span>
+        <select id="culture">
+          <option value="invariant">Invariant</option>
+          <option value="en-US" selected>en-US</option>
+          <option value="en-GB">en-GB</option>
+          <option value="de-DE">de-DE</option>
+          <option value="fr-FR">fr-FR</option>
+          <option value="es-ES">es-ES</option>
+          <option value="it-IT">it-IT</option>
+          <option value="pt-BR">pt-BR</option>
+          <option value="nl-NL">nl-NL</option>
+          <option value="tr-TR">tr-TR</option>
+          <option value="ru-RU">ru-RU</option>
+          <option value="ja-JP">ja-JP</option>
+          <option value="zh-CN">zh-CN</option>
+        </select>
+      </label>
+      <span class="type-tag" id="culture-info"></span>
+    </section>
+
+    <div class="msg" id="msg" hidden></div>
+
+    <!-- NUMERIC -->
+    <section class="panel sec">
+      <div class="panel-head"><span class="panel-title">Numeric formatting</span><span class="type-tag" id="num-type"></span></div>
+      <div class="row-in">
+        <label class="opt"><span class="opt-label">Number</span><input type="text" id="num" value="1234567.891" spellcheck="false" aria-label="Number" /></label>
+        <label class="opt"><span class="opt-label">Custom format</span><input type="text" id="num-fmt" value="#,##0.00;(#,##0.00);'zero'" spellcheck="false" aria-label="Custom format string" /></label>
+      </div>
+      <div class="custom-res" id="num-custom" role="status" aria-live="polite"></div>
+      <div class="tbl-wrap">
+        <table class="tbl fmt-tbl">
+          <thead><tr><th>Expression</th><th class="desc">Meaning</th><th>Result</th><th></th></tr></thead>
+          <tbody id="num-rows"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- PADDING -->
+    <section class="panel sec">
+      <div class="panel-head"><span class="panel-title">Padding &amp; alignment</span></div>
+      <div class="row-in">
+        <label class="opt"><span class="opt-label">Text</span><input type="text" id="pad-text" value="Hello" spellcheck="false" aria-label="Text to pad" /></label>
+        <label class="opt"><span class="opt-label">Width</span><input type="number" id="pad-width" value="10" min="0" max="200" /></label>
+        <label class="opt"><span class="opt-label">Pad char</span><input type="text" id="pad-char" value="-" maxlength="1" style="width:46px" aria-label="Pad character" /></label>
+      </div>
+      <div class="tbl-wrap">
+        <table class="tbl fmt-tbl">
+          <thead><tr><th>Expression</th><th class="desc">Meaning</th><th>Result (boxed)</th><th></th></tr></thead>
+          <tbody id="pad-rows"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- COMPOSITE -->
+    <section class="panel sec">
+      <div class="panel-head"><span class="panel-title">Composite formatting — string.Format</span></div>
+      <div class="row-in">
+        <label class="opt" style="flex:1 1 100%"><span class="opt-label">Template</span><input type="text" id="cf-tpl" value="Name: {0}, Age: {1,3}, Score: {2:F2} ({2:P0})" spellcheck="false" aria-label="Format template" /></label>
+        <label class="opt"><span class="opt-label">{0}</span><input type="text" id="cf-0" value="Alice" spellcheck="false" aria-label="Argument 0" /></label>
+        <label class="opt"><span class="opt-label">{1}</span><input type="text" id="cf-1" value="30" spellcheck="false" aria-label="Argument 1" /></label>
+        <label class="opt"><span class="opt-label">{2}</span><input type="text" id="cf-2" value="0.9567" spellcheck="false" aria-label="Argument 2" /></label>
+      </div>
+      <div class="panel-head" style="border-top:0">
+        <span class="mono" id="cf-code" style="font-size:12px;color:var(--muted2);word-break:break-all;padding:8px 0"></span>
+        <span class="panel-actions"><button class="btn sm" id="cf-copy">Copy result</button></span>
+      </div>
+      <div class="custom-res" id="cf-out" role="status" aria-live="polite" style="white-space:pre-wrap"></div>
+    </section>
+
+    <!-- STRING METHODS -->
+    <section class="panel sec">
+      <div class="panel-head"><span class="panel-title">Common string methods</span></div>
+      <div class="row-in">
+        <label class="opt"><span class="opt-label">s =</span><input type="text" id="sm-text" value="  Hello World  " spellcheck="false" aria-label="Test string" /></label>
+        <label class="opt"><span class="opt-label">Search</span><input type="text" id="sm-find" value="World" spellcheck="false" aria-label="Search text" /></label>
+      </div>
+      <div class="tbl-wrap">
+        <table class="tbl fmt-tbl">
+          <thead><tr><th>Expression</th><th class="desc">Meaning</th><th>Result</th><th></th></tr></thead>
+          <tbody id="sm-rows"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ESCAPES -->
+    <section class="panel sec">
+      <div class="panel-head"><span class="panel-title">Escape sequences &amp; string literals</span></div>
+      <div class="tbl-wrap">
+        <table class="tbl fmt-tbl">
+          <thead><tr><th>Syntax</th><th>Meaning</th><th>Example</th></tr></thead>
+          <tbody id="esc-rows"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="about">
+      <h2>About this tool</h2>
+      <p>This page re-implements .NET's formatting rules in JavaScript so you can try format strings without compiling anything. Whole numbers are treated as <code>int</code> (or <code>long</code> when they do not fit), anything with a decimal point or exponent as <code>double</code>. <code>D</code> and <code>X</code> only work with integer types, exactly like in .NET.</p>
+      <ul>
+        <li>Standard formats (<code>F</code>, <code>N</code>, <code>C</code>, <code>P</code>, <code>E</code>, <code>G</code> with a precision) round the exact binary value of a double and send exact halves to the even digit, like .NET Core 3.0 and later: <code>0.125.ToString("F2")</code> is <code>0.12</code>.</li>
+        <li>Custom formats first reduce a double to 15 significant digits and then round halves away from zero, so <code>1.005.ToString("0.00")</code> is <code>1.01</code>. <code>int</code> and <code>long</code> values are always exact.</li>
+        <li>A negative double that rounds to zero keeps its sign (<code>-0.001.ToString("0.00")</code> is <code>-0.00</code>), as in .NET Core 3.0 and later.</li>
+        <li>Separators, currency symbols and percent placement come from your browser's locale data (ICU), which is also what .NET uses on Linux and macOS. Windows (NLS) data can differ slightly, for example in negative currency patterns.</li>
+        <li>Custom formats support <code>0</code>, <code>#</code>, <code>.</code>, <code>,</code> (grouping and ÷1000 scaling), <code>%</code>, <code>‰</code>, <code>E+0</code>/<code>e-0</code>, <code>\</code> escapes, quoted literals and up to three <code>;</code> sections.</li>
+      </ul>
+      <h2>Privacy</h2>
+      <p>Everything is computed in your browser. Nothing is sent, stored or logged.</p>
+    </section>
+  </main>
+</div>
+
+<script src="/assets/tools.js"></script>
+<script>
+(function () {
+  'use strict';
+  const { el, $, $$, debounce, copy, msg } = DevTools;
+
+  /* #pure */
+  const CURRENCY = { 'en-US': 'USD', 'en-GB': 'GBP', 'de-DE': 'EUR', 'fr-FR': 'EUR', 'es-ES': 'EUR', 'it-IT': 'EUR', 'pt-BR': 'BRL', 'nl-NL': 'EUR', 'tr-TR': 'TRY', 'ru-RU': 'RUB', 'ja-JP': 'JPY', 'zh-CN': 'CNY' };
+  const NFI_CACHE = {};
+
+  /** Turns an Intl-formatted 1 / -1 into a template like "$n", "n €", "-n %". */
+  function intlTemplate(parts) {
+    let t = '', placed = false;
+    for (const p of parts) {
+      if (p.type === 'integer' || p.type === 'group') { if (!placed) { t += '\u0001'; placed = true; } }
+      else if (p.type === 'decimal' || p.type === 'fraction') { /* part of the number */ }
+      else t += p.value;
+    }
+    return t;
+  }
+
+  /** NumberFormatInfo-like object for a culture name ('invariant' or BCP-47). */
+  function getNfi(culture) {
+    if (NFI_CACHE[culture]) return NFI_CACHE[culture];
+    let nfi;
+    if (culture === 'invariant') {
+      nfi = { dec: '.', group: ',', neg: '-', pct: '%', permille: '‰', currPos: '¤\u0001', currNeg: '(¤\u0001)', currDigits: 2, pctPos: '\u0001 %', pctNeg: '-\u0001 %', nan: 'NaN', posInf: 'Infinity', negInf: '-Infinity', sym: '¤' };
+    } else {
+      const dp = new Intl.NumberFormat(culture, { useGrouping: true }).formatToParts(1234567.5);
+      const get = (arr, type, d) => { const x = arr.find(p => p.type === type); return x ? x.value : d; };
+      const cf = new Intl.NumberFormat(culture, { style: 'currency', currency: CURRENCY[culture] || 'USD' });
+      const pf = new Intl.NumberFormat(culture, { style: 'percent' });
+      const minus = get(new Intl.NumberFormat(culture).formatToParts(-1), 'minusSign', '-');
+      nfi = {
+        dec: get(dp, 'decimal', '.'), group: get(dp, 'group', ','), neg: minus,
+        pct: get(pf.formatToParts(0.01), 'percentSign', '%'), permille: '‰',
+        currPos: intlTemplate(cf.formatToParts(1)), currNeg: intlTemplate(cf.formatToParts(-1)),
+        currDigits: cf.resolvedOptions().maximumFractionDigits,
+        pctPos: intlTemplate(pf.formatToParts(0.01)), pctNeg: intlTemplate(pf.formatToParts(-0.01)),
+        nan: 'NaN', posInf: '∞', negInf: minus + '∞',
+        sym: get(cf.formatToParts(1), 'currency', '¤'),
+      };
+    }
+    NFI_CACHE[culture] = nfi;
+    return nfi;
+  }
+
+  /** Parses user input into a typed value: {type:'int'|'long'|'double', rep, x} or throws. */
+  function parseNumber(s) {
+    const t = String(s).trim().replace(/_/g, '');
+    if (/^[+-]?\d+$/.test(t)) {
+      const b = BigInt(t);
+      if (b >= -(2n ** 31n) && b < 2n ** 31n) return { type: 'int', big: b, rep: { neg: b < 0n, N: b < 0n ? -b : b, k: 0 }, x: Number(b) };
+      if (b >= -(2n ** 63n) && b < 2n ** 63n) return { type: 'long', big: b, rep: { neg: b < 0n, N: b < 0n ? -b : b, k: 0 }, x: Number(b) };
+    }
+    if (/^[+-]?(\d+\.?\d*|\.\d+)([eE][+-]?\d+)?$/.test(t)) {
+      const x = Number(t);
+      return { type: 'double', x, rep: Number.isFinite(x) ? exactDecimal(x) : null };
+    }
+    if (/^[+-]?(Infinity|∞)$/i.test(t)) { const x = t[0] === '-' ? -Infinity : Infinity; return { type: 'double', x, rep: null }; }
+    if (/^NaN$/i.test(t)) return { type: 'double', x: NaN, rep: null };
+    throw new Error('"' + s + '" is not a valid number.');
+  }
+
+  /** Exact decimal expansion of a finite double: value = (neg ? -1 : 1) * N / 10^k. */
+  function exactDecimal(x) {
+    const neg = x < 0 || Object.is(x, -0);
+    x = Math.abs(x);
+    if (x === 0) return { neg, N: 0n, k: 0 };
+    const dv = new DataView(new ArrayBuffer(8));
+    dv.setFloat64(0, x);
+    const hi = dv.getUint32(0), lo = dv.getUint32(4);
+    const eb = (hi >>> 20) & 0x7ff;
+    let m = (BigInt(hi & 0xfffff) << 32n) | BigInt(lo);
+    let e;
+    if (eb === 0) e = -1074; else { m |= 1n << 52n; e = eb - 1075; }
+    if (e >= 0) return { neg, N: m << BigInt(e), k: 0 };
+    return { neg, N: m * 5n ** BigInt(-e), k: -e };
+  }
+
+  /**
+   * Round to f fractional digits after multiplying by 10^scale.
+   * Halves go away from zero, or to the even digit when `even` is set (what .NET Core 3.0+
+   * does for standard formats on double, because it rounds the exact binary value).
+   */
+  function roundFixed(rep, f, scale, even) {
+    let N = rep.N, k = rep.k - (scale || 0);
+    if (k < 0) { N *= 10n ** BigInt(-k); k = 0; }
+    if (k > f) {
+      const d = 10n ** BigInt(k - f); const r2 = (N % d) * 2n;
+      N = N / d;
+      if (r2 > d || (r2 === d && (!even || N % 2n === 1n))) N += 1n;
+    }
+    else if (k < f) N *= 10n ** BigInt(f - k);
+    const s = N.toString().padStart(f + 1, '0');
+    return { int: s.slice(0, s.length - f), frac: s.slice(s.length - f), zero: N === 0n };
+  }
+
+  /** Round to p significant digits: returns digits (length p) and exponent so value = d.ddd × 10^exp. `even` = ties to even. */
+  function roundSig(rep, p, scale, even) {
+    if (rep.N === 0n) return { digits: '0'.repeat(p), exp: 0, zero: true };
+    let s = rep.N.toString();
+    let exp = s.length - 1 - rep.k + (scale || 0);
+    if (s.length > p) {
+      let up = s[p] > '5' || (s[p] === '5' && (!even || /[1-9]/.test(s.slice(p + 1)) || (p > 0 && Number(s[p - 1]) % 2 === 1)));
+      let h = BigInt(s.slice(0, p) || '0') + (up ? 1n : 0n);
+      let hs = h.toString();
+      if (p === 0) { hs = ''; }
+      else if (hs.length > p) { hs = hs.slice(0, p); exp++; }
+      s = hs;
+    } else s = s.padEnd(p, '0');
+    return { digits: s, exp, zero: false };
+  }
+
+  /**
+   * .NET formats a double for a custom format string from only 15 significant digits
+   * (DoublePrecisionCustomFormat), so 1.005 is seen as 1.00500000000000 and "0.00" gives 1.01.
+   */
+  function round15(rep) {
+    if (rep.N === 0n) return rep;
+    const r = roundSig(rep, 15, 0, true);
+    const digits = r.digits.replace(/0+$/, '') || '0';
+    let N = BigInt(digits), k = digits.length - 1 - r.exp;
+    if (k < 0) { N *= 10n ** BigInt(-k); k = 0; }
+    return { neg: rep.neg, N, k };
+  }
+
+  /** Shortest round-trip digits of a double (what .NET Core 3.0+ uses for ToString()/R). */
+  function shortest(x) {
+    const m = Math.abs(x).toExponential().match(/^(\d)(?:\.(\d+))?e([+-]\d+)$/);
+    return { digits: m[1] + (m[2] || ''), exp: Number(m[3]) };
+  }
+
+  function group(intStr, sep) {
+    let out = '';
+    for (let i = 0; i < intStr.length; i++) {
+      out += intStr[i];
+      const rem = intStr.length - 1 - i;
+      if (rem > 0 && rem % 3 === 0) out += sep;
+    }
+    return out;
+  }
+
+  function fail(spec) { const e = new Error('FormatException: format specifier "' + spec + '" is not valid for this value.'); e.format = true; throw e; }
+
+  /** .NET-style ToString(format) for a parsed number. */
+  function formatNumber(v, format, culture) {
+    const nfi = getNfi(culture);
+    format = format == null ? '' : String(format);
+    if (v.rep === null) { // NaN / Infinity
+      if (Number.isNaN(v.x)) return nfi.nan;
+      return v.x > 0 ? nfi.posInf : nfi.negInf;
+    }
+    const m = format.match(/^([A-Za-z])(\d{0,9})$/);
+    if (format === '') return formatGeneral(v, -1, 'E', nfi);
+    const isDbl = v.type === 'double';
+    if (!m) return formatCustom(isDbl ? round15(v.rep) : v.rep, format, nfi, isDbl);
+    const L = m[1], U = L.toUpperCase();
+    const prec = m[2] === '' ? -1 : Number(m[2]);
+    if (prec > 999999999) fail(format);
+    const rep = v.rep, isInt = !isDbl;
+    // Doubles keep their sign when they round to zero (-0.001 → "-0.00"); integers cannot be -0.
+    const sign = (txt, zero) => (rep.neg && (isDbl || !zero) ? nfi.neg : '') + txt;
+    switch (U) {
+      case 'C': {
+        const d = prec < 0 ? nfi.currDigits : prec;
+        const r = roundFixed(rep, d, 0, isDbl);
+        const num = group(r.int, nfi.group) + (d > 0 ? nfi.dec + r.frac : '');
+        const tpl = rep.neg && (isDbl || !r.zero) ? nfi.currNeg : nfi.currPos;
+        return tpl.replace('\u0001', num).replace('¤', nfi.sym);
+      }
+      case 'D': {
+        if (!isInt) fail(format);
+        const s = rep.N.toString().padStart(Math.max(prec, 1), '0');
+        return sign(s, false);
+      }
+      case 'E': {
+        const p = prec < 0 ? 6 : prec;
+        const r = roundSig(rep, p + 1, 0, isDbl);
+        const mant = r.digits[0] + (p > 0 ? nfi.dec + r.digits.slice(1) : '');
+        const ex = (r.exp < 0 ? '-' : '+') + String(Math.abs(r.exp)).padStart(3, '0');
+        return sign(mant + L + ex, false);
+      }
+      case 'F': case 'N': {
+        const d = prec < 0 ? 2 : prec;
+        const r = roundFixed(rep, d, 0, isDbl);
+        const ip = U === 'N' ? group(r.int, nfi.group) : r.int;
+        return sign(ip + (d > 0 ? nfi.dec + r.frac : ''), r.zero);
+      }
+      case 'P': {
+        const d = prec < 0 ? 2 : prec;
+        const r = roundFixed(rep, d, 2, isDbl);
+        const num = group(r.int, nfi.group) + (d > 0 ? nfi.dec + r.frac : '');
+        const tpl = rep.neg && (isDbl || !r.zero) ? nfi.pctNeg : nfi.pctPos;
+        return tpl.replace('\u0001', num);
+      }
+      case 'G': return formatGeneral(v, prec, L === 'g' ? 'e' : 'E', nfi);
+      case 'R': return formatGeneral(v, -1, L === 'r' ? 'e' : 'E', nfi);
+      case 'X': {
+        if (!isInt) fail(format);
+        let b = v.big;
+        if (b < 0n) b += v.type === 'int' ? 2n ** 32n : 2n ** 64n;
+        let s = b.toString(16);
+        s = L === 'X' ? s.toUpperCase() : s;
+        return s.padStart(Math.max(prec, 1), '0');
+      }
+      default: return formatCustom(isDbl ? round15(v.rep) : v.rep, format, nfi, isDbl);
+    }
+  }
+
+  function formatGeneral(v, prec, e, nfi) {
+    const rep = v.rep;
+    let digits, exp, sciLimit;
+    if (rep.N === 0n) return (rep.neg && v.type === 'double' ? nfi.neg : '') + '0';
+    if (prec <= 0) {
+      // .NET uses max(digit count, 17) as the limit for the shortest round-trip form,
+      // so 1E16 prints as 10000000000000000 and 1E17 as 1E+17.
+      if (v.type === 'double') { ({ digits, exp } = shortest(v.x)); sciLimit = Math.max(digits.length, 17); }
+      else { digits = rep.N.toString(); exp = digits.length - 1; sciLimit = Infinity; }
+    } else {
+      ({ digits, exp } = roundSig(rep, prec, 0, v.type === 'double')); sciLimit = prec;
+    }
+    digits = digits.replace(/0+$/, '') || '0';
+    let body;
+    if (exp >= sciLimit || exp < -4) {
+      body = digits[0] + (digits.length > 1 ? nfi.dec + digits.slice(1) : '') + e + (exp < 0 ? '-' : '+') + String(Math.abs(exp)).padStart(2, '0');
+    } else if (exp < 0) {
+      body = '0' + nfi.dec + '0'.repeat(-exp - 1) + digits;
+    } else {
+      const ip = digits.slice(0, exp + 1).padEnd(exp + 1, '0');
+      const fp = digits.slice(exp + 1);
+      body = ip + (fp ? nfi.dec + fp : '');
+    }
+    return (rep.neg ? nfi.neg : '') + body;
+  }
+
+  /** Splits a custom format into ';' sections, respecting quotes and backslash escapes. */
+  function splitSections(fmt) {
+    const out = [];
+    let cur = '';
+    for (let i = 0; i < fmt.length; i++) {
+      const ch = fmt[i];
+      if (ch === '\\') { cur += ch + (fmt[i + 1] || ''); i++; continue; }
+      if (ch === '"' || ch === "'") {
+        const j = fmt.indexOf(ch, i + 1);
+        const end = j < 0 ? fmt.length : j + 1;
+        cur += fmt.slice(i, end); i = end - 1; continue;
+      }
+      if (ch === ';') { out.push(cur); cur = ''; continue; }
+      cur += ch;
+    }
+    out.push(cur);
+    return out.slice(0, 3);
+  }
+
+  /**
+   * Custom format with up to three sections (positive;negative;zero), following .NET's
+   * NumberToStringFormat: a value that rounds to zero switches to the zero section, or back to
+   * the first section when there is none. In the first section a negative double keeps its
+   * minus sign even when it rounds to zero, unless the section produced no text at all.
+   */
+  function formatCustom(rep, fmt, nfi, isDouble) {
+    const secs = splitSections(fmt);
+    const has = i => secs.length > i && secs[i] !== '';
+    let sec = rep.N === 0n ? (has(2) ? 2 : 0) : rep.neg && has(1) ? 1 : 0;
+    let r = formatSection(rep, secs[sec], nfi);
+    if (rep.N !== 0n && r.zero) {
+      const z = has(2) ? 2 : 0;
+      if (z !== sec) { sec = z; r = formatSection(rep, secs[sec], nfi); }
+    }
+    const signed = sec === 0 && rep.neg && (isDouble || !r.zero) && r.text !== '';
+    return (signed ? nfi.neg : '') + r.text;
+  }
+
+  function formatSection(rep, sec, nfi) {
+    // pass 1: analyse placeholders
+    let digitCount = 0, decimalPos = -1, firstDigit = Infinity, lastDigit = 0;
+    let thousandPos = -1, thousandCount = 0, thousandSeps = false, scale = 0, sci = false;
+    for (let i = 0; i < sec.length; i++) {
+      const ch = sec[i];
+      switch (ch) {
+        case '#': digitCount++; break;
+        case '0': if (firstDigit === Infinity) firstDigit = digitCount; digitCount++; lastDigit = digitCount; break;
+        case '.': if (decimalPos < 0) decimalPos = digitCount; break;
+        case ',':
+          if (digitCount > 0 && decimalPos < 0) {
+            if (thousandPos >= 0) { if (thousandPos === digitCount) { thousandCount++; break; } thousandSeps = true; }
+            thousandPos = digitCount; thousandCount = 1;
+          }
+          break;
+        case '%': scale += 2; break;
+        case '‰': scale += 3; break;
+        case '"': case "'": { const j = sec.indexOf(ch, i + 1); i = j < 0 ? sec.length : j; break; }
+        case '\\': i++; break;
+        case 'E': case 'e': {
+          let j = i + 1;
+          if (sec[j] === '+' || sec[j] === '-') j++;
+          if (sec[j] === '0' && !sci) { sci = true; while (sec[j] === '0') j++; i = j - 1; }
+          break;
+        }
+      }
+    }
+    if (decimalPos < 0) decimalPos = digitCount;
+    if (thousandPos >= 0) { if (thousandPos === decimalPos) scale -= thousandCount * 3; else thousandSeps = true; }
+
+    const I = decimalPos;
+    const maxFrac = digitCount - decimalPos;
+    const minFrac = Math.max(0, lastDigit - decimalPos);
+    const minInt = firstDigit < decimalPos ? decimalPos - firstDigit : 0;
+    let intStr, fracStr, zero, exponent = 0;
+    if (sci) {
+      const r = roundSig(rep, Math.max(digitCount, 1), scale);
+      zero = r.zero;
+      const d = r.digits.slice(0, Math.max(digitCount, 1));
+      intStr = d.slice(0, I); fracStr = d.slice(I);
+      exponent = zero ? 0 : r.exp + 1 - I;
+    } else {
+      const r = roundFixed(rep, maxFrac, scale);
+      zero = r.zero; intStr = r.int; fracStr = r.frac;
+    }
+    fracStr = fracStr.replace(/0+$/, '');
+    if (fracStr.length < minFrac) fracStr = fracStr.padEnd(minFrac, '0');
+    if (sci && zero) intStr = '0'.repeat(I); // .NET prints every integer placeholder of a zero mantissa as 0
+    else intStr = intStr.replace(/^0+/, '');
+    if (intStr.length < minInt) intStr = intStr.padStart(minInt, '0');
+
+    // pass 2: emit
+    let out = '';
+    let pos = 0, seenDecimal = false, intDone = false;
+    const emitInt = (from, to) => {
+      for (let t = from; t < to; t++) {
+        out += intStr[t];
+        const rem = intStr.length - 1 - t;
+        if (thousandSeps && rem > 0 && rem % 3 === 0) out += nfi.group;
+      }
+    };
+    for (let i = 0; i < sec.length; i++) {
+      const ch = sec[i];
+      switch (ch) {
+        case '#': case '0':
+          if (pos < I) {
+            const idx = intStr.length - I + pos;
+            if (pos === 0 && idx > 0) emitInt(0, idx + 1);
+            else if (idx >= 0) emitInt(idx, idx + 1);
+            if (pos === I - 1) intDone = true;
+          } else {
+            const f = pos - I;
+            if (f < fracStr.length) out += fracStr[f];
+          }
+          pos++;
+          break;
+        case '.':
+          if (!seenDecimal) {
+            seenDecimal = true;
+            if (I === 0 && !intDone) { emitInt(0, intStr.length); intDone = true; }
+            if (fracStr.length) out += nfi.dec;
+          }
+          break;
+        case ',': break;
+        case '%': out += nfi.pct; break;
+        case '‰': out += nfi.permille; break;
+        case '"': case "'": {
+          const j = sec.indexOf(ch, i + 1);
+          out += sec.slice(i + 1, j < 0 ? sec.length : j);
+          i = j < 0 ? sec.length : j;
+          break;
+        }
+        case '\\': if (i + 1 < sec.length) out += sec[i + 1]; i++; break;
+        case 'E': case 'e': {
+          let j = i + 1, plus = false;
+          if (sec[j] === '+' || sec[j] === '-') { plus = sec[j] === '+'; j++; }
+          if (sci && sec[j] === '0') {
+            let n = 0;
+            while (sec[j] === '0') { n++; j++; }
+            out += ch + (exponent < 0 ? '-' : plus ? '+' : '') + String(Math.abs(exponent)).padStart(n, '0');
+            i = j - 1;
+          } else out += ch;
+          break;
+        }
+        default: out += ch;
+      }
+    }
+    return { text: out, zero };
+  }
+
+  /** string.Format emulation. args = array of raw strings; numeric-looking ones are formatted as numbers. */
+  function compositeFormat(tpl, args, culture) {
+    let out = '';
+    const bad = () => { throw new Error('FormatException: Input string was not in a correct format.'); };
+    for (let i = 0; i < tpl.length; i++) {
+      const ch = tpl[i];
+      if (ch === '}') { if (tpl[i + 1] === '}') { out += '}'; i++; continue; } bad(); }
+      if (ch !== '{') { out += ch; continue; }
+      if (tpl[i + 1] === '{') { out += '{'; i++; continue; }
+      const close = tpl.indexOf('}', i + 1);
+      if (close < 0) bad();
+      const item = tpl.slice(i + 1, close);
+      const m = item.match(/^\s*(\d+)\s*(?:,\s*(-?\d+)\s*)?(?::(.*))?$/s);
+      if (!m) bad();
+      const idx = Number(m[1]);
+      if (idx >= args.length) throw new Error('FormatException: Index (zero based) must be greater than or equal to zero and less than the size of the argument list.');
+      const align = m[2] ? Number(m[2]) : 0;
+      const raw = args[idx];
+      let s;
+      let num = null;
+      try { num = parseNumber(raw); } catch { num = null; }
+      if (num && String(raw).trim() !== '') s = formatNumber(num, m[3] || '', culture);
+      else s = String(raw);
+      if (align > 0) s = s.padStart(align, ' '); else if (align < 0) s = s.padEnd(-align, ' ');
+      out += s;
+      i = close;
+    }
+    return out;
+  }
+  /* #endpure */
+
+  const culture = $('#culture');
+  function errText(e) { return e && e.message ? e.message : String(e); }
+  function csStr(s) { return '"' + String(s).replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\n/g, '\\n').replace(/\r/g, '\\r').replace(/\t/g, '\\t') + '"'; }
+  function cultureArg() {
+    const c = culture.value;
+    return c === 'invariant' ? 'CultureInfo.InvariantCulture' : 'new CultureInfo(' + csStr(c) + ')';
+  }
+
+  function resultRow(expr, desc, compute, opts) {
+    let text, err = false;
+    try { text = compute(); } catch (e) { text = errText(e); err = true; }
+    const res = opts && opts.boxed && !err ? el('td', { class: 'res' }, el('span', { class: 'box' }, text)) : el('td', { class: 'res' + (err ? ' err' : '') }, text);
+    return el('tr', null,
+      el('td', null, el('code', null, expr)),
+      el('td', { class: 'desc' }, desc),
+      res,
+      el('td', { class: 'act' }, err ? null : el('button', { class: 'btn sm', 'aria-label': 'Copy result of ' + expr, onclick: e => copy(text, e.currentTarget) }, 'Copy')));
+  }
+
+  const NUM_FORMATS = [
+    ['N', 'Number, grouped, default 2 decimals'], ['N0', 'Number, no decimals'], ['N2', 'Number, 2 decimals'], ['N4', 'Number, 4 decimals'],
+    ['F2', 'Fixed-point, no grouping'], ['C', 'Currency, culture default decimals'], ['C0', 'Currency, no decimals'],
+    ['P', 'Percent (value × 100)'], ['P0', 'Percent, no decimals'], ['E2', 'Scientific, 2 decimals'], ['G', 'General (shortest)'], ['R', 'Round-trip'],
+    ['X', 'Hexadecimal (integers only)'], ['X8', 'Hex padded to 8 digits'], ['D8', 'Decimal padded to 8 digits (integers only)'],
+    ['#,##0.00', 'Custom: grouping + 2 fixed decimals'], ['0.###', 'Custom: up to 3 optional decimals'], ['0.00E+00', 'Custom: scientific'],
+    ['#,##0,K', 'Custom: scale by 1000'], ['(###) ###-####', 'Custom: phone number mask'], ['00000', 'Custom: zero padding'],
+  ];
+
+  function renderNumbers() {
+    const rows = $('#num-rows'), cust = $('#num-custom');
+    rows.replaceChildren();
+    let v;
+    try { v = parseNumber($('#num').value); DevTools.invalid($('#num'), false); }
+    catch (e) {
+      $('#num-type').textContent = '';
+      cust.className = 'custom-res err'; cust.textContent = errText(e);
+      DevTools.invalid($('#num'), true); $('#num').setAttribute('aria-describedby', 'num-custom');
+      return;
+    }
+    $('#num-type').textContent = 'treated as ' + v.type;
+    const c = culture.value;
+    const f = $('#num-fmt').value;
+    try { cust.className = 'custom-res'; cust.textContent = formatNumber(v, f, c); DevTools.invalid($('#num-fmt'), false); }
+    catch (e) { cust.className = 'custom-res err'; cust.textContent = errText(e); DevTools.invalid($('#num-fmt'), true); $('#num-fmt').setAttribute('aria-describedby', 'num-custom'); }
+    const lit = String($('#num').value).trim();
+    for (const [fmt, desc] of NUM_FORMATS) {
+      rows.appendChild(resultRow(lit + '.ToString(' + csStr(fmt) + ')', desc, () => formatNumber(v, fmt, c)));
+    }
+  }
+
+  function renderPadding() {
+    const rows = $('#pad-rows');
+    const s = $('#pad-text').value;
+    const w = Math.max(0, Math.min(200, parseInt($('#pad-width').value, 10) || 0));
+    const pc = $('#pad-char').value || ' ';
+    const lit = csStr(s);
+    rows.replaceChildren(
+      resultRow('$"{' + 's,' + w + '}"', 'Right-align in a field of ' + w, () => s.padStart(w, ' '), { boxed: true }),
+      resultRow('$"{' + 's,-' + w + '}"', 'Left-align in a field of ' + w, () => s.padEnd(w, ' '), { boxed: true }),
+      resultRow(lit + '.PadLeft(' + w + ')', 'Pad on the left with spaces', () => s.padStart(w, ' '), { boxed: true }),
+      resultRow(lit + '.PadRight(' + w + ')', 'Pad on the right with spaces', () => s.padEnd(w, ' '), { boxed: true }),
+      resultRow(lit + ".PadLeft(" + w + ", '" + pc + "')", 'Pad on the left with a custom char', () => s.padStart(w, pc), { boxed: true }),
+      resultRow(lit + ".PadRight(" + w + ", '" + pc + "')", 'Pad on the right with a custom char', () => s.padEnd(w, pc), { boxed: true }),
+      resultRow('string.Format("[{0,' + w + '}]", s)', 'Alignment inside composite formatting', () => compositeFormat('[{0,' + w + '}]', [s], culture.value)),
+    );
+  }
+
+  function renderComposite() {
+    const tpl = $('#cf-tpl').value;
+    const args = [$('#cf-0').value, $('#cf-1').value, $('#cf-2').value];
+    $('#cf-code').textContent = 'string.Format(' + (culture.value === 'invariant' ? 'CultureInfo.InvariantCulture, ' : '') + csStr(tpl) + ', ' + args.map(a => {
+      try { parseNumber(a); return a.trim() ? a.trim() : csStr(a); } catch { return csStr(a); }
+    }).join(', ') + ')';
+    const out = $('#cf-out');
+    try { out.className = 'custom-res'; out.textContent = compositeFormat(tpl, args, culture.value); DevTools.invalid($('#cf-tpl'), false); }
+    catch (e) { out.className = 'custom-res err'; out.textContent = errText(e); DevTools.invalid($('#cf-tpl'), true); $('#cf-tpl').setAttribute('aria-describedby', 'cf-out'); }
+  }
+
+  function renderMethods() {
+    const s = $('#sm-text').value, q = $('#sm-find').value;
+    const c = culture.value === 'invariant' ? 'en-US' : culture.value;
+    const q1 = csStr(q);
+    const show = v => typeof v === 'boolean' ? (v ? 'True' : 'False') : typeof v === 'number' ? String(v) : csStr(v);
+    const ws = /^[\s\u0085\u00a0\u1680\u2000-\u200a\u2028\u2029\u202f\u205f\u3000]+|[\s\u0085\u00a0\u1680\u2000-\u200a\u2028\u2029\u202f\u205f\u3000]+$/g;
+    const rows = [
+      ['s.ToUpper()', 'Upper case (current culture)', () => show(s.toLocaleUpperCase(c))],
+      ['s.ToLower()', 'Lower case (current culture)', () => show(s.toLocaleLowerCase(c))],
+      ['s.Trim()', 'Remove leading and trailing white space', () => show(s.replace(ws, ''))],
+      ['s.TrimStart()', 'Remove leading white space', () => show(s.replace(/^\s+/, ''))],
+      ['s.TrimEnd()', 'Remove trailing white space', () => show(s.replace(/\s+$/, ''))],
+      ['s.Length', 'Number of UTF-16 code units', () => show(s.length)],
+      ['s.Replace(" ", "_")', 'Replace every space', () => show(s.split(' ').join('_'))],
+      ['s.Substring(0, 5)', 'First 5 characters', () => { if (s.length < 5) throw new Error('ArgumentOutOfRangeException: length is beyond the end of the string.'); return show(s.substring(0, 5)); }],
+      ['s.Contains(' + q1 + ')', 'Ordinal substring test', () => show(s.includes(q))],
+      ['s.StartsWith(' + q1 + ')', 'Begins with the search text?', () => show(s.startsWith(q))],
+      ['s.EndsWith(' + q1 + ')', 'Ends with the search text?', () => show(s.endsWith(q))],
+      ['s.IndexOf(' + q1 + ')', 'First position, or -1', () => show(s.indexOf(q))],
+      ['s.LastIndexOf(' + q1 + ')', 'Last position, or -1', () => show(q === '' ? Math.max(0, s.length - 1) : s.lastIndexOf(q))],
+      ['s.IndexOf("o")', 'First position of "o"', () => show(s.indexOf('o'))],
+      ["s.Split(' ').Length", 'Pieces when splitting on a space (empty entries included)', () => show(s.split(' ').length)],
+      ['string.IsNullOrWhiteSpace(s)', 'Empty or white space only?', () => show(s.trim() === '')],
+      ['new string(s.Reverse().ToArray())', 'Reversed (by UTF-16 unit)', () => show(s.split('').reverse().join(''))],
+    ];
+    $('#sm-rows').replaceChildren(...rows.map(r => resultRow(r[0], r[1], r[2])));
+  }
+
+  function renderEscapes() {
+    const rows = [
+      ['\\\\', 'Backslash', '"C:\\\\temp" → C:\\temp'],
+      ['\\n', 'New line (LF, U+000A)', '"a\\nb" → a, b on two lines'],
+      ['\\r', 'Carriage return (CR, U+000D)', '"\\r\\n" is a Windows line break'],
+      ['\\t', 'Horizontal tab', '"a\\tb" → a    b'],
+      ['\\"', 'Double quote inside a regular string', '"say \\"hi\\"" → say "hi"'],
+      ["\\'", 'Single quote (needed in char literals)', "'\\'' → '"],
+      ['\\0', 'Null character (U+0000)', '"a\\0b".Length → 3'],
+      ['\\xNN', 'Hex escape, 1–4 hex digits (beware greedy parsing)', '"\\x41" → A'],
+      ['\\uNNNN', 'UTF-16 code unit', '"\\u00e9" → é'],
+      ['\\UNNNNNNNN', 'Unicode code point (surrogate pair)', '"\\U0001F600" → 😀'],
+      ['@"..."', 'Verbatim string: no escapes, "" for a quote, may span lines', '@"C:\\temp\\new" → C:\\temp\\new'],
+      ['$"..."', 'Interpolated string: {expr}, {expr,align}, {expr:format}', '$"{price:C}" → $9.99'],
+      ['$@"..."', 'Interpolated verbatim string', '$@"{dir}\\file.txt"'],
+      ['"""..."""', 'Raw string literal (C# 11): no escapes at all', '"""He said "hi" """'],
+      ['{{  }}', 'Literal braces in format / interpolated strings', '$"{{0}}" → {0}'],
+    ];
+    $('#esc-rows').replaceChildren(...rows.map(r => el('tr', null, el('td', null, el('code', null, r[0])), el('td', null, r[1]), el('td', { class: 'mono' }, r[2]))));
+  }
+
+  function renderCultureInfo() {
+    try {
+      const n = getNfi(culture.value);
+      $('#culture-info').textContent = 'decimal "' + n.dec + '"  group "' + n.group + '"  currency ' + n.currPos.replace('\u0001', '1').replace('¤', n.sym);
+    } catch { $('#culture-info').textContent = ''; }
+  }
+
+  function renderAll() {
+    try {
+      renderCultureInfo(); renderNumbers(); renderPadding(); renderComposite(); renderMethods();
+      msg($('#msg'), '');
+    } catch (e) { msg($('#msg'), 'error', 'Unexpected error: ' + errText(e)); }
+  }
+
+  $('#cf-copy').addEventListener('click', e => copy($('#cf-out').textContent, e.currentTarget));
+  culture.addEventListener('change', renderAll);
+  ['#num', '#num-fmt'].forEach(s => $(s).addEventListener('input', renderNumbers));
+  ['#pad-text', '#pad-width', '#pad-char'].forEach(s => $(s).addEventListener('input', renderPadding));
+  ['#cf-tpl', '#cf-0', '#cf-1', '#cf-2'].forEach(s => $(s).addEventListener('input', renderComposite));
+  ['#sm-text', '#sm-find'].forEach(s => $(s).addEventListener('input', renderMethods));
+  renderEscapes();
+  renderAll();
+})();
+</script>
+</body>
+</html>

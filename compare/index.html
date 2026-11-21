@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-F14owBIVTPNk1H6E3B+QKMLACtit+c/h1gKSKdoeSHU='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self';" />
+  <title>String Compare — Line-by-Line Text Diff Online</title>
+  <meta name="description" content="Compare two texts line by line with added, removed and changed lines highlighted down to the character. Ignore case or whitespace. Runs in your browser." />
+  <meta name="keywords" content="compare strings, text diff, diff checker, compare text online, line by line diff, character diff" />
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large" />
+  <link rel="canonical" href="https://devtool-moya.netlify.app/compare" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="String Compare — Line-by-Line Text Diff Online" />
+  <meta property="og:description" content="Diff two texts in your browser with line and character highlighting. Nothing leaves your machine." />
+  <meta property="og:url" content="https://devtool-moya.netlify.app/compare" />
+  <meta property="og:site_name" content="DevTools" />
+  <meta name="twitter:card" content="summary" />
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "String Compare",
+    "url": "https://devtool-moya.netlify.app/compare",
+    "description": "Free online text compare tool with a line-by-line diff, character-level highlighting, ignore case, ignore whitespace and trim options. Runs client-side.",
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "Any",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+    "featureList": ["Line-by-line diff", "Character-level highlighting", "Ignore case", "Ignore whitespace", "Trim lines", "Difference statistics", "Client-side only"],
+    "isAccessibleForFree": true
+  }
+  </script>
+  <script type="application/ld+json">
+  { "@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://devtool-moya.netlify.app/" },
+    { "@type": "ListItem", "position": 2, "name": "String Compare", "item": "https://devtool-moya.netlify.app/compare" } ] }
+  </script>
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="/assets/app.css" />
+  <style>
+    .diff-wrap { margin-top: 16px; }
+    .diff-scroll { overflow: auto; max-height: 70vh; }
+    table.diff { width: 100%; border-collapse: collapse; font-family: var(--mono); font-size: 12.5px; }
+    table.diff td { padding: 1px 8px; vertical-align: top; border-bottom: 1px solid rgba(255,255,255,0.03); }
+    table.diff td.ln { width: 1%; color: var(--muted); text-align: right; user-select: none; white-space: nowrap; }
+    table.diff td.mk { width: 1%; text-align: center; user-select: none; font-weight: 700; }
+    table.diff td.tx { white-space: pre-wrap; word-break: break-word; }
+    table.diff tr.del td { background: rgba(255,91,107,0.08); }
+    table.diff tr.add td { background: rgba(79,255,176,0.07); }
+    table.diff tr.del td.mk { color: var(--danger); }
+    table.diff tr.add td.mk { color: var(--accent); }
+    table.diff tr.same td.tx { color: var(--muted2); }
+    table.diff tr.gap td { color: var(--muted); font-style: italic; text-align: center; background: var(--surface2); }
+    table.diff span.diff-del, table.diff span.diff-add { border-radius: 2px; }
+    table.diff span.diff-del { background: rgba(255,91,107,0.35); color: var(--text); }
+    table.diff span.diff-add { background: rgba(79,255,176,0.28); color: var(--text); }
+    .grid-2 textarea { min-height: 220px; }
+  </style>
+</head>
+<body>
+<div class="shell">
+  <header id="site-header"></header>
+  <aside id="sidebar"></aside>
+  <div class="nav-backdrop"></div>
+
+  <main class="page">
+    <section class="tool-head">
+      <h1>String Compare</h1>
+      <p>Paste two versions of a text to see which lines were added, removed or changed.</p>
+    </section>
+
+    <section class="options" aria-label="Options">
+      <label class="check"><input type="checkbox" id="icase" /> Ignore case</label>
+      <label class="check"><input type="checkbox" id="iws" /> Ignore whitespace</label>
+      <label class="check"><input type="checkbox" id="trim" /> Trim lines</label>
+      <span class="divider"></span>
+      <label class="check"><input type="checkbox" id="onlydiff" /> Show only differences</label>
+      <span class="divider"></span>
+      <button class="btn sm" id="swapab" title="Exchange the two texts">Swap A / B</button>
+      <button class="btn sm" id="clearall">Clear all</button>
+    </section>
+
+    <div class="msg" id="msg" hidden></div>
+
+    <section class="grid-2">
+      <div class="panel">
+        <div class="panel-head">
+          <span class="panel-title">Text A (original)</span>
+          <span class="panel-actions">
+            <span class="panel-meta" id="a-meta"></span>
+            <button class="btn sm" id="clear-a">Clear</button>
+          </span>
+        </div>
+        <textarea id="a" spellcheck="false" placeholder="Original text..."></textarea>
+      </div>
+      <div class="panel">
+        <div class="panel-head">
+          <span class="panel-title">Text B (changed)</span>
+          <span class="panel-actions">
+            <span class="panel-meta" id="b-meta"></span>
+            <button class="btn sm" id="clear-b">Clear</button>
+          </span>
+        </div>
+        <textarea id="b" spellcheck="false" placeholder="Changed text..."></textarea>
+      </div>
+    </section>
+
+    <div class="stats" id="stats" hidden></div>
+
+    <section class="panel diff-wrap">
+      <div class="panel-head">
+        <span class="panel-title">Differences</span>
+        <span class="panel-actions">
+          <span class="panel-meta" id="diff-meta"></span>
+          <button class="btn sm" id="copy">Copy</button>
+          <button class="btn sm" id="dl">Download</button>
+        </span>
+      </div>
+      <div class="diff-scroll" id="diff"></div>
+    </section>
+
+    <section class="about">
+      <h2>About this tool</h2>
+      <p>The comparison anchors on lines that occur exactly once in both texts, then aligns the stretches between them with the Myers algorithm — so it finds the lines the two texts share and reports everything else as removed (<span class="diff-del">−</span>, only in A) or added (<span class="diff-add">+</span>, only in B). Because it aligns on common lines, inserting one line near the top does not flag the rest of the document. When a removed line is directly replaced by an added one, the exact characters that differ are highlighted.</p>
+      <ul>
+        <li><b>Ignore case</b> treats upper- and lower-case letters as equal.</li>
+        <li><b>Ignore whitespace</b> disregards all spaces and tabs inside lines.</li>
+        <li><b>Trim lines</b> only ignores whitespace at the start and end of each line.</li>
+      </ul>
+      <p><em>Copy</em> and <em>Download</em> export the result as plain text with <code>-</code> / <code>+</code> markers. Windows and Unix line endings compare as equal.</p>
+      <h2>Privacy</h2>
+      <p>All processing happens in your browser. Nothing you type is sent, stored or logged.</p>
+    </section>
+  </main>
+</div>
+
+<script src="/assets/tools.js"></script>
+<script>
+(function () {
+  'use strict';
+  const { el, $, debounce, copy, download, msg } = DevTools;
+
+  /* PURE-START */
+  /** Myers O(ND) diff over arrays of comparable keys. Returns ops [{t:'='|'-'|'+', a?, b?}] or null when D exceeds maxD. */
+  function myers(a, b, maxD) {
+    const n = a.length, m = b.length;
+    if (!n) return b.map((_, j) => ({ t: '+', b: j }));
+    if (!m) return a.map((_, i) => ({ t: '-', a: i }));
+    const max = n + m, off = max + 1;
+    const v = new Int32Array(2 * max + 3);
+    const trace = [];
+    let found = false;
+    for (let d = 0; d <= max; d++) {
+      if (d > maxD) return null;
+      trace.push(v.slice(off - d, off + d + 1));
+      for (let k = -d; k <= d; k += 2) {
+        let x = (k === -d || (k !== d && v[off + k - 1] < v[off + k + 1])) ? v[off + k + 1] : v[off + k - 1] + 1;
+        let y = x - k;
+        while (x < n && y < m && a[x] === b[y]) { x++; y++; }
+        v[off + k] = x;
+        if (x >= n && y >= m) { found = true; break; }
+      }
+      if (found) break;
+    }
+    const ops = [];
+    let x = n, y = m;
+    for (let d = trace.length - 1; d >= 0; d--) {
+      if (d === 0) { while (x > 0 && y > 0) { ops.push({ t: '=', a: --x, b: --y }); } break; }
+      const sl = trace[d], at = k => sl[k + d];
+      const k = x - y;
+      const prevK = (k === -d || (k !== d && at(k - 1) < at(k + 1))) ? k + 1 : k - 1;
+      const prevX = at(prevK), prevY = prevX - prevK;
+      while (x > prevX && y > prevY) ops.push({ t: '=', a: --x, b: --y });
+      if (x === prevX) ops.push({ t: '+', b: --y }); else ops.push({ t: '-', a: --x });
+    }
+    return ops.reverse();
+  }
+
+  /** Diff with common prefix/suffix stripped first. Falls back to a plain replace-all when too different. */
+  function diffKeys(a, b, maxD) {
+    let s = 0;
+    while (s < a.length && s < b.length && a[s] === b[s]) s++;
+    let ea = a.length, eb = b.length;
+    while (ea > s && eb > s && a[ea - 1] === b[eb - 1]) { ea--; eb--; }
+    let mid = myers(a.slice(s, ea), b.slice(s, eb), maxD);
+    let approx = false;
+    if (!mid) {
+      approx = true;
+      mid = [];
+      for (let i = 0; i < ea - s; i++) mid.push({ t: '-', a: i });
+      for (let j = 0; j < eb - s; j++) mid.push({ t: '+', b: j });
+    }
+    const ops = [];
+    for (let i = 0; i < s; i++) ops.push({ t: '=', a: i, b: i });
+    for (const o of mid) ops.push(o.t === '=' ? { t: '=', a: o.a + s, b: o.b + s } : o.t === '-' ? { t: '-', a: o.a + s } : { t: '+', b: o.b + s });
+    for (let i = 0; i < a.length - ea; i++) ops.push({ t: '=', a: ea + i, b: eb + i });
+    return { ops, approx };
+  }
+
+  /** Map each string to a small int id (equal strings → equal ids), shared across both sides. */
+  function hashLines(la, lb) {
+    const ids = new Map();
+    const conv = arr => { const out = new Int32Array(arr.length); for (let i = 0; i < arr.length; i++) { let v = ids.get(arr[i]); if (v === undefined) { v = ids.size; ids.set(arr[i], v); } out[i] = v; } return out; };
+    return { a: conv(la), b: conv(lb) };
+  }
+
+  /** Indices of a longest strictly increasing subsequence of seq (patience sorting, O(k log k)). */
+  function lisIndices(seq) {
+    const tails = [], prev = new Int32Array(seq.length);
+    for (let i = 0; i < seq.length; i++) {
+      let lo = 0, hi = tails.length;
+      while (lo < hi) { const mid = (lo + hi) >> 1; if (seq[tails[mid]] < seq[i]) lo = mid + 1; else hi = mid; }
+      prev[i] = lo > 0 ? tails[lo - 1] : -1;
+      tails[lo] = i;
+    }
+    const out = new Array(tails.length);
+    for (let i = tails.length - 1, k = tails.length ? tails[tails.length - 1] : -1; i >= 0; i--, k = prev[k]) out[i] = k;
+    return out;
+  }
+
+  /**
+   * Line diff for large inputs: patience-style anchoring on lines that occur exactly once in both
+   * ranges, recursing between anchors, with Myers (bounded by maxD) inside anchor-free segments.
+   * Only a segment that is still too different falls back to "all removed + all added" (approx = true).
+   * a, b: Int32Array of line ids. Returns { ops, approx }.
+   */
+  function diffLines(a, b, maxD) {
+    const ops = [];
+    let approx = false;
+    function eq(i, j) { ops.push({ t: '=', a: i, b: j }); }
+    function seg(a0, a1, b0, b1, depth) {
+      // common prefix / suffix
+      while (a0 < a1 && b0 < b1 && a[a0] === b[b0]) eq(a0++, b0++);
+      let sa = a1, sb = b1;
+      while (sa > a0 && sb > b0 && a[sa - 1] === b[sb - 1]) { sa--; sb--; }
+      const tail = a1 - sa;
+      if (a0 === sa || b0 === sb) {
+        for (let i = a0; i < sa; i++) ops.push({ t: '-', a: i });
+        for (let j = b0; j < sb; j++) ops.push({ t: '+', b: j });
+      } else {
+        // unique-in-both anchors
+        const cnt = new Map();
+        for (let i = a0; i < sa; i++) { const c = cnt.get(a[i]); if (c === undefined) cnt.set(a[i], { na: 1, nb: 0, pa: i, pb: -1 }); else c.na++; }
+        for (let j = b0; j < sb; j++) { const c = cnt.get(b[j]); if (c !== undefined) { c.nb++; c.pb = j; } }
+        const pa = [], pb = [];
+        for (let i = a0; i < sa; i++) { const c = cnt.get(a[i]); if (c.na === 1 && c.nb === 1) { pa.push(i); pb.push(c.pb); } }
+        if (pa.length && depth < 200) {
+          const keep = lisIndices(pb);
+          let ca = a0, cb = b0;
+          for (const k of keep) { seg(ca, pa[k], cb, pb[k], depth + 1); eq(pa[k], pb[k]); ca = pa[k] + 1; cb = pb[k] + 1; }
+          seg(ca, sa, cb, sb, depth + 1);
+        } else {
+          const mid = myers(a.subarray(a0, sa), b.subarray(b0, sb), maxD);
+          if (mid) {
+            for (const o of mid) ops.push(o.t === '=' ? { t: '=', a: o.a + a0, b: o.b + b0 } : o.t === '-' ? { t: '-', a: o.a + a0 } : { t: '+', b: o.b + b0 });
+          } else {
+            approx = true;
+            for (let i = a0; i < sa; i++) ops.push({ t: '-', a: i });
+            for (let j = b0; j < sb; j++) ops.push({ t: '+', b: j });
+          }
+        }
+      }
+      for (let k = 0; k < tail; k++) eq(sa + k, sb + k);
+    }
+    seg(0, a.length, 0, b.length, 0);
+    return { ops, approx };
+  }
+
+  function splitLines(t) { return t === '' ? [] : t.split(/\r\n|\r|\n/); }
+  function normalizer(o) {
+    return s => {
+      if (o.trim) s = s.trim();
+      if (o.ignoreWs) s = s.replace(/\s+/g, '');
+      if (o.ignoreCase) s = s.toLowerCase();
+      return s;
+    };
+  }
+
+  /** Character-level segments for a changed pair: returns {a:[[text,changed]], b:[[text,changed]]} or null when too large. */
+  function charDiff(la, lb, ignoreCase) {
+    const ca = Array.from(la), cb = Array.from(lb);
+    if (ca.length + cb.length > 4000) return null;
+    const k = ignoreCase ? c => c.toLowerCase() : c => c;
+    const res = diffKeys(ca.map(k), cb.map(k), 300);
+    if (res.approx) return null;
+    const A = [], B = [];
+    const push = (arr, ch, chg) => { const last = arr[arr.length - 1]; if (last && last[1] === chg) last[0] += ch; else arr.push([ch, chg]); };
+    for (const op of res.ops) {
+      if (op.t === '=') { push(A, ca[op.a], false); push(B, cb[op.b], false); }
+      else if (op.t === '-') push(A, ca[op.a], true);
+      else push(B, cb[op.b], true);
+    }
+    return { a: A, b: B };
+  }
+
+  /** Full comparison → rows [{type:'same'|'del'|'add', na, nb, text, segs?}] + stats */
+  function compareTexts(textA, textB, o) {
+    const la = splitLines(textA), lb = splitLines(textB);
+    const norm = normalizer(o);
+    const ids = hashLines(la.map(norm), lb.map(norm));
+    const { ops, approx } = diffLines(ids.a, ids.b, 1000);
+    const rows = [];
+    let changedLines = 0, added = 0, removed = 0, charBudget = 300000;
+    let i = 0;
+    while (i < ops.length) {
+      if (ops[i].t === '=') { rows.push({ type: 'same', na: ops[i].a + 1, nb: ops[i].b + 1, text: la[ops[i].a] }); i++; continue; }
+      const dels = [], adds = [];
+      while (i < ops.length && ops[i].t !== '=') { (ops[i].t === '-' ? dels : adds).push(ops[i]); i++; }
+      changedLines += Math.max(dels.length, adds.length);
+      removed += dels.length; added += adds.length;
+      const pairs = Math.min(dels.length, adds.length);
+      const segs = [];
+      for (let p = 0; p < pairs; p++) {
+        // Character highlighting is bounded by a global budget so huge, totally different inputs stay fast.
+        const x = la[dels[p].a], y = lb[adds[p].b];
+        if (charBudget > 0) { charBudget -= x.length + y.length; segs.push(charDiff(x, y, o.ignoreCase)); } else segs.push(null);
+      }
+      dels.forEach((d, p) => rows.push({ type: 'del', na: d.a + 1, nb: null, text: la[d.a], segs: p < pairs && segs[p] ? segs[p].a : null }));
+      adds.forEach((d, p) => rows.push({ type: 'add', na: null, nb: d.b + 1, text: lb[d.b], segs: p < pairs && segs[p] ? segs[p].b : null }));
+    }
+    const cps = s => Array.from(s).length;
+    return {
+      rows, approx,
+      stats: {
+        charsA: cps(textA), charsB: cps(textB), linesA: la.length, linesB: lb.length,
+        charDiff: cps(textB) - cps(textA), lineDiff: lb.length - la.length,
+        changedLines, added, removed, identical: changedLines === 0,
+      },
+    };
+  }
+
+  function diffAsText(rows) {
+    return rows.map(r => (r.type === 'same' ? '  ' : r.type === 'del' ? '- ' : '+ ') + r.text).join('\n');
+  }
+  /* PURE-END */
+
+  const ta = $('#a'), tb = $('#b');
+  const MAX_ROWS = 5000;
+  let lastRows = [];
+
+  function stat(k, v) { return el('span', null, k + ' ', el('b', null, String(v))); }
+  const signed = n => (n > 0 ? '+' : '') + n;
+
+  function textCell(r) {
+    if (!r.segs) return el('td', { class: 'tx' }, r.text);
+    return el('td', { class: 'tx' }, r.segs.map(([t, chg]) => chg ? el('span', { class: r.type === 'del' ? 'diff-del' : 'diff-add' }, t) : t));
+  }
+
+  function render(rows, onlyDiff) {
+    const box = $('#diff');
+    const body = el('tbody');
+    let shown = 0, hiddenSame = 0;
+    const flushGap = () => { if (hiddenSame) { body.appendChild(el('tr', { class: 'gap' }, el('td', { colspan: '4' }, '… ' + hiddenSame + ' unchanged line' + (hiddenSame === 1 ? '' : 's') + ' …'))); hiddenSame = 0; } };
+    for (const r of rows) {
+      if (onlyDiff && r.type === 'same') { hiddenSame++; continue; }
+      flushGap();
+      if (shown >= MAX_ROWS) break;
+      body.appendChild(el('tr', { class: r.type },
+        el('td', { class: 'ln' }, r.na == null ? '' : String(r.na)),
+        el('td', { class: 'ln' }, r.nb == null ? '' : String(r.nb)),
+        el('td', { class: 'mk' }, r.type === 'del' ? '−' : r.type === 'add' ? '+' : ''),
+        textCell(r)));
+      shown++;
+    }
+    flushGap();
+    box.replaceChildren(el('table', { class: 'diff' }, body));
+    return shown >= MAX_ROWS;
+  }
+
+  function run() {
+    const A = ta.value, B = tb.value;
+    const o = { ignoreCase: $('#icase').checked, ignoreWs: $('#iws').checked, trim: $('#trim').checked };
+    const plural = (n, w) => n + ' ' + w + (n === 1 ? '' : 's');
+    const meta = s => plural(Array.from(s).length, 'char') + ' | ' + plural(splitLines(s).length, 'line');
+    $('#a-meta').textContent = meta(A);
+    $('#b-meta').textContent = meta(B);
+    if (!A && !B) {
+      lastRows = [];
+      $('#stats').hidden = true;
+      $('#diff-meta').textContent = '';
+      $('#diff').replaceChildren(el('div', { class: 'out', style: 'color:var(--muted)' }, 'Enter text in both boxes to compare them.'));
+      msg($('#msg'), '');
+      return;
+    }
+    const res = compareTexts(A, B, o);
+    lastRows = res.rows;
+    const s = res.stats;
+    $('#stats').replaceChildren(
+      stat('Char difference:', signed(s.charDiff)),
+      stat('Line difference:', signed(s.lineDiff)),
+      stat(res.approx ? 'Different lines (approximate):' : 'Different lines:', s.changedLines),
+      stat('Removed:', s.removed), stat('Added:', s.added),
+    );
+    $('#stats').hidden = false;
+    $('#diff-meta').textContent = plural(res.rows.length, 'row');
+    const truncated = render(res.rows, $('#onlydiff').checked);
+    if (s.identical) {
+      msg($('#msg'), 'ok', A === B ? 'The texts are identical.' : 'No differences under the current options (the raw texts are not byte-identical).');
+    } else if (res.approx) {
+      msg($('#msg'), 'warn', 'Some regions differ too much for a precise line alignment, so they are shown as whole removed/added blocks and the counts are approximate.');
+    } else if (truncated) {
+      msg($('#msg'), 'warn', 'Only the first ' + MAX_ROWS + ' rows are displayed. Copy or Download for the complete result.');
+    } else {
+      msg($('#msg'), '');
+    }
+  }
+  const runLater = debounce(run, 200);
+
+  [ta, tb].forEach(t => t.addEventListener('input', runLater));
+  ['#icase', '#iws', '#trim', '#onlydiff'].forEach(s => $(s).addEventListener('change', run));
+  $('#clear-a').addEventListener('click', () => { ta.value = ''; run(); ta.focus(); });
+  $('#clear-b').addEventListener('click', () => { tb.value = ''; run(); tb.focus(); });
+  $('#clearall').addEventListener('click', () => { ta.value = ''; tb.value = ''; run(); ta.focus(); });
+  $('#swapab').addEventListener('click', () => { const t = ta.value; ta.value = tb.value; tb.value = t; run(); });
+  $('#copy').addEventListener('click', e => copy(diffAsText(lastRows), e.currentTarget));
+  $('#dl').addEventListener('click', () => download('diff.txt', diffAsText(lastRows)));
+  run();
+})();
+</script>
+</body>
+</html>

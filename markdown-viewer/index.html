@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-QiulsWgZnSvhCb5NbOK2foMTHJUU2t0Sp08MxbejlIU='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self';" />
+  <title>Markdown Viewer &amp; Editor — Live Preview, Export HTML</title>
+  <meta name="description" content="Write Markdown with a live, GitHub-style preview. Tables, task lists, code blocks, templates, word count and export to .md or standalone .html — all in your browser." />
+  <meta name="keywords" content="markdown viewer, markdown editor online, markdown preview, markdown to html, gfm preview, readme editor" />
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large" />
+  <link rel="canonical" href="https://devtool-moya.netlify.app/markdown-viewer" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Markdown Viewer &amp; Editor — Live Preview" />
+  <meta property="og:description" content="Live Markdown preview with GitHub-flavoured syntax, templates and HTML export. Runs locally in your browser." />
+  <meta property="og:url" content="https://devtool-moya.netlify.app/markdown-viewer" />
+  <meta property="og:site_name" content="DevTools" />
+  <meta name="twitter:card" content="summary" />
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Markdown Viewer",
+    "url": "https://devtool-moya.netlify.app/markdown-viewer",
+    "description": "Free online Markdown editor with live GitHub-flavoured preview, templates, statistics and export to Markdown or standalone HTML. Runs client-side.",
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "Any",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+    "featureList": ["Live preview", "GitHub-flavoured Markdown (tables, task lists)", "Split / editor / preview modes", "Templates", "Export .md and .html", "Copy HTML", "Sanitized output"],
+    "isAccessibleForFree": true
+  }
+  </script>
+  <script type="application/ld+json">
+  { "@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://devtool-moya.netlify.app/" },
+    { "@type": "ListItem", "position": 2, "name": "Markdown Viewer", "item": "https://devtool-moya.netlify.app/markdown-viewer" } ] }
+  </script>
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="/assets/app.css" />
+  <style>
+    .viewer { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .viewer.mode-editor, .viewer.mode-preview { grid-template-columns: 1fr; }
+    .viewer.mode-editor .pv-panel, .viewer.mode-preview .ed-panel { display: none; }
+    .viewer .panel { height: 68vh; min-height: 360px; }
+    .ed { display: flex; flex: 1; min-height: 0; }
+    .gutter { font-family: var(--mono); font-size: 13px; line-height: 1.6; color: var(--muted); text-align: right; padding: 14px 8px 14px 10px; border-right: 1px solid var(--border); background: var(--surface2); overflow: hidden; user-select: none; white-space: pre; min-width: 42px; }
+    .ed textarea { flex: 1; min-height: 0; height: 100%; border: none; border-radius: 0; background: transparent; resize: none; }
+    .ed.numbered textarea { white-space: pre; overflow-wrap: normal; overflow-x: auto; }
+    .pv { flex: 1; overflow: auto; padding: 20px 24px; }
+    .panel.is-fs { position: fixed; inset: 0; z-index: 500; height: auto !important; border-radius: 0; }
+    #msg .btn { margin-left: 8px; font-family: var(--sans); }
+    /* GitHub-like preview */
+    .md-body { color: var(--text); font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; font-size: 15px; line-height: 1.65; word-wrap: break-word; }
+    .md-body > :first-child { margin-top: 0; }
+    .md-body h1, .md-body h2, .md-body h3, .md-body h4, .md-body h5, .md-body h6 { font-family: var(--sans); margin: 1.4em 0 .6em; line-height: 1.25; font-weight: 700; }
+    .md-body h1 { font-size: 1.9em; padding-bottom: .3em; border-bottom: 1px solid var(--border); }
+    .md-body h2 { font-size: 1.45em; padding-bottom: .3em; border-bottom: 1px solid var(--border); }
+    .md-body h3 { font-size: 1.2em; }
+    .md-body p, .md-body ul, .md-body ol, .md-body blockquote, .md-body table, .md-body pre { margin: 0 0 1em; }
+    .md-body ul, .md-body ol { padding-left: 1.8em; }
+    .md-body li + li { margin-top: .25em; }
+    .md-body li > input[type=checkbox] { margin: 0 .4em 0 -1.4em; vertical-align: middle; }
+    .md-body li:has(> input[type=checkbox]) { list-style: none; }
+    .md-body blockquote { padding: 0 1em; color: var(--muted2); border-left: 4px solid var(--border2); }
+    .md-body code { font-size: 85%; padding: .15em .4em; background: var(--surface3); border-radius: 5px; }
+    .md-body pre { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; overflow: auto; }
+    .md-body pre code { background: none; padding: 0; font-size: 13px; }
+    .md-body table { border-collapse: collapse; display: block; overflow: auto; }
+    .md-body th, .md-body td { border: 1px solid var(--border2); padding: 6px 13px; }
+    .md-body th { background: var(--surface2); font-weight: 700; }
+    .md-body tr:nth-child(2n) td { background: rgba(255,255,255,.02); }
+    .md-body hr { border: none; height: 2px; background: var(--border); margin: 1.6em 0; }
+    .md-body img { max-width: 100%; }
+    .md-body a { color: var(--info); }
+    .cheat { width: 100%; }
+    .cheat td:first-child { font-family: var(--mono); white-space: pre; color: var(--text); }
+    @media (max-width: 860px) {
+      .viewer { grid-template-columns: 1fr; }
+      .viewer .panel { height: 52vh; min-height: 300px; }
+    }
+  </style>
+</head>
+<body>
+<div class="shell">
+  <header id="site-header"></header>
+  <aside id="sidebar"></aside>
+  <div class="nav-backdrop"></div>
+
+  <main class="page">
+    <section class="tool-head">
+      <h1>Markdown Viewer</h1>
+      <p>Write Markdown on the left and watch it render on the right.</p>
+    </section>
+
+    <section class="options" aria-label="Options">
+      <span class="opt-label">View</span>
+      <div class="seg" id="mode">
+        <button data-v="split" class="on">Split</button>
+        <button data-v="editor">Editor</button>
+        <button data-v="preview">Preview</button>
+      </div>
+      <label class="check"><input type="checkbox" id="lines" /> Line numbers</label>
+      <label class="check"><input type="checkbox" id="breaks" /> Line breaks as &lt;br&gt;</label>
+      <label class="check"><input type="checkbox" id="sync" checked /> Sync scroll</label>
+      <span class="divider"></span>
+      <label class="opt"><span class="opt-label">Template</span>
+        <select id="tpl">
+          <option value="">Choose…</option>
+          <option value="readme">Project README</option>
+          <option value="blog">Blog post</option>
+          <option value="docs">API documentation</option>
+          <option value="meeting">Meeting notes</option>
+          <option value="todo">To-do list</option>
+          <option value="changelog">Changelog</option>
+        </select>
+      </label>
+    </section>
+
+    <div class="msg" id="msg" hidden></div>
+
+    <section class="viewer mode-split" id="viewer">
+      <div class="panel ed-panel" id="ed-panel">
+        <div class="panel-head">
+          <span class="panel-title">Markdown</span>
+          <span class="panel-actions">
+            <span class="panel-meta" id="in-meta"></span>
+            <button class="btn sm" id="clear">Clear</button>
+            <button class="btn sm" id="copy-md">Copy</button>
+            <button class="btn sm" id="dl-md">Download .md</button>
+            <button class="btn sm fs-btn" title="Fullscreen (Esc to exit)" aria-label="Fullscreen">⛶</button>
+          </span>
+        </div>
+        <div class="ed" id="ed">
+          <div class="gutter" id="gutter" hidden aria-hidden="true"></div>
+          <textarea id="input" spellcheck="false" placeholder="# Start typing Markdown…"></textarea>
+        </div>
+      </div>
+      <div class="panel pv-panel" id="pv-panel">
+        <div class="panel-head">
+          <span class="panel-title">Preview</span>
+          <span class="panel-actions">
+            <button class="btn sm" id="copy-html">Copy HTML</button>
+            <button class="btn sm" id="dl-html">Download .html</button>
+            <button class="btn sm fs-btn" title="Fullscreen (Esc to exit)" aria-label="Fullscreen">⛶</button>
+          </span>
+        </div>
+        <div class="pv md-body" id="preview"></div>
+      </div>
+    </section>
+
+    <div class="stats" id="stats"></div>
+
+    <section class="about">
+      <h2>About this tool</h2>
+      <p>The editor understands GitHub-flavoured Markdown: headings, emphasis, links, lists, task lists, tables, fenced code blocks, block quotes and strikethrough. The rendered HTML is passed through a sanitizer before it is shown, so scripts and event handlers in pasted content never run. Your draft is kept in this browser between visits.</p>
+      <p>Note: for privacy and security, images can only be shown when they are embedded as <code>data:</code> URLs; remote images are blocked on this site.</p>
+      <h2>Cheat sheet</h2>
+      <div class="tbl-wrap"><table class="tbl cheat">
+        <tbody>
+          <tr><td># Title / ## Section</td><td>Headings, levels 1–6</td></tr>
+          <tr><td>**bold**  *italic*  ~~struck~~</td><td>Inline emphasis</td></tr>
+          <tr><td>`inline code`</td><td>Monospace span</td></tr>
+          <tr><td>[label](https://example.org)</td><td>Link</td></tr>
+          <tr><td>![alt text](data:image/png;base64,…)</td><td>Image</td></tr>
+          <tr><td>- item / 1. item</td><td>Bulleted or numbered list (indent to nest)</td></tr>
+          <tr><td>- [ ] open / - [x] done</td><td>Task list</td></tr>
+          <tr><td>&gt; quoted text</td><td>Block quote</td></tr>
+          <tr><td>```js … ```</td><td>Fenced code block with language</td></tr>
+          <tr><td>| a | b |<br>|---|--:|</td><td>Table (colons set alignment)</td></tr>
+          <tr><td>---</td><td>Horizontal rule</td></tr>
+        </tbody>
+      </table></div>
+      <h2>Privacy</h2>
+      <p>Everything is rendered in your browser. Nothing you write is uploaded or logged.</p>
+    </section>
+  </main>
+</div>
+
+<script src="/assets/tools.js"></script>
+<script src="/assets/vendor/marked.min.js"></script>
+<script src="/assets/vendor/purify.min.js"></script>
+<script>
+(function () {
+  'use strict';
+  const { $, $$, el, debounce, copy, download, msg } = DevTools;
+  const DRAFT_KEY = 'devtools:markdown-viewer:draft';
+  // Crash guard: set while a render runs. If it is still set on load, the last render hung or crashed the
+  // tab, so the saved draft is loaded without rendering instead of bricking the page again.
+  const GUARD_KEY = 'devtools:markdown-viewer:rendering';
+  function guard(on) { try { if (on) sessionStorage.setItem(GUARD_KEY, '1'); else sessionStorage.removeItem(GUARD_KEY); } catch { /* storage unavailable */ } }
+  function guarded() { try { return sessionStorage.getItem(GUARD_KEY) === '1'; } catch { return false; } }
+  const input = $('#input'), preview = $('#preview'), gutter = $('#gutter'), msgEl = $('#msg');
+
+  const TEMPLATES = {
+    readme: `# Project Name
+
+A one-sentence pitch that tells readers what this project does and why they should care.
+
+## Features
+
+- Fast startup with zero configuration
+- Works offline
+- Plugin system for custom formats
+
+## Installation
+
+\`\`\`bash
+npm install project-name
+\`\`\`
+
+## Usage
+
+\`\`\`js
+import { start } from 'project-name';
+
+start({ port: 8080 });
+\`\`\`
+
+## Configuration
+
+| Option    | Type    | Default | Description              |
+|-----------|---------|--------:|--------------------------|
+| \`port\`    | number  | 3000    | Port to listen on        |
+| \`verbose\` | boolean | false   | Print extra log messages |
+
+## Contributing
+
+Pull requests are welcome. For bigger changes, open an issue first so we can talk it through.
+
+## License
+
+MIT
+`,
+    blog: `# Five Things I Learned Shipping a Side Project
+
+*Published on 12 March · 6 min read*
+
+Shipping something small taught me more than a year of reading about it. Here is what stuck.
+
+## 1. Scope is the enemy
+
+The first version had **eleven** planned features. The one that launched had three.
+
+> Finished and modest beats perfect and imaginary.
+
+## 2. Write the README first
+
+Describing the tool before building it exposed every fuzzy idea.
+
+## 3. Measure one thing
+
+Pick a single number that tells you whether people find the thing useful.
+
+---
+
+*Thanks for reading! Questions are welcome in the comments.*
+`,
+    docs: `# Orders API
+
+Base URL: \`https://api.example.com/v2\`
+
+## Authentication
+
+Send a bearer token with every request:
+
+\`\`\`http
+Authorization: Bearer <your-token>
+\`\`\`
+
+## List orders
+
+\`GET /orders\`
+
+| Query param | Type   | Required | Description                  |
+|-------------|--------|:--------:|------------------------------|
+| \`status\`    | string | no       | \`open\`, \`paid\` or \`shipped\`   |
+| \`limit\`     | int    | no       | Page size, 1–100 (default 20) |
+
+### Response
+
+\`\`\`json
+{
+  "data": [{ "id": "ord_123", "status": "paid", "total": 49.9 }],
+  "next": null
+}
+\`\`\`
+
+## Errors
+
+| Code | Meaning              |
+|-----:|----------------------|
+| 400  | Invalid parameters   |
+| 401  | Missing or bad token |
+| 404  | Order not found      |
+`,
+    meeting: `# Weekly Sync — 2026-11-16
+
+**Attendees:** Priya, Marco, Lee, Sam
+**Facilitator:** Priya
+
+## Agenda
+
+1. Release status
+2. On-call handover
+3. Open questions
+
+## Notes
+
+- Release candidate is green on CI; one flaky test quarantined.
+- Marco takes over on-call from Monday.
+
+## Decisions
+
+- Ship the release on **Thursday** after the staging soak.
+
+## Action items
+
+- [ ] Lee — fix the flaky upload test
+- [ ] Sam — update the status page copy
+- [x] Priya — book the retro room
+`,
+    todo: `# This Week
+
+## Must do
+
+- [ ] Review the pull request for the search feature
+- [ ] Renew the TLS certificate
+- [x] Answer the support ticket backlog
+
+## Nice to have
+
+- [ ] Tidy up the \`utils\` folder
+- [ ] Try the new profiler
+
+## Done
+
+- [x] ~~Migrate CI to the new runners~~
+`,
+    changelog: `# Changelog
+
+All notable changes to this project are documented here.
+The format follows *Keep a Changelog* and the project uses semantic versioning.
+
+## [Unreleased]
+
+### Added
+- Dark theme for the settings page.
+
+## [2.1.0] — 2026-10-02
+
+### Added
+- Export to CSV.
+
+### Fixed
+- Crash when the config file was empty.
+
+## [2.0.0] — 2026-08-14
+
+### Changed
+- **Breaking:** the \`init()\` function is now async.
+
+### Removed
+- Support for Node 16.
+`,
+  };
+
+  const DEFAULT_DOC = `# Welcome to the Markdown Viewer
+
+Type on the left — the preview on the right updates as you go.
+
+## What you can use
+
+- **Bold**, *italic*, ~~strikethrough~~ and \`inline code\`
+- [Links](https://example.org) and lists
+- Task lists:
+  - [x] Write the draft
+  - [ ] Proofread it
+
+> Pick a template from the toolbar to get going quickly.
+
+\`\`\`js
+const greet = name => \`Hello, \${name}!\`;
+console.log(greet('Markdown'));
+\`\`\`
+
+| Shortcut | Action          |
+|----------|-----------------|
+| Tab      | Indent          |
+| Esc      | Leave fullscreen |
+`;
+
+  // Open links in a new tab, safely.
+  if (window.DOMPurify) {
+    DOMPurify.addHook('afterSanitizeAttributes', node => {
+      if (node.tagName === 'A' && node.getAttribute('href')) { node.setAttribute('target', '_blank'); node.setAttribute('rel', 'noopener noreferrer'); }
+    });
+  }
+
+  function toHtml(md) {
+    if (!window.marked || !window.DOMPurify) throw new Error('The Markdown libraries failed to load. Reload the page.');
+    const raw = marked.parse(md, { gfm: true, breaks: $('#breaks').checked, async: false });
+    return DOMPurify.sanitize(raw, { USE_PROFILES: { html: true } });
+  }
+
+  let lastHtml = '';
+  function render() {
+    const md = input.value;
+    try { localStorage.setItem(DRAFT_KEY, md); } catch { /* storage unavailable */ }
+    guard(true);
+    try {
+      lastHtml = toHtml(md);
+      preview.innerHTML = lastHtml; // sanitized by DOMPurify above
+      msg(msgEl, '');
+    } catch (e) {
+      msg(msgEl, 'error', 'Could not render: ' + e.message);
+    } finally {
+      guard(false);
+    }
+    stats(md);
+    updateGutter();
+  }
+  const renderSoon = debounce(render, 150);
+
+  function stats(md) {
+    const words = (md.match(/[\p{L}\p{N}][\p{L}\p{N}'’_-]*/gu) || []).length;
+    const lines = md ? md.split('\n').length : 0;
+    $('#in-meta').textContent = md.length + ' chars';
+    const s = $('#stats');
+    s.replaceChildren();
+    [['Characters', md.length], ['Lines', lines], ['Words', words], ['Reading time', words ? '~' + Math.max(1, Math.round(words / 200)) + ' min' : '0 min']]
+      .forEach(([k, v]) => s.append(DevTools.el('span', null, k + ': ', DevTools.el('b', null, String(v)))));
+  }
+
+  function updateGutter() {
+    if (gutter.hidden) return;
+    const n = input.value.split('\n').length;
+    let out = '';
+    for (let i = 1; i <= n; i++) out += i + '\n';
+    gutter.textContent = out;
+    gutter.scrollTop = input.scrollTop;
+  }
+
+  function setMode(v) {
+    $$('#mode button').forEach(b => b.classList.toggle('on', b.dataset.v === v));
+    $('#viewer').className = 'viewer mode-' + v;
+  }
+
+  function escapeHtml(s) { return s.replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+
+  // The exported file gets its own CSP so remote (tracking) images and scripts never load when it is opened.
+  // (Attribute order is content-first on purpose: scripts/gen-site.mjs strips lines starting with
+  // `<meta http-equiv="Content-Security-Policy"` when it rewrites this page's own CSP.)
+  const EXPORT_CSP = "default-src 'none'; img-src data:; style-src 'unsafe-inline'";
+  function standaloneHtml() {
+    const h1 = /^#\s+(.+)$/m.exec(input.value);
+    const title = escapeHtml(h1 ? h1[1].trim() : 'Document');
+    return `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta content="${EXPORT_CSP}" http-equiv="Content-Security-Policy">
+<title>${title}</title>
+<style>
+  body { max-width: 820px; margin: 40px auto; padding: 0 20px; font: 16px/1.65 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; color: #1f2328; background: #fff; }
+  h1, h2 { border-bottom: 1px solid #d8dee4; padding-bottom: .3em; }
+  h1, h2, h3, h4 { line-height: 1.25; margin: 1.5em 0 .6em; }
+  a { color: #0969da; }
+  code { font: 85% ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; background: #eff1f3; padding: .15em .4em; border-radius: 5px; }
+  pre { background: #f6f8fa; padding: 14px 16px; border-radius: 8px; overflow: auto; }
+  pre code { background: none; padding: 0; }
+  blockquote { margin: 0 0 1em; padding: 0 1em; color: #59636e; border-left: 4px solid #d1d9e0; }
+  table { border-collapse: collapse; margin: 0 0 1em; }
+  th, td { border: 1px solid #d1d9e0; padding: 6px 13px; }
+  th { background: #f6f8fa; }
+  img { max-width: 100%; }
+  hr { border: none; height: 2px; background: #d8dee4; }
+  li:has(> input[type=checkbox]) { list-style: none; }
+</style>
+</head>
+<body>
+${lastHtml}
+</body>
+</html>
+`;
+  }
+
+  // ── fullscreen panel = modal: role=dialog + aria-modal, rest of the page inert, Esc closes, focus returns ──
+  let fsState = null;
+  function closeFs() {
+    if (!fsState) return;
+    const { panel, inerted, opener } = fsState; fsState = null;
+    inerted.forEach(n => { n.inert = false; });
+    panel.classList.remove('is-fs');
+    ['role', 'aria-modal', 'aria-label'].forEach(a => panel.removeAttribute(a));
+    $$('.fs-btn', panel).forEach(b => { b.setAttribute('aria-label', 'Fullscreen'); b.title = 'Fullscreen (Esc to exit)'; });
+    document.body.style.overflow = '';
+    if (opener && opener.isConnected) opener.focus();
+  }
+  function openFs(panel, opener) {
+    closeFs();
+    const inerted = [];
+    for (let n = panel; n.parentElement && n !== document.body; n = n.parentElement) {
+      for (const s of n.parentElement.children) {
+        if (s === n || s.inert || /^(SCRIPT|STYLE)$/.test(s.tagName) || s.hasAttribute('aria-live')) continue;
+        s.inert = true; inerted.push(s);
+      }
+    }
+    fsState = { panel, inerted, opener };
+    panel.classList.add('is-fs');
+    panel.setAttribute('role', 'dialog');
+    panel.setAttribute('aria-modal', 'true');
+    panel.setAttribute('aria-label', $('.panel-title', panel).textContent + ' (fullscreen)');
+    $$('.fs-btn', panel).forEach(b => { b.setAttribute('aria-label', 'Exit fullscreen'); b.title = 'Exit fullscreen (Esc)'; });
+    document.body.style.overflow = 'hidden';
+    ($('textarea', panel) || opener).focus();
+  }
+  $$('.fs-btn').forEach(b => b.addEventListener('click', () => {
+    const p = b.closest('.panel');
+    if (fsState && fsState.panel === p) closeFs(); else openFs(p, b);
+  }));
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && fsState) { e.preventDefault(); closeFs(); } });
+
+  // ── wiring ──
+  input.addEventListener('input', renderSoon);
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Tab' && !e.shiftKey && !e.ctrlKey && !e.metaKey) {
+      e.preventDefault();
+      const s = input.selectionStart, en = input.selectionEnd;
+      input.setRangeText('  ', s, en, 'end');
+      renderSoon();
+    }
+  });
+  input.addEventListener('scroll', () => {
+    gutter.scrollTop = input.scrollTop;
+    if ($('#sync').checked && $('#viewer').classList.contains('mode-split')) {
+      const max = input.scrollHeight - input.clientHeight;
+      const ratio = max > 0 ? input.scrollTop / max : 0;
+      preview.scrollTop = ratio * (preview.scrollHeight - preview.clientHeight);
+    }
+  });
+  $$('#mode button').forEach(b => b.addEventListener('click', () => setMode(b.dataset.v)));
+  $('#lines').addEventListener('change', e => {
+    gutter.hidden = !e.target.checked;
+    $('#ed').classList.toggle('numbered', e.target.checked);
+    input.wrap = e.target.checked ? 'off' : 'soft';
+    updateGutter();
+  });
+  $('#breaks').addEventListener('change', render);
+  $('#tpl').addEventListener('change', e => {
+    const t = TEMPLATES[e.target.value];
+    if (t) {
+      if (input.value.trim() && input.value !== DEFAULT_DOC && !Object.values(TEMPLATES).includes(input.value) && !confirm('Replace the current text with this template?')) { e.target.value = ''; return; }
+      input.value = t; render(); input.scrollTop = 0;
+    }
+    e.target.value = '';
+  });
+  $('#clear').addEventListener('click', () => { input.value = ''; render(); input.focus(); });
+  $('#copy-md').addEventListener('click', e => copy(input.value, e.currentTarget));
+  $('#dl-md').addEventListener('click', () => download('document.md', input.value, 'text/markdown;charset=utf-8'));
+  $('#copy-html').addEventListener('click', e => copy(lastHtml, e.currentTarget));
+  $('#dl-html').addEventListener('click', () => download('document.html', standaloneHtml(), 'text/html;charset=utf-8'));
+
+  let draft = null;
+  try { draft = localStorage.getItem(DRAFT_KEY); } catch { /* storage unavailable */ }
+  input.value = draft != null && draft !== '' ? draft : DEFAULT_DOC;
+  if (draft && guarded()) {
+    stats(draft);
+    $('#in-meta').textContent = draft.length + ' chars · not rendered';
+    msg(msgEl, 'warn', 'The last render of your saved draft did not finish, so it was loaded without rendering. Edit the text, or render it if the problem was a one-off.');
+    msgEl.append(el('button', { class: 'btn sm', type: 'button', onclick: () => { msg(msgEl, ''); render(); } }, 'Render anyway'));
+  } else render();
+})();
+</script>
+</body>
+</html>

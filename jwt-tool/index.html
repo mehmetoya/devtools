@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-XzNxoQbQ70gVXhKlrMkhst9UzaGMHL9NEGdLgG2bwow='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self';" />
+  <title>JWT Tool — Generate, Decode &amp; Validate JSON Web Tokens</title>
+  <meta name="description" content="Create HS256/HS384/HS512 JSON Web Tokens, decode any JWT into readable header and claims, and verify signatures, expiry and issuer. Runs entirely in your browser." />
+  <meta name="keywords" content="jwt decoder, jwt generator, jwt validator, json web token, hs256, verify jwt signature, jwt debugger" />
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large" />
+  <link rel="canonical" href="https://devtool-moya.netlify.app/jwt-tool" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="JWT Tool — Generate, Decode &amp; Validate JSON Web Tokens" />
+  <meta property="og:description" content="Generate, decode and verify JWTs in your browser. Tokens and secrets never leave your machine." />
+  <meta property="og:url" content="https://devtool-moya.netlify.app/jwt-tool" />
+  <meta property="og:site_name" content="DevTools" />
+  <meta name="twitter:card" content="summary" />
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "JWT Tool",
+    "url": "https://devtool-moya.netlify.app/jwt-tool",
+    "description": "Free online JSON Web Token generator, decoder and validator for HS256, HS384 and HS512. Runs client-side.",
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "Any",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+    "featureList": ["Generate HS256/HS384/HS512 JWTs", "Decode header and payload", "Human-readable iat/exp/nbf", "Verify signature", "Check expiry and issuer", "Client-side only"],
+    "isAccessibleForFree": true
+  }
+  </script>
+  <script type="application/ld+json">
+  { "@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://devtool-moya.netlify.app/" },
+    { "@type": "ListItem", "position": 2, "name": "JWT Tool", "item": "https://devtool-moya.netlify.app/jwt-tool" } ] }
+  </script>
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="/assets/app.css" />
+  <style>
+    .jwt-h { color: var(--danger); }
+    .jwt-p { color: #c38bff; }
+    .jwt-s { color: var(--info); }
+    .jwt-dot { color: var(--muted2); }
+    .token-out { word-break: break-all; min-height: 90px; }
+    .form { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 14px; padding: 14px; }
+    .form .full { grid-column: 1 / -1; }
+    .field { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+    .field > span { font-size: 11px; font-weight: 700; letter-spacing: 0.6px; text-transform: uppercase; color: var(--muted); }
+    .field input, .field select { width: 100%; }
+    .field textarea { min-height: 110px; }
+    .secret-row { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+    .secret-row input { flex: 1; min-width: 0; }
+    .field label.check { display: flex; width: 100%; margin-top: 2px; }
+    .field label.check input { width: auto; flex: none; margin: 0; }
+    .json-out { min-height: 80px; }
+    .checks { list-style: none; padding: 14px; display: flex; flex-direction: column; gap: 6px; font-family: var(--mono); font-size: 12px; }
+    .checks li.pass { color: var(--accent); }
+    .checks li.fail { color: var(--danger); }
+    .checks li.skip { color: var(--muted2); }
+    .status-pill { font-family: var(--mono); font-size: 11px; padding: 2px 8px; border-radius: 10px; }
+    .status-pill.ok { background: var(--accent-dim); color: var(--accent); }
+    .status-pill.bad { background: var(--danger-dim); color: var(--danger); }
+    .status-pill.warn { background: var(--warn-dim); color: var(--warn); }
+    .claims-tbl td:first-child { white-space: nowrap; font-family: var(--mono); color: var(--muted2); }
+    .claims-tbl td.mono { white-space: pre-wrap; }
+    .tab-body { margin-bottom: 16px; }
+    .mt { margin-top: 16px; }
+    @media (max-width: 600px) { .form { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+<div class="shell">
+  <header id="site-header"></header>
+  <aside id="sidebar"></aside>
+  <div class="nav-backdrop"></div>
+
+  <main class="page">
+    <section class="tool-head">
+      <h1>JWT Tool</h1>
+      <p>Generate signed JSON Web Tokens, decode their contents and verify signature and claims.</p>
+    </section>
+
+    <section class="options" aria-label="Mode">
+      <span class="opt-label">Mode</span>
+      <div class="seg" id="tab">
+        <button data-v="generate" class="on">Generate</button>
+        <button data-v="decode">Decode</button>
+        <button data-v="validate">Validate</button>
+      </div>
+    </section>
+
+    <div class="msg" id="msg" hidden></div>
+
+    <!-- GENERATE -->
+    <section class="tab-body" id="tab-generate">
+      <div class="grid-2">
+        <div class="panel">
+          <div class="panel-head"><span class="panel-title">Header &amp; claims</span></div>
+          <div class="form">
+            <label class="field"><span>Algorithm</span>
+              <select id="g-alg"><option>HS256</option><option>HS384</option><option>HS512</option></select>
+            </label>
+            <label class="field"><span>Expires in (minutes, 0 = never)</span>
+              <input type="number" id="g-exp" value="60" min="0" step="1" />
+            </label>
+            <label class="field"><span>Issuer (iss)</span><input type="text" id="g-iss" placeholder="https://auth.example.com" spellcheck="false" /></label>
+            <label class="field"><span>Subject (sub)</span><input type="text" id="g-sub" placeholder="user-123" spellcheck="false" /></label>
+            <label class="field full"><span>Audience (aud, comma-separated for several)</span><input type="text" id="g-aud" placeholder="my-api" spellcheck="false" /></label>
+            <label class="check full"><input type="checkbox" id="g-iat" checked /> Include issued-at (iat)</label>
+            <label class="field full"><span>Custom claims (JSON object)</span>
+              <textarea id="g-claims" spellcheck="false">{
+  "name": "Ada Lovelace",
+  "role": "admin"
+}</textarea>
+            </label>
+            <div class="field full"><span>Secret</span>
+              <div class="secret-row">
+                <input type="password" id="g-secret" autocomplete="off" spellcheck="false" placeholder="At least 32 characters for HS256" aria-label="Signing secret" />
+                <button class="btn sm" type="button" data-toggle="g-secret">Show</button>
+                <button class="btn sm" type="button" id="g-random" title="Fill with 64 random bytes, Base64 encoded">Random</button>
+              </div>
+              <label class="check"><input type="checkbox" id="g-b64" /> Secret is Base64 encoded</label>
+            </div>
+          </div>
+        </div>
+        <div class="stack">
+          <div class="panel">
+            <div class="panel-head">
+              <span class="panel-title">Token</span>
+              <span class="panel-actions">
+                <span class="panel-meta" id="g-meta"></span>
+                <button class="btn sm" id="g-to-decode">Decode ›</button>
+                <button class="btn sm" id="g-to-validate">Validate ›</button>
+                <button class="btn sm" id="g-copy">Copy</button>
+              </span>
+            </div>
+            <div class="out token-out" id="g-token"></div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span class="panel-title">Header</span></div>
+            <div class="out json-out" id="g-header"></div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span class="panel-title">Payload</span></div>
+            <div class="out json-out" id="g-payload"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- DECODE -->
+    <section class="tab-body" id="tab-decode" hidden>
+      <div class="grid-2">
+        <div class="panel">
+          <div class="panel-head">
+            <span class="panel-title">Encoded token</span>
+            <span class="panel-actions"><button class="btn sm" id="d-clear">Clear</button></span>
+          </div>
+          <textarea id="d-input" spellcheck="false" placeholder="Paste a JWT (xxxxx.yyyyy.zzzzz)..."></textarea>
+          <div class="out token-out" id="d-colored" style="border-top:1px solid var(--border)"></div>
+        </div>
+        <div class="stack">
+          <div class="panel">
+            <div class="panel-head"><span class="panel-title">Header</span>
+              <span class="panel-actions"><button class="btn sm" id="d-copy-h">Copy</button></span></div>
+            <div class="out json-out jwt-h" id="d-header"></div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span class="panel-title">Payload</span>
+              <span class="panel-actions"><span class="panel-meta" id="d-status"></span><button class="btn sm" id="d-copy-p">Copy</button></span></div>
+            <div class="out json-out jwt-p" id="d-payload"></div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span class="panel-title">Time claims</span></div>
+            <table class="tbl claims-tbl"><tbody id="d-times"></tbody></table>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span class="panel-title">Signature (not verified here)</span></div>
+            <div class="out jwt-s" id="d-sig" style="min-height:0;word-break:break-all"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- VALIDATE -->
+    <section class="tab-body" id="tab-validate" hidden>
+      <div class="grid-2">
+        <div class="panel">
+          <div class="panel-head">
+            <span class="panel-title">Token &amp; rules</span>
+            <span class="panel-actions"><button class="btn sm" id="v-clear">Clear</button></span>
+          </div>
+          <textarea id="v-input" spellcheck="false" placeholder="Paste a JWT to validate..." style="min-height:160px"></textarea>
+          <div class="form" style="border-top:1px solid var(--border)">
+            <div class="field full"><span>Secret</span>
+              <div class="secret-row">
+                <input type="password" id="v-secret" autocomplete="off" spellcheck="false" placeholder="Secret used to sign the token" aria-label="Verification secret" />
+                <button class="btn sm" type="button" data-toggle="v-secret">Show</button>
+              </div>
+              <label class="check"><input type="checkbox" id="v-b64" /> Secret is Base64 encoded</label>
+            </div>
+            <label class="check full"><input type="checkbox" id="v-exp" checked /> Validate expiration (exp) and not-before (nbf)</label>
+            <label class="check"><input type="checkbox" id="v-iss-on" /> Validate issuer</label>
+            <label class="field"><span>Expected issuer</span><input type="text" id="v-iss" spellcheck="false" placeholder="https://auth.example.com" /></label>
+            <label class="check"><input type="checkbox" id="v-aud-on" /> Validate audience</label>
+            <label class="field"><span>Expected audience</span><input type="text" id="v-aud" spellcheck="false" placeholder="my-api" /></label>
+            <label class="field"><span>Clock skew (seconds)</span><input type="number" id="v-skew" value="0" min="0" step="1" /></label>
+          </div>
+        </div>
+        <div class="stack">
+          <div class="panel">
+            <div class="panel-head"><span class="panel-title">Result</span><span class="panel-meta" id="v-verdict"></span></div>
+            <ul class="checks" id="v-checks"></ul>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span class="panel-title">Claims</span></div>
+            <table class="tbl claims-tbl"><tbody id="v-claims"></tbody></table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="about">
+      <h2>About JSON Web Tokens</h2>
+      <p>A JWT is three Base64URL segments joined by dots: a <span class="jwt-h">header</span> naming the algorithm, a <span class="jwt-p">payload</span> holding the claims, and a <span class="jwt-s">signature</span> computed over the first two parts. Anyone can read the header and payload; only the signature proves who created the token.</p>
+      <ul>
+        <li><code>iat</code> (issued at), <code>exp</code> (expiration) and <code>nbf</code> (not before) are Unix timestamps in seconds.</li>
+        <li>This tool signs and verifies with HMAC (HS256, HS384, HS512) through the browser's Web Crypto API. Signature comparison is done by <code>crypto.subtle.verify</code>.</li>
+        <li>Tokens using <code>alg: none</code> are always reported as invalid. RSA/ECDSA tokens can be decoded but not verified here.</li>
+        <li>RFC 7518 asks for an HMAC secret at least as long as the hash output (32 bytes for HS256, 48 for HS384, 64 for HS512).</li>
+      </ul>
+      <h2>Privacy</h2>
+      <p>Tokens and secrets are processed only in your browser. Nothing is sent, stored or logged. Even so, avoid pasting production secrets into any web page you do not control.</p>
+    </section>
+  </main>
+</div>
+
+<script src="/assets/tools.js"></script>
+<script>
+(function () {
+  'use strict';
+  const { el, $, $$, debounce, copy, msg } = DevTools;
+
+  /* #pure */
+  const HASHES = { HS256: 'SHA-256', HS384: 'SHA-384', HS512: 'SHA-512' };
+  const MIN_KEY = { HS256: 32, HS384: 48, HS512: 64 };
+
+  function utf8(s) { return new TextEncoder().encode(s); }
+  function b64urlEncode(bytes) {
+    let bin = '';
+    for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+    return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  }
+  function b64urlDecode(s) {
+    if (!/^[A-Za-z0-9_-]*$/.test(s)) throw new Error('contains characters outside the Base64URL alphabet');
+    if (s.length % 4 === 1) throw new Error('has an invalid Base64URL length');
+    let b = s.replace(/-/g, '+').replace(/_/g, '/');
+    while (b.length % 4) b += '=';
+    const bin = atob(b);
+    const out = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+    return out;
+  }
+  /** Decodes standard or URL-safe Base64 (used for "secret is Base64"). */
+  function b64anyDecode(s) {
+    const t = s.replace(/\s+/g, '').replace(/=+$/, '');
+    return b64urlDecode(t.replace(/\+/g, '-').replace(/\//g, '_'));
+  }
+  function secretBytes(secret, isB64) {
+    if (!isB64) return utf8(secret);
+    try { return b64anyDecode(secret); } catch (e) { throw Object.assign(new Error('Secret is not valid Base64: ' + e.message), { field: 'g-secret' }); }
+  }
+
+  function decodeSegment(seg, label) {
+    const Label = label[0].toUpperCase() + label.slice(1);
+    const notJson = Label + ' is not valid Base64URL-encoded JSON.';
+    let bytes;
+    try { bytes = b64urlDecode(seg); } catch { throw new Error(notJson); }
+    let text;
+    try { text = new TextDecoder('utf-8', { fatal: true }).decode(bytes); } catch { throw new Error(notJson); }
+    let obj;
+    try { obj = JSON.parse(text); } catch { throw new Error(notJson); }
+    if (!obj || typeof obj !== 'object' || Array.isArray(obj)) throw new Error(Label + ' must be a JSON object, e.g. ' + (label === 'header' ? '{"alg": "HS256"}' : '{"sub": "123"}') + '.');
+    return obj;
+  }
+
+  /** Largest |seconds| a JS Date can represent (8.64e15 ms). */
+  const MAX_DATE_SEC = 8.64e12;
+  /** ISO text for a Unix-seconds value, or null when it is outside the Date range. */
+  function isoOrNull(sec) {
+    if (typeof sec !== 'number' || !Number.isFinite(sec) || Math.abs(sec) > MAX_DATE_SEC) return null;
+    return new Date(sec * 1000).toISOString();
+  }
+
+  /** Splits and decodes a token without verifying it. Throws Error with a readable message. */
+  function decodeJwt(token) {
+    const t = String(token).trim();
+    const parts = t.split('.');
+    if (parts.length !== 3) throw new Error('Invalid JWT format (should have 3 parts separated by dots, found ' + parts.length + ').');
+    if (!parts[0] || !parts[1]) throw new Error('Invalid JWT format (header and payload must not be empty).');
+    const header = decodeSegment(parts[0], 'header');
+    const payload = decodeSegment(parts[1], 'payload');
+    let sigBytes;
+    try { sigBytes = b64urlDecode(parts[2]); } catch (e) { throw new Error('Invalid signature: segment ' + e.message + '.'); }
+    return { header, payload, parts, signature: parts[2], sigBytes };
+  }
+
+  async function hmacKey(alg, keyBytes, usage) {
+    if (!HASHES[alg]) throw new Error('Unsupported algorithm "' + alg + '". Only HS256, HS384 and HS512 are supported.');
+    if (!keyBytes.length) throw new Error('A secret is required.');
+    return globalThis.crypto.subtle.importKey('raw', keyBytes, { name: 'HMAC', hash: HASHES[alg] }, false, [usage]);
+  }
+
+  /** Signs header+payload objects and returns the compact token. */
+  async function signJwt(header, payload, keyBytes) {
+    const alg = header.alg;
+    const key = await hmacKey(alg, keyBytes, 'sign');
+    const input = b64urlEncode(utf8(JSON.stringify(header))) + '.' + b64urlEncode(utf8(JSON.stringify(payload)));
+    const sig = new Uint8Array(await globalThis.crypto.subtle.sign('HMAC', key, utf8(input)));
+    return input + '.' + b64urlEncode(sig);
+  }
+
+  /** Verifies the signature over the exact encoded header.payload as received. */
+  async function verifySignature(decoded, keyBytes) {
+    const key = await hmacKey(decoded.header.alg, keyBytes, 'verify');
+    return globalThis.crypto.subtle.verify('HMAC', key, decoded.sigBytes, utf8(decoded.parts[0] + '.' + decoded.parts[1]));
+  }
+
+  /** Builds the payload for the generator. nowSec injected for testability. */
+  function buildPayload(o, nowSec) {
+    let custom = {};
+    const txt = (o.claims || '').trim();
+    if (txt) {
+      try { custom = JSON.parse(txt); } catch (e) { throw Object.assign(new Error('Custom claims are not valid JSON: ' + e.message), { field: 'g-claims' }); }
+      if (!custom || typeof custom !== 'object' || Array.isArray(custom)) throw Object.assign(new Error('Custom claims must be a JSON object, e.g. {"role": "admin"}.'), { field: 'g-claims' });
+    }
+    const p = {};
+    if (o.iss) p.iss = o.iss;
+    if (o.sub) p.sub = o.sub;
+    if (o.aud) {
+      const list = o.aud.split(',').map(s => s.trim()).filter(Boolean);
+      if (list.length) p.aud = list.length === 1 ? list[0] : list;
+    }
+    if (o.iat) p.iat = nowSec;
+    const mins = Number(o.expMinutes);
+    if (o.expMinutes !== '' && o.expMinutes != null && (!Number.isFinite(mins) || mins < 0)) throw Object.assign(new Error('Expiration must be a positive number of minutes (or 0 for no expiry).'), { field: 'g-exp' });
+    if (mins > 0) p.exp = nowSec + Math.round(mins * 60);
+    return Object.assign(p, custom);
+  }
+
+  /** Time-claim checks. Returns list of {name, ok, text}. */
+  function checkTimes(payload, nowSec, skew) {
+    const res = [];
+    skew = skew || 0;
+    for (const c of ['exp', 'nbf', 'iat']) {
+      if (!(c in payload)) continue;
+      if (typeof payload[c] !== 'number' || !Number.isFinite(payload[c])) { res.push({ name: c, ok: false, text: c + ' is not a numeric timestamp' }); continue; }
+      if (Math.abs(payload[c]) > MAX_DATE_SEC) res.push({ name: c, ok: false, text: c + ' is out of range (more than ±' + MAX_DATE_SEC + ' seconds from 1970)' });
+    }
+    if (typeof payload.exp === 'number' && Math.abs(payload.exp) <= MAX_DATE_SEC) {
+      const ok = nowSec < payload.exp + skew;
+      res.push({ name: 'exp', ok, text: ok ? 'Not expired' : 'Token expired' });
+    }
+    if (typeof payload.nbf === 'number' && Math.abs(payload.nbf) <= MAX_DATE_SEC) {
+      const ok = nowSec >= payload.nbf - skew;
+      res.push({ name: 'nbf', ok, text: ok ? 'Already valid (nbf reached)' : 'Token not valid yet (nbf in the future)' });
+    }
+    return res;
+  }
+  /* #endpure */
+
+  function setSeg(id, v) { $$('#' + id + ' button').forEach(b => b.classList.toggle('on', b.dataset.v === v)); }
+  function nowSec() { return Math.floor(Date.now() / 1000); }
+  function errText(e) { return e && e.message ? e.message : String(e); }
+
+  function colored(node, token) {
+    const parts = String(token).trim().split('.');
+    const cls = ['jwt-h', 'jwt-p', 'jwt-s'];
+    const kids = [];
+    parts.forEach((p, i) => {
+      if (i) kids.push(el('span', { class: 'jwt-dot' }, '.'));
+      kids.push(el('span', { class: cls[i] || 'jwt-dot' }, p));
+    });
+    node.replaceChildren(...kids);
+  }
+
+  function relTime(sec, now) {
+    const d = sec - now, a = Math.abs(d);
+    const unit = a < 60 ? [a, 's'] : a < 3600 ? [Math.round(a / 60), 'min'] : a < 86400 ? [Math.round(a / 3600), 'h'] : [Math.round(a / 86400), 'd'];
+    return d >= 0 ? 'in ' + unit[0] + ' ' + unit[1] : unit[0] + ' ' + unit[1] + ' ago';
+  }
+  function timeRow(name, label, v, now) {
+    if (typeof v !== 'number') return el('tr', null, el('td', null, name), el('td', { class: 'mono' }, JSON.stringify(v) + ' (not a number)'));
+    const iso = isoOrNull(v);
+    const text = iso === null ? String(v) + '  (date out of range)' : iso.replace('.000Z', 'Z') + '  (' + new Date(v * 1000).toLocaleString() + ', ' + relTime(v, now) + ')';
+    return el('tr', null, el('td', null, name), el('td', { class: 'mono' }, label + ': ' + text));
+  }
+
+  // ── tabs ──
+  let tab = 'generate';
+  function setTab(v) {
+    tab = v; setSeg('tab', v);
+    ['generate', 'decode', 'validate'].forEach(t => { $('#tab-' + t).hidden = t !== v; });
+    msg($('#msg'), '');
+    if (v === 'generate') generate(); else if (v === 'decode') decodeView(); else validate();
+  }
+  $$('#tab button').forEach(b => b.addEventListener('click', () => setTab(b.dataset.v)));
+
+  $$('[data-toggle]').forEach(b => b.addEventListener('click', () => {
+    const inp = $('#' + b.dataset.toggle);
+    const show = inp.type === 'password';
+    inp.type = show ? 'text' : 'password';
+    b.textContent = show ? 'Hide' : 'Show';
+  }));
+
+  // ── generate ──
+  let genSeq = 0, lastToken = '';
+  async function generate() {
+    const my = ++genSeq;
+    const alg = $('#g-alg').value;
+    const out = $('#g-token');
+    ['g-claims', 'g-exp', 'g-secret'].forEach(id => DevTools.invalid($('#' + id), false));
+    try {
+      const payload = buildPayload({
+        iss: $('#g-iss').value.trim(), sub: $('#g-sub').value.trim(), aud: $('#g-aud').value,
+        iat: $('#g-iat').checked, expMinutes: $('#g-exp').value, claims: $('#g-claims').value,
+      }, nowSec());
+      const header = { alg, typ: 'JWT' };
+      $('#g-header').textContent = JSON.stringify(header, null, 2);
+      $('#g-payload').textContent = JSON.stringify(payload, null, 2);
+      const secret = $('#g-secret').value;
+      if (!secret) {
+        lastToken = ''; out.replaceChildren(); $('#g-meta').textContent = '';
+        msg($('#msg'), 'info', 'Enter a secret to sign the token.');
+        return;
+      }
+      const key = secretBytes(secret, $('#g-b64').checked);
+      const token = await signJwt(header, payload, key);
+      if (my !== genSeq) return;
+      lastToken = token;
+      colored(out, token);
+      $('#g-meta').textContent = token.length + ' chars';
+      if (key.length < MIN_KEY[alg]) msg($('#msg'), 'warn', 'Token signed, but the secret is only ' + key.length + ' bytes. ' + alg + ' should use at least ' + MIN_KEY[alg] + ' bytes.');
+      else msg($('#msg'), '');
+    } catch (e) {
+      if (my !== genSeq) return;
+      lastToken = ''; out.replaceChildren(); $('#g-meta').textContent = '';
+      msg($('#msg'), 'error', errText(e));
+      if (e && e.field) DevTools.invalid($('#' + e.field), true);
+    }
+  }
+  const generateSoon = debounce(generate, 150);
+  ['#g-alg', '#g-exp', '#g-iss', '#g-sub', '#g-aud', '#g-iat', '#g-claims', '#g-secret', '#g-b64'].forEach(s => {
+    $(s).addEventListener('input', generateSoon);
+    $(s).addEventListener('change', generateSoon);
+  });
+  $('#g-random').addEventListener('click', () => {
+    const b = new Uint8Array(64); crypto.getRandomValues(b);
+    let bin = ''; b.forEach(x => { bin += String.fromCharCode(x); });
+    $('#g-secret').value = btoa(bin);
+    $('#g-b64').checked = true;
+    generate();
+  });
+  $('#g-copy').addEventListener('click', e => { if (lastToken) copy(lastToken, e.currentTarget); });
+  $('#g-to-decode').addEventListener('click', () => { if (!lastToken) return; $('#d-input').value = lastToken; setTab('decode'); });
+  $('#g-to-validate').addEventListener('click', () => {
+    if (!lastToken) return;
+    $('#v-input').value = lastToken;
+    $('#v-secret').value = $('#g-secret').value;
+    $('#v-b64').checked = $('#g-b64').checked;
+    setTab('validate');
+  });
+
+  // ── decode ──
+  function decodeView() {
+    const raw = $('#d-input').value.trim();
+    const H = $('#d-header'), P = $('#d-payload'), T = $('#d-times'), S = $('#d-sig'), st = $('#d-status');
+    H.textContent = ''; P.textContent = ''; T.replaceChildren(); S.textContent = ''; st.replaceChildren();
+    $('#d-colored').replaceChildren();
+    DevTools.invalid($('#d-input'), false);
+    if (!raw) { msg($('#msg'), ''); return; }
+    colored($('#d-colored'), raw);
+    let d;
+    try { d = decodeJwt(raw); } catch (e) { DevTools.invalid($('#d-input'), true); msg($('#msg'), 'error', errText(e)); return; }
+    msg($('#msg'), d.header.alg === 'none' ? 'warn' : '', 'This token uses "alg": "none" and carries no signature. Never accept it.');
+    H.textContent = JSON.stringify(d.header, null, 2);
+    P.textContent = JSON.stringify(d.payload, null, 2);
+    S.textContent = d.signature || '(empty)';
+    const now = nowSec();
+    const labels = { iat: 'Issued at', nbf: 'Not before', exp: 'Expires' };
+    for (const c of ['iat', 'nbf', 'exp']) if (c in d.payload) T.appendChild(timeRow(c, labels[c], d.payload[c], now));
+    if (!T.children.length) T.appendChild(el('tr', null, el('td', { colspan: '2' }, 'No iat / nbf / exp claims.')));
+    const checks = checkTimes(d.payload, now, 0);
+    const bad = checks.find(c => !c.ok);
+    if (bad) st.appendChild(el('span', { class: 'status-pill bad' }, bad.text));
+    else if (typeof d.payload.exp === 'number') st.appendChild(el('span', { class: 'status-pill ok' }, 'Not expired'));
+    else st.appendChild(el('span', { class: 'status-pill warn' }, 'No expiry'));
+  }
+  $('#d-input').addEventListener('input', decodeView);
+  $('#d-clear').addEventListener('click', () => { $('#d-input').value = ''; decodeView(); $('#d-input').focus(); });
+  $('#d-copy-h').addEventListener('click', e => copy($('#d-header').textContent, e.currentTarget));
+  $('#d-copy-p').addEventListener('click', e => copy($('#d-payload').textContent, e.currentTarget));
+
+  // ── validate ──
+  let valSeq = 0;
+  async function validate() {
+    const my = ++valSeq;
+    const list = $('#v-checks'), claims = $('#v-claims'), verdict = $('#v-verdict');
+    const raw = $('#v-input').value.trim();
+    const rows = [];
+    let shown = false;
+    verdict.replaceChildren();
+    list.replaceChildren();
+    DevTools.invalid($('#v-input'), false);
+    const show = (overall) => {
+      shown = true;
+      if (my !== valSeq) return;
+      list.replaceChildren(...rows.map(r => el('li', { class: r.state }, (r.state === 'pass' ? '✓ ' : r.state === 'fail' ? '✗ ' : '– ') + r.text)));
+      verdict.replaceChildren();
+      if (overall === true) { verdict.appendChild(el('span', { class: 'status-pill ok' }, 'VALID')); msg($('#msg'), 'ok', 'Token is valid.'); }
+      else if (overall === false) { verdict.appendChild(el('span', { class: 'status-pill bad' }, 'INVALID')); msg($('#msg'), 'error', 'Token is invalid: ' + (rows.find(r => r.state === 'fail') || { text: '' }).text); }
+      else msg($('#msg'), '');
+    };
+    claims.replaceChildren();
+    try {
+      await validateInto(rows, raw, claims, show);
+    } catch (e) {
+      rows.push({ state: 'fail', text: 'Unexpected error: ' + errText(e) });
+    } finally {
+      if (!shown) show(raw ? !rows.some(r => r.state === 'fail') : null);
+    }
+  }
+
+  async function validateInto(rows, raw, claims, show) {
+    if (!raw) { show(null); return; }
+    let d;
+    try { d = decodeJwt(raw); } catch (e) { DevTools.invalid($('#v-input'), true); rows.push({ state: 'fail', text: errText(e) }); show(false); return; }
+    rows.push({ state: 'pass', text: 'Format: 3 Base64URL parts, header and payload are JSON' });
+    for (const [k, v] of Object.entries(d.payload)) {
+      const val = typeof v === 'string' ? v : JSON.stringify(v, null, 2);
+      const extra = (k === 'iat' || k === 'exp' || k === 'nbf') && typeof v === 'number' ? '  (' + (isoOrNull(v) || 'date out of range') + ')' : '';
+      claims.appendChild(el('tr', null, el('td', null, k), el('td', { class: 'mono' }, val + extra)));
+    }
+    const alg = d.header.alg;
+    if (alg === 'none') rows.push({ state: 'fail', text: 'Algorithm "none" is not allowed' });
+    else if (!HASHES[alg]) rows.push({ state: 'fail', text: 'Algorithm "' + alg + '" cannot be verified here (HS256/HS384/HS512 only)' });
+    else {
+      const secret = $('#v-secret').value;
+      if (!secret) rows.push({ state: 'fail', text: 'Signature: enter the secret to verify it' });
+      else {
+        try {
+          const ok = await verifySignature(d, secretBytes(secret, $('#v-b64').checked));
+          rows.push({ state: ok ? 'pass' : 'fail', text: ok ? 'Signature verified (' + alg + ')' : 'Invalid signature (wrong secret or tampered token)' });
+        } catch (e) { rows.push({ state: 'fail', text: 'Signature: ' + errText(e) }); }
+      }
+    }
+    if ($('#v-exp').checked) {
+      const skew = Math.max(0, Number($('#v-skew').value) || 0);
+      const t = checkTimes(d.payload, nowSec(), skew);
+      if (!t.length) rows.push({ state: 'skip', text: 'No exp / nbf claims to check' });
+      t.forEach(c => rows.push({ state: c.ok ? 'pass' : 'fail', text: c.text + (c.name === 'exp' && isoOrNull(d.payload.exp) ? ' (exp ' + isoOrNull(d.payload.exp) + ')' : '') }));
+    } else rows.push({ state: 'skip', text: 'Expiration not checked' });
+    if ($('#v-iss-on').checked) {
+      const want = $('#v-iss').value.trim();
+      const ok = d.payload.iss === want;
+      rows.push({ state: ok ? 'pass' : 'fail', text: ok ? 'Issuer matches "' + want + '"' : 'Issuer mismatch: expected "' + want + '", got ' + JSON.stringify(d.payload.iss) });
+    }
+    if ($('#v-aud-on').checked) {
+      const want = $('#v-aud').value.trim();
+      const aud = d.payload.aud;
+      const ok = Array.isArray(aud) ? aud.includes(want) : aud === want;
+      rows.push({ state: ok ? 'pass' : 'fail', text: ok ? 'Audience contains "' + want + '"' : 'Audience mismatch: expected "' + want + '", got ' + JSON.stringify(aud) });
+    }
+    show(!rows.some(r => r.state === 'fail'));
+  }
+  const validateSoon = debounce(validate, 150);
+  ['#v-input', '#v-secret', '#v-b64', '#v-exp', '#v-iss-on', '#v-iss', '#v-aud-on', '#v-aud', '#v-skew'].forEach(s => {
+    $(s).addEventListener('input', validateSoon);
+    $(s).addEventListener('change', validateSoon);
+  });
+  $('#v-clear').addEventListener('click', () => { $('#v-input').value = ''; validate(); $('#v-input').focus(); });
+
+  generate();
+})();
+</script>
+</body>
+</html>

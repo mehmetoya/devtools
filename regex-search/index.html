@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-5K+JkZ3kvsPD5fhoBRUcNMf1Pi86xujOeqWVx04p1D4='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self';" />
+  <title>Regex Search — Test Regular Expressions Online, Client-Side</title>
+  <meta name="description" content="Test JavaScript regular expressions against your text: highlighted matches, positions, numbered and named capture groups. Runs entirely in your browser." />
+  <meta name="keywords" content="regex tester, regex search, regular expression tester, regex online, capture groups, named groups, javascript regex" />
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large" />
+  <link rel="canonical" href="https://devtool-moya.netlify.app/regex-search" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Regex Search — Test Regular Expressions, Client-Side" />
+  <meta property="og:description" content="Find regex matches and capture groups in your browser. Nothing leaves your machine." />
+  <meta property="og:url" content="https://devtool-moya.netlify.app/regex-search" />
+  <meta property="og:site_name" content="DevTools" />
+  <meta name="twitter:card" content="summary" />
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Regex Search",
+    "url": "https://devtool-moya.netlify.app/regex-search",
+    "description": "Free online regular expression tester with match highlighting, positions and numbered/named capture groups. Runs client-side.",
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "Any",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+    "featureList": ["Live match highlighting", "Numbered and named capture groups", "Ignore case, multiline, dotall, unicode flags", "Match index and length", "Client-side only"],
+    "isAccessibleForFree": true
+  }
+  </script>
+  <script type="application/ld+json">
+  { "@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://devtool-moya.netlify.app/" },
+    { "@type": "ListItem", "position": 2, "name": "Regex Search", "item": "https://devtool-moya.netlify.app/regex-search" } ] }
+  </script>
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="/assets/app.css" />
+  <style>
+    .pattern-row { display: flex; align-items: center; gap: 8px; flex: 1 1 100%; }
+    .pattern-row .slash { font-family: var(--mono); color: var(--muted); font-size: 16px; }
+    .pattern-row input { flex: 1; min-width: 0; font-size: 14px; }
+    .pattern-row .flags { font-family: var(--mono); color: var(--accent); min-width: 2.5em; }
+    #input, #highlight, #only { min-height: 300px; max-height: 60vh; }
+    #highlight { overflow: auto; }
+    mark.m { background: rgba(79,255,176,0.22); color: var(--text); border-radius: 2px; box-shadow: inset 0 -2px 0 var(--accent); }
+    mark.m.alt { background: rgba(91,158,255,0.25); box-shadow: inset 0 -2px 0 var(--info); }
+    span.zero { border-left: 2px solid var(--warn); margin: 0 -1px; }
+    .results { margin-top: 16px; }
+    .results .tbl-wrap { overflow: auto; max-height: 60vh; }
+    .grp { display: block; font-family: var(--mono); font-size: 12px; }
+    .grp .gk { color: var(--muted2); }
+    .grp .undef { color: var(--muted); font-style: italic; }
+    .empty-note { padding: 18px 14px; color: var(--muted); }
+  </style>
+</head>
+<body>
+<div class="shell">
+  <header id="site-header"></header>
+  <aside id="sidebar"></aside>
+  <div class="nav-backdrop"></div>
+
+  <main class="page">
+    <section class="tool-head">
+      <h1>Regex Search</h1>
+      <p>Test a regular expression against your text and inspect every match and capture group.</p>
+    </section>
+
+    <section class="options" aria-label="Options">
+      <div class="pattern-row">
+        <span class="slash">/</span>
+        <input type="text" id="pattern" spellcheck="false" autocomplete="off" placeholder="(?&lt;user&gt;[\w.]+)@(?&lt;domain&gt;[\w.]+)" aria-label="Regular expression" />
+        <span class="slash">/</span><span class="flags" id="flags-view">g</span>
+      </div>
+      <label class="check"><input type="checkbox" id="f-i" /> Ignore case (i)</label>
+      <label class="check"><input type="checkbox" id="f-m" /> Multiline (m)</label>
+      <label class="check"><input type="checkbox" id="f-s" /> Dot matches newline (s)</label>
+      <label class="check"><input type="checkbox" id="f-u" checked /> Unicode (u)</label>
+      <span class="divider"></span>
+      <label class="check"><input type="checkbox" id="only-matches" /> Show matches only</label>
+      <button class="btn" id="sample">Sample</button>
+    </section>
+
+    <div class="msg" id="msg" hidden></div>
+
+    <section class="grid-2">
+      <div class="panel">
+        <div class="panel-head">
+          <span class="panel-title">Test string</span>
+          <span class="panel-actions">
+            <span class="panel-meta" id="in-meta"></span>
+            <button class="btn sm" id="clear">Clear</button>
+          </span>
+        </div>
+        <textarea id="input" spellcheck="false" placeholder="Paste the text to search…"></textarea>
+      </div>
+      <div class="panel">
+        <div class="panel-head">
+          <span class="panel-title" id="right-title">Highlighted</span>
+          <span class="panel-actions">
+            <span class="panel-meta" id="out-meta"></span>
+            <button class="btn sm" id="copy" title="Copy all matched values, one per line">Copy matches</button>
+            <button class="btn sm" id="dl">Download</button>
+          </span>
+        </div>
+        <div class="out" id="highlight" aria-live="polite"></div>
+        <textarea id="only" spellcheck="false" readonly hidden aria-label="Matched values"></textarea>
+      </div>
+    </section>
+
+    <section class="panel results" id="results-panel">
+      <div class="panel-head">
+        <span class="panel-title">Matches</span>
+        <span class="panel-meta" id="res-meta"></span>
+      </div>
+      <div class="tbl-wrap" id="results"><div class="empty-note">Enter a pattern to see matches.</div></div>
+    </section>
+
+    <section class="about">
+      <h2>About this tool</h2>
+      <p>Regex Search uses your browser's JavaScript regular-expression engine and always searches globally, so every match is listed with its start index, length, matched value and capture groups — both numbered (<code>$1</code>, <code>$2</code>…) and named (<code>(?&lt;name&gt;…)</code>).</p>
+      <h2>Flags</h2>
+      <ul>
+        <li><strong>i</strong> — case-insensitive matching.</li>
+        <li><strong>m</strong> — <code>^</code> and <code>$</code> match at every line break.</li>
+        <li><strong>s</strong> — <code>.</code> also matches newlines (single-line / dotall mode).</li>
+        <li><strong>u</strong> — full Unicode: code-point escapes like <code>\u{1F600}</code> and property classes like <code>\p{L}</code>.</li>
+      </ul>
+      <h2>Limits</h2>
+      <p>The table shows the first 500 matches; counting stops at 100,000 matches or after about one second. Empty matches (such as <code>a*</code> between characters) are shown as thin markers and the search moves on by one character (one code point with the <strong>u</strong> flag), so it never loops forever. Matching runs in a background worker: a pathological pattern such as <code>(a+)+$</code> is stopped after 1.5 seconds and the page stays responsive.</p>
+      <h2>Privacy</h2>
+      <p>All processing happens in your browser. Nothing you type is sent, stored or logged.</p>
+    </section>
+  </main>
+</div>
+
+<script src="/assets/tools.js"></script>
+<script src="/assets/regex-worker.js"></script>
+<script>
+(function () {
+  'use strict';
+  const { $, el, debounce, copy, download, msg, invalid } = DevTools;
+
+  const runner = RegexWorker.createRunner({ timeoutMs: 1500 });
+
+  const input = $('#input'), pattern = $('#pattern'), msgEl = $('#msg');
+  const hl = $('#highlight'), only = $('#only'), results = $('#results');
+  const SHOW_ROWS = 500, MAX_MARKS = 5000;
+  let last = null;
+
+  function currentFlags() {
+    return ['i', 'm', 's', 'u'].filter(f => $('#f-' + f).checked).join('');
+  }
+
+  function renderHighlight(text, matches) {
+    const frag = document.createDocumentFragment();
+    let pos = 0;
+    const n = Math.min(matches.length, MAX_MARKS);
+    for (let i = 0; i < n; i++) {
+      const m = matches[i];
+      if (m.index > pos) frag.appendChild(document.createTextNode(text.slice(pos, m.index)));
+      if (m.length === 0) frag.appendChild(el('span', { class: 'zero', title: 'Empty match at ' + m.index }));
+      else frag.appendChild(el('mark', { class: 'm' + (i % 2 ? ' alt' : ''), title: '#' + (i + 1) + ' · index ' + m.index }, m.value));
+      pos = Math.max(pos, m.index + m.length);
+    }
+    if (pos < text.length) frag.appendChild(document.createTextNode(text.slice(pos)));
+    hl.replaceChildren(frag);
+  }
+
+  function groupCell(m) {
+    const items = [];
+    m.groups.forEach((g, i) => items.push(el('span', { class: 'grp' }, el('span', { class: 'gk' }, '$' + (i + 1) + ' = '),
+      g === undefined ? el('span', { class: 'undef' }, 'undefined') : JSON.stringify(g))));
+    if (m.named) for (const [k, v] of Object.entries(m.named)) items.push(el('span', { class: 'grp' }, el('span', { class: 'gk' }, '<' + k + '> = '),
+      v === undefined ? el('span', { class: 'undef' }, 'undefined') : JSON.stringify(v)));
+    return items.length ? items : el('span', { class: 'undef' }, '—');
+  }
+
+  function renderTable(r) {
+    if (!r.matches.length) { results.replaceChildren(el('div', { class: 'empty-note' }, 'No matches.')); return; }
+    const rows = r.matches.slice(0, SHOW_ROWS).map((m, i) => el('tr', null,
+      el('td', { class: 'mono' }, String(i + 1)),
+      el('td', { class: 'mono' }, String(m.index)),
+      el('td', { class: 'mono' }, String(m.length)),
+      el('td', { class: 'mono' }, JSON.stringify(m.value)),
+      el('td', null, groupCell(m))));
+    const nodes = [el('table', { class: 'tbl' },
+      el('thead', null, el('tr', null, el('th', null, '#'), el('th', null, 'Index'), el('th', null, 'Length'), el('th', null, 'Value'), el('th', null, 'Groups'))),
+      el('tbody', null, rows))];
+    if (r.matches.length > SHOW_ROWS) nodes.push(el('div', { class: 'empty-note' }, '… and ' + (r.matches.length - SHOW_ROWS).toLocaleString() + ' more matches'));
+    results.replaceChildren(...nodes);
+  }
+
+  function reset(note) {
+    last = null;
+    hl.replaceChildren(document.createTextNode(input.value));
+    only.value = '';
+    $('#out-meta').textContent = ''; $('#res-meta').textContent = '';
+    results.replaceChildren(el('div', { class: 'empty-note' }, note));
+  }
+
+  let seq = 0;
+  function run() {
+    const text = input.value, src = pattern.value, flags = currentFlags();
+    const my = ++seq;
+    $('#flags-view').textContent = 'g' + flags;
+    $('#in-meta').textContent = text ? text.length.toLocaleString() + ' chars' : '';
+    const onlyMode = $('#only-matches').checked;
+    hl.hidden = onlyMode; only.hidden = !onlyMode;
+    $('#right-title').textContent = onlyMode ? 'Matched values' : 'Highlighted';
+    if (!src) { invalid(pattern, false); msg(msgEl, ''); reset('Enter a pattern to see matches.'); return; }
+    // Validate on the main thread (compiling never backtracks), then match in the worker with a time limit.
+    try { new RegExp(src, flags + 'g'); }
+    catch (e) { invalid(pattern, true); msg(msgEl, 'error', 'Invalid regular expression: ' + e.message.replace(/^Invalid regular expression: /, '') + '. Fix the pattern or turn off a flag.'); reset('Fix the pattern to see matches.'); return; }
+    $('#out-meta').textContent = 'searching…';
+    runner.run('search', { text, pattern: src, flags, limit: 100000, budgetMs: 1000 }).then(r => {
+      if (my !== seq) return;
+      show(r, text, onlyMode);
+    }, e => {
+      if (my !== seq) return;
+      invalid(pattern, true);
+      msg(msgEl, 'error', e.name === 'RegexTimeout' ? e.message : 'Invalid regular expression: ' + e.message.replace(/^Invalid regular expression: /, ''));
+      reset('Fix the pattern to see matches.');
+    });
+  }
+
+  function show(r, text, onlyMode) {
+    invalid(pattern, false);
+    last = r;
+    const count = r.matches.length.toLocaleString() + (r.truncated || r.timedOut ? '+' : '');
+    if (r.timedOut) msg(msgEl, 'warn', 'Stopped after ' + count + ' matches: the search took too long. Simplify the pattern or the input.');
+    else if (r.truncated) msg(msgEl, 'warn', 'Stopped counting at ' + count + ' matches.');
+    else if (!r.matches.length) msg(msgEl, 'info', 'No matches.');
+    else msg(msgEl, 'ok', r.matches.length.toLocaleString() + ' match' + (r.matches.length === 1 ? '' : 'es') + ' found.');
+    $('#out-meta').textContent = count + ' match' + (r.matches.length === 1 ? '' : 'es');
+    $('#res-meta').textContent = r.matches.length > SHOW_ROWS ? 'showing first ' + SHOW_ROWS : '';
+    if (onlyMode) only.value = r.matches.map(m => m.value).join('\n');
+    else renderHighlight(text, r.matches);
+    renderTable(r);
+  }
+  const runSoon = debounce(run, 200);
+
+  input.addEventListener('input', runSoon);
+  pattern.addEventListener('input', runSoon);
+  ['f-i', 'f-m', 'f-s', 'f-u', 'only-matches'].forEach(id => $('#' + id).addEventListener('change', run));
+  $('#clear').addEventListener('click', () => { input.value = ''; run(); input.focus(); });
+  const matchText = () => last ? last.matches.map(m => m.value).join('\n') : '';
+  $('#copy').addEventListener('click', e => { if (last && last.matches.length) copy(matchText(), e.currentTarget); });
+  $('#dl').addEventListener('click', () => { if (last && last.matches.length) download('matches.txt', matchText()); });
+  $('#sample').addEventListener('click', () => {
+    pattern.value = '(?<user>[\\w.+-]+)@(?<domain>[\\w-]+(?:\\.[\\w-]+)+)';
+    input.value = 'Contact: alice@example.com, bob.smith+news@mail.example.org\nSupport <help@devtools.dev> — not an email: foo@bar';
+    run();
+  });
+  run();
+})();
+</script>
+</body>
+</html>

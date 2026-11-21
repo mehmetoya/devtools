@@ -1,47 +1,40 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-  <!-- ── PRIMARY SEO / GEO ── -->
-  <title>JSON Formatter — Free Online JSON Beautifier & Validator</title>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-EHhkCjG4njrliVBWSnrE8x5p1dAfQaL6CBPuP50N1+8='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self';" />
+  <title>JSON Formatter — Free Online JSON Beautifier &amp; Validator</title>
   <meta name="description" content="Format, beautify, validate and minify JSON instantly. No data leaves your browser — 100% private, client-side, no server. Free developer tool." />
   <meta name="keywords" content="json formatter, json beautifier, json validator, json minifier, json viewer, online json tool, json pretty print, free json tool" />
   <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large" />
-  <link rel="canonical" href="/json-formatter" />
-
-  <!-- ── OPEN GRAPH (social + AI crawlers) ── -->
-  <meta property="og:type"        content="website" />
-  <meta property="og:title"       content="JSON Formatter — Free, Private, Client-Side" />
+  <link rel="canonical" href="https://devtool-moya.netlify.app/json-formatter" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="JSON Formatter — Free, Private, Client-Side" />
   <meta property="og:description" content="Format, validate and minify JSON in your browser. Nothing is sent to any server. Free developer tool." />
-  <meta property="og:url"         content="/json-formatter" />
-  <meta property="og:site_name"   content="DevTools" />
-  <meta property="og:locale"      content="en_US" />
-
-  <!-- ── TWITTER / X CARD ── -->
-  <meta name="twitter:card"        content="summary_large_image" />
-  <meta name="twitter:title"       content="JSON Formatter — Free, Private, Client-Side" />
+  <meta property="og:url" content="https://devtool-moya.netlify.app/json-formatter" />
+  <meta property="og:site_name" content="DevTools" />
+  <meta property="og:locale" content="en_US" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="JSON Formatter — Free, Private, Client-Side" />
   <meta name="twitter:description" content="Format, validate and minify JSON in your browser. Nothing is sent to any server." />
-
-  <!-- ── STRUCTURED DATA (JSON-LD) — GEO / LLM signal ── -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
     "@type": "WebApplication",
     "name": "JSON Formatter",
-    "url": "/json-formatter",
+    "url": "https://devtool-moya.netlify.app/json-formatter",
     "description": "Free online JSON formatter, beautifier, validator and minifier. All processing happens client-side in your browser — no data is sent to any server.",
     "applicationCategory": "DeveloperApplication",
     "operatingSystem": "Any",
     "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
     "featureList": [
       "Format and beautify JSON",
-      "Validate JSON syntax",
+      "Validate JSON syntax with line and column",
       "Minify / compact JSON",
       "Sort JSON keys alphabetically",
       "Convert JSON to CSV",
+      "Escape non-ASCII characters",
       "Syntax highlighting",
       "Client-side only — no server",
       "Drag and drop file support"
@@ -50,680 +43,521 @@
     "browserRequirements": "Requires JavaScript"
   }
   </script>
-
-  <!-- ── BREADCRUMB (GEO context for AI crawlers) ── -->
   <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    "itemListElement": [
-      { "@type": "ListItem", "position": 1, "name": "Home",           "item": "/" },
-      { "@type": "ListItem", "position": 2, "name": "JSON Formatter", "item": "/json-formatter" }
-    ]
-  }
+  { "@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://devtool-moya.netlify.app/" },
+    { "@type": "ListItem", "position": 2, "name": "JSON Formatter", "item": "https://devtool-moya.netlify.app/json-formatter" } ] }
   </script>
-
-  <!-- ── FONTS ── -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet" />
-
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="/assets/app.css" />
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    :root {
-      --bg:        #0d0e11;
-      --surface:   #13151a;
-      --surface2:  #1a1d24;
-      --border:    #2a2d36;
-      --border2:   #373b48;
-      --text:      #e8eaf0;
-      --muted:     #6b7080;
-      --accent:    #4fffb0;
-      --accent-dim:#1a3d2e;
-      --danger:    #ff5b6b;
-      --danger-dim:#3d1a1e;
-      --warn:      #ffb84f;
-      --info:      #5b9eff;
-      --mono:      'IBM Plex Mono', monospace;
-      --sans:      'Syne', sans-serif;
-      --radius:    8px;
-      --radius-lg: 14px;
-    }
-
-    html, body { height: 100%; background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 14px; line-height: 1.5; }
-
-    .shell { display: grid; grid-template-rows: auto 1fr auto; min-height: 100vh; }
-
-    /* ── HEADER ── */
-    header {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 0 28px; height: 56px;
-      border-bottom: 1px solid var(--border); background: var(--surface);
-      position: sticky; top: 0; z-index: 100;
-    }
-    .logo { font-size: 16px; font-weight: 800; letter-spacing: -0.3px; color: var(--text); text-decoration: none; display: flex; align-items: center; gap: 8px; }
-    .logo-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
-    .nav-links { display: flex; align-items: center; gap: 4px; }
-    .nav-link {
-      font-size: 12px; font-weight: 600; color: var(--muted); text-decoration: none;
-      padding: 5px 10px; border-radius: var(--radius); transition: color 0.12s, background 0.12s;
-    }
-    .nav-link:hover { color: var(--text); background: var(--surface2); }
-    .nav-link.active { color: var(--accent); background: var(--accent-dim); }
-    .nav-link.soon { opacity: 0.4; cursor: default; pointer-events: none; }
-    .badge-private {
-      display: flex; align-items: center; gap: 6px;
-      font-size: 11px; font-weight: 600; letter-spacing: 0.4px;
-      color: var(--accent); background: var(--accent-dim);
-      padding: 3px 10px; border-radius: 20px; border: 1px solid rgba(79,255,176,0.2);
-    }
-    .badge-private::before {
-      content: ''; display: inline-block; width: 6px; height: 6px;
-      border-radius: 50%; background: var(--accent); animation: pulse 2s infinite;
-    }
-    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
-
-    /* ── MAIN GRID ── */
-    main { display: grid; grid-template-columns: 1fr 200px 1fr; gap: 0; overflow: hidden; }
-
-    /* ── PANES ── */
-    .pane { display: flex; flex-direction: column; overflow: hidden; border-right: 1px solid var(--border); }
-    .pane:last-child { border-right: none; }
-    .pane-header {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 0 16px; height: 42px;
-      background: var(--surface); border-bottom: 1px solid var(--border); flex-shrink: 0;
-    }
-    .pane-title { font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); }
-    .pane-meta  { font-size: 11px; color: var(--muted); font-family: var(--mono); }
-
-    textarea {
-      flex: 1; resize: none; border: none; outline: none;
-      background: var(--bg); color: var(--text);
-      font-family: var(--mono); font-size: 13px; line-height: 1.7;
-      padding: 16px; tab-size: 2; caret-color: var(--accent);
-    }
-    textarea::placeholder { color: var(--muted); }
-    textarea:focus { background: #0f1014; }
-
-    .output-scroll { flex: 1; overflow: auto; background: var(--bg); padding: 16px; }
-    .output-pre { font-family: var(--mono); font-size: 13px; line-height: 1.7; white-space: pre; min-height: 100%; }
-
+    .json-out { white-space: pre; word-break: normal; max-height: 70vh; min-height: 280px; }
+    #input { min-height: 380px; }
+    #input.drag { border-color: var(--accent); background: var(--accent-dim); }
+    .fs-overlay .json-out { max-height: none; min-height: 100%; }
+    dialog.fs-overlay { width: 100%; height: 100%; max-width: none; max-height: none; margin: 0; border: 0; color: var(--text); }
+    dialog.fs-overlay::backdrop { background: var(--bg); }
+    .fs-bar { display: flex; align-items: center; gap: 8px; }
+    .fs-bar .panel-title { flex: 1; }
     .t-key  { color: #82aaff; }
     .t-str  { color: #c3e88d; }
     .t-num  { color: var(--warn); }
     .t-bool { color: #c792ea; }
     .t-null { color: var(--muted); }
-    .t-punct{ color: var(--border2); }
-
-    /* ── CONTROLS ── */
-    .controls { display: flex; flex-direction: column; background: var(--surface); border-right: 1px solid var(--border); overflow-y: auto; }
-    .ctrl-section { padding: 20px 14px 16px; border-bottom: 1px solid var(--border); }
-    .ctrl-label { font-size: 10px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
-
-    .btn {
-      display: flex; align-items: center; gap: 8px; width: 100%;
-      padding: 9px 12px; border: 1px solid var(--border2); border-radius: var(--radius);
-      background: var(--surface2); color: var(--text);
-      font-family: var(--sans); font-size: 12px; font-weight: 600;
-      cursor: pointer; transition: background 0.12s, border-color 0.12s, color 0.12s;
-      margin-bottom: 6px; text-align: left;
-    }
-    .btn:last-child { margin-bottom: 0; }
-    .btn:hover  { background: var(--border); border-color: var(--muted); }
-    .btn:active { transform: scale(0.98); }
-    .btn.primary    { background: var(--accent-dim); border-color: rgba(79,255,176,0.3); color: var(--accent); }
-    .btn.primary:hover { background: rgba(79,255,176,0.15); }
-    .btn.danger-btn { background: var(--danger-dim); border-color: rgba(255,91,107,0.3); color: var(--danger); }
-    .btn.danger-btn:hover { background: rgba(255,91,107,0.15); }
-    .btn-icon { width: 16px; height: 16px; flex-shrink: 0; opacity: 0.8; }
-
-    .select-wrap { position: relative; }
-    .select-wrap select {
-      width: 100%; padding: 8px 10px;
-      border: 1px solid var(--border2); border-radius: var(--radius);
-      background: var(--surface2); color: var(--text);
-      font-family: var(--sans); font-size: 12px; font-weight: 600;
-      appearance: none; cursor: pointer; outline: none;
-    }
-    .select-wrap select:focus { border-color: var(--accent); }
-    .select-wrap::after { content: '↓'; position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 11px; pointer-events: none; }
-
-    .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
-    .stat-card  { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius); padding: 8px 10px; }
-    .stat-val   { font-size: 17px; font-weight: 800; color: var(--text); line-height: 1.2; }
-    .stat-lbl   { font-size: 10px; color: var(--muted); letter-spacing: 0.3px; margin-top: 2px; }
-
-    /* ── STATUS / FOOTER ── */
-    .statusbar {
-      display: flex; align-items: center; gap: 16px;
-      padding: 0 20px; height: 36px;
-      background: var(--surface); border-top: 1px solid var(--border);
-      font-size: 11px; font-family: var(--mono); flex-shrink: 0;
-    }
-    .status-msg      { flex: 1; font-weight: 500; }
-    .status-msg.ok   { color: var(--accent); }
-    .status-msg.err  { color: var(--danger); }
-    .status-msg.idle { color: var(--muted); }
-    .status-size     { color: var(--muted); }
-    .kbd { font-size: 10px; color: var(--muted); opacity: 0.6; display: none; }
-
-    /* ── SEO CONTENT (visible to crawlers, subtle for users) ── */
-    .seo-section {
-      padding: 40px 32px 32px;
-      background: var(--surface);
-      border-top: 1px solid var(--border);
-    }
-    .seo-section h1 {
-      font-size: 22px; font-weight: 800; color: var(--text);
-      margin-bottom: 12px; letter-spacing: -0.3px;
-    }
-    .seo-section h2 {
-      font-size: 15px; font-weight: 700; color: var(--text);
-      margin: 24px 0 8px;
-    }
-    .seo-section p  { font-size: 13px; color: var(--muted); line-height: 1.7; max-width: 800px; margin-bottom: 8px; }
-    .seo-features   { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; margin-top: 16px; }
-    .seo-feature    {
-      background: var(--surface2); border: 1px solid var(--border);
-      border-radius: var(--radius); padding: 12px 14px;
-    }
-    .seo-feature strong { display: block; font-size: 12px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
-    .seo-feature span   { font-size: 11px; color: var(--muted); }
-    .privacy-banner {
-      display: flex; align-items: flex-start; gap: 12px;
-      background: var(--accent-dim); border: 1px solid rgba(79,255,176,0.2);
-      border-radius: var(--radius-lg); padding: 14px 18px; margin-top: 20px; max-width: 700px;
-    }
-    .privacy-banner-icon { font-size: 20px; flex-shrink: 0; margin-top: 1px; }
-    .privacy-banner p    { font-size: 12px; color: var(--accent); line-height: 1.6; margin: 0; }
-    .privacy-banner strong { color: var(--accent); }
-
-    /* ── TOAST ── */
-    .toast {
-      position: fixed; bottom: 52px; left: 50%;
-      transform: translateX(-50%) translateY(8px);
-      background: var(--surface2); border: 1px solid var(--border2);
-      border-radius: var(--radius); padding: 8px 18px;
-      font-size: 12px; font-family: var(--sans); font-weight: 600;
-      color: var(--accent); opacity: 0;
-      transition: opacity 0.15s, transform 0.15s;
-      pointer-events: none; z-index: 999;
-    }
-    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-
-    /* ── RESPONSIVE ── */
-    @media (max-width: 800px) {
-      main { grid-template-columns: 1fr; grid-template-rows: auto auto auto; overflow: visible; }
-      .pane { min-height: 280px; border-right: none; border-bottom: 1px solid var(--border); }
-      .controls { flex-direction: row; flex-wrap: wrap; }
-      .ctrl-section { flex: 1; min-width: 160px; border-bottom: none; border-right: 1px solid var(--border); }
-      .nav-links { display: none; }
-      .kbd { display: none; }
-    }
-    @media (min-width: 1200px) { .kbd { display: inline; } }
-
-    ::-webkit-scrollbar { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
-    ::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+    .t-punct{ color: var(--muted2); }
+    .t-err  { color: var(--danger); }
   </style>
 </head>
 <body>
 <div class="shell">
+  <header id="site-header"></header>
+  <aside id="sidebar"></aside>
+  <div class="nav-backdrop"></div>
 
-  <!-- ── HEADER ── -->
-  <header>
-    <a class="logo" href="/" aria-label="DevTools home">
-      <span class="logo-dot" aria-hidden="true"></span>
-      DevTools
-    </a>
-
-    <nav class="nav-links" aria-label="Tools">
-      <a class="nav-link active" href="/json-formatter"  aria-current="page">JSON Formatter</a>
-      <a class="nav-link soon"  href="/base64"           aria-disabled="true" title="Coming soon">Base64</a>
-      <a class="nav-link soon"  href="/url-encoder"      aria-disabled="true" title="Coming soon">URL Encode</a>
-      <a class="nav-link soon"  href="/regex-tester"     aria-disabled="true" title="Coming soon">Regex</a>
-    </nav>
-
-    <span class="badge-private" role="status" aria-label="Privacy: all data processed locally">
-      100% LOCAL — NO SERVER
-    </span>
-  </header>
-
-  <!-- ── TOOL ── -->
-  <main aria-label="JSON Formatter tool">
-
-    <!-- INPUT PANE -->
-    <section class="pane" aria-label="JSON input">
-      <div class="pane-header">
-        <span class="pane-title">Input</span>
-        <span class="pane-meta" id="in-size" aria-live="polite"></span>
-      </div>
-      <textarea
-        id="input"
-        spellcheck="false"
-        autocomplete="off"
-        autocorrect="off"
-        autocapitalize="off"
-        aria-label="Paste JSON here"
-        placeholder='Paste your JSON here…&#10;&#10;{"name": "example", "value": 42}'
-      ></textarea>
+  <main class="page">
+    <section class="tool-head">
+      <h1>JSON Formatter</h1>
+      <p>Beautify, minify, validate, sort keys and convert JSON to CSV — with syntax highlighting.</p>
     </section>
 
-    <!-- CONTROLS COLUMN -->
-    <aside class="controls" aria-label="Formatter controls">
-
-      <div class="ctrl-section">
-        <div class="ctrl-label">Format</div>
-        <button class="btn primary" onclick="beautify()" title="Ctrl+Enter">
-          <svg class="btn-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M2 4h12M2 8h8M2 12h10"/></svg>
-          Beautify
-        </button>
-        <button class="btn" onclick="minify()" title="Ctrl+M">
-          <svg class="btn-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M2 8h12M6 5l-3 3 3 3M10 5l3 3-3 3"/></svg>
-          Minify
-        </button>
+    <section class="options" aria-label="Options">
+      <span class="opt-label">Action</span>
+      <div class="seg" id="mode">
+        <button data-v="beautify" class="on">Beautify</button>
+        <button data-v="minify">Minify</button>
+        <button data-v="sort">Sort keys</button>
+        <button data-v="csv">To CSV</button>
       </div>
-
-      <div class="ctrl-section">
-        <div class="ctrl-label">Tools</div>
-        <button class="btn" onclick="validate_only()">
-          <svg class="btn-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M3 8l3.5 3.5L13 4"/></svg>
-          Validate
-        </button>
-        <button class="btn" onclick="sort_keys()">
-          <svg class="btn-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M2 4h8M2 8h5M2 12h11M12 2v8M10 8l2 2 2-2"/></svg>
-          Sort Keys
-        </button>
-        <button class="btn" onclick="to_csv()">
-          <svg class="btn-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="2" y="3" width="12" height="10" rx="1"/><path d="M2 7h12M6 7v6"/></svg>
-          To CSV
-        </button>
+      <button class="btn" id="validate">Validate</button>
+      <span class="divider"></span>
+      <span class="opt-label">Indent</span>
+      <div class="seg" id="indent">
+        <button data-v="2" class="on">2 spaces</button>
+        <button data-v="4">4 spaces</button>
+        <button data-v="tab">Tab</button>
       </div>
+      <label class="check"><input type="checkbox" id="escape" /> Escape non-ASCII (\uXXXX)</label>
+      <span class="divider"></span>
+      <button class="btn" id="sample">Sample</button>
+    </section>
 
-      <div class="ctrl-section">
-        <div class="ctrl-label">Indent</div>
-        <div class="select-wrap">
-          <select id="indent" aria-label="Indentation size" onchange="if(document.getElementById('input').value.trim()) beautify()">
-            <option value="2">2 spaces</option>
-            <option value="4">4 spaces</option>
-            <option value="&#9;">Tab</option>
-          </select>
+    <div class="msg" id="msg" hidden></div>
+
+    <section class="grid-2">
+      <div class="panel">
+        <div class="panel-head">
+          <span class="panel-title">Input</span>
+          <span class="panel-actions">
+            <span class="panel-meta" id="in-meta"></span>
+            <button class="btn sm" id="open">Open file</button>
+            <button class="btn sm" id="clear">Clear</button>
+          </span>
         </div>
+        <textarea id="input" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off" aria-label="JSON input"
+          placeholder='Paste JSON or drop a .json file here…&#10;&#10;{"name": "example", "value": 42}'></textarea>
+        <input type="file" id="file" accept=".json,application/json,text/plain" hidden />
       </div>
-
-      <div class="ctrl-section">
-        <div class="ctrl-label">Output</div>
-        <button class="btn" onclick="copy_output()">
-          <svg class="btn-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="5" y="5" width="8" height="9" rx="1"/><path d="M3 11V3a1 1 0 011-1h8"/></svg>
-          Copy
-        </button>
-        <button class="btn" onclick="download_output()">
-          <svg class="btn-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M8 2v8M5 7l3 3 3-3M2 13h12"/></svg>
-          Download
-        </button>
-      </div>
-
-      <div class="ctrl-section">
-        <div class="ctrl-label">Stats</div>
-        <div class="stats-grid">
-          <div class="stat-card"><div class="stat-val" id="s-keys">—</div><div class="stat-lbl">keys</div></div>
-          <div class="stat-card"><div class="stat-val" id="s-depth">—</div><div class="stat-lbl">depth</div></div>
+      <div class="panel">
+        <div class="panel-head">
+          <span class="panel-title">Output</span>
+          <span class="panel-actions">
+            <span class="panel-meta" id="out-meta"></span>
+            <button class="btn sm" id="fs" title="Fullscreen (Esc to close)" aria-label="Fullscreen output"><span aria-hidden="true">⛶</span> Fullscreen</button>
+            <button class="btn sm" id="copy">Copy</button>
+            <button class="btn sm" id="dl">Download .json</button>
+          </span>
         </div>
-      </div>
-
-      <div class="ctrl-section">
-        <button class="btn" onclick="load_sample()">
-          <svg class="btn-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="2" y="2" width="12" height="12" rx="2"/><path d="M5 8h6M8 5v6"/></svg>
-          Sample
-        </button>
-        <button class="btn danger-btn" onclick="clear_all()" title="Ctrl+K">
-          <svg class="btn-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M3 4h10M6 4V3h4v1M5 4l.5 9h5l.5-9"/></svg>
-          Clear
-        </button>
-      </div>
-
-    </aside>
-
-    <!-- OUTPUT PANE -->
-    <section class="pane" aria-label="Formatted JSON output">
-      <div class="pane-header">
-        <span class="pane-title">Output</span>
-        <span class="pane-meta" id="out-size" aria-live="polite"></span>
-      </div>
-      <div class="output-scroll">
-        <pre class="output-pre" id="output" aria-live="polite" aria-label="Formatted output"></pre>
+        <pre class="out json-out" id="output" aria-live="polite" aria-label="Formatted output"></pre>
       </div>
     </section>
 
+    <div class="stats" id="stats" aria-live="polite"></div>
+
+    <section class="about">
+      <h2>About this tool</h2>
+      <p>A free JSON formatter, beautifier, validator and minifier. Paste JSON (or drop a .json file on the input) and it is re-formatted as you type, with color-coded keys, strings, numbers, booleans and null values. Switch the action to minify, sort keys at every nesting level, or convert an array of objects into CSV.</p>
+      <h2>Features</h2>
+      <ul>
+        <li><strong>Beautify</strong> with 2 spaces, 4 spaces or tabs.</li>
+        <li><strong>Validate</strong> with the exact line and column of the first syntax error, plus a hint on how to fix it.</li>
+        <li><strong>Lossless</strong>: numbers are written exactly as in the input (<code>12345678901234567890</code> and <code>1e400</code> stay intact), and duplicate keys are kept and reported.</li>
+        <li><strong>Minify</strong> to strip whitespace for transport.</li>
+        <li><strong>Sort keys</strong> alphabetically, recursively.</li>
+        <li><strong>JSON to CSV</strong> for arrays of objects (nested values are written as JSON).</li>
+        <li><strong>Escape non-ASCII</strong> characters as <code>\uXXXX</code> for ASCII-only transports.</li>
+        <li><strong>Size stats</strong>: original vs. result bytes (UTF-8) and the difference.</li>
+        <li><strong>Fullscreen</strong> output, copy and download as .json or .csv.</li>
+      </ul>
+      <h2>Keyboard shortcuts</h2>
+      <p><kbd>Ctrl+Enter</kbd> (<kbd>⌘+Enter</kbd> on Mac) runs the selected action · <kbd>Esc</kbd> closes fullscreen.</p>
+      <h2>Privacy &amp; security</h2>
+      <p>All JSON is processed in your browser by a strict, lossless parser that runs on the page. Nothing is sent to a server, stored, or logged, and there is no share or history feature. The highlighted output is built with DOM text nodes only — never <code>innerHTML</code> — so a malicious payload cannot inject markup or scripts.</p>
+    </section>
   </main>
-
-  <!-- ── STATUS BAR ── -->
-  <div class="statusbar" role="status" aria-live="polite">
-    <span class="status-msg idle" id="status-msg">Ready — paste JSON to begin</span>
-    <span class="status-size"     id="status-size"></span>
-    <span class="kbd">Ctrl+Enter beautify · Ctrl+M minify · Ctrl+K clear</span>
-  </div>
-
-  <!-- ── SEO / GEO CONTENT SECTION ── -->
-  <!-- This section is intentionally visible — it signals purpose to crawlers and AI models -->
-  <section class="seo-section" aria-label="About this tool">
-
-    <h1>JSON Formatter — Free Online JSON Beautifier & Validator</h1>
-    <p>
-      A free developer tool to format, beautify, validate, minify, and convert JSON data.
-      Paste your JSON into the editor above and it formats instantly with syntax highlighting.
-      Supports sorting keys, converting JSON arrays to CSV, and downloading the result.
-    </p>
-
-    <div class="privacy-banner" role="note">
-      <span class="privacy-banner-icon" aria-hidden="true">🔒</span>
-      <p>
-        <strong>Your data never leaves your browser.</strong>
-        All processing happens locally using JavaScript — no JSON is sent to any server, stored, or logged.
-        This tool has no "Recent Links" feed, no paste history, and no backend.
-        Safe to use with sensitive API responses, tokens, and production payloads.
-      </p>
-    </div>
-
-    <h2>Features</h2>
-    <div class="seo-features">
-      <div class="seo-feature">
-        <strong>Beautify / Pretty Print</strong>
-        <span>Indent JSON with 2 spaces, 4 spaces, or tabs for readability.</span>
-      </div>
-      <div class="seo-feature">
-        <strong>Validate JSON</strong>
-        <span>Instant syntax validation with precise error messages and line numbers.</span>
-      </div>
-      <div class="seo-feature">
-        <strong>Minify / Compact</strong>
-        <span>Remove whitespace and reduce payload size for production use.</span>
-      </div>
-      <div class="seo-feature">
-        <strong>Sort Keys</strong>
-        <span>Sort all object keys alphabetically at every nesting level.</span>
-      </div>
-      <div class="seo-feature">
-        <strong>JSON to CSV</strong>
-        <span>Convert a JSON array of objects to a comma-separated CSV file.</span>
-      </div>
-      <div class="seo-feature">
-        <strong>Syntax Highlighting</strong>
-        <span>Color-coded keys, strings, numbers, booleans, and null values.</span>
-      </div>
-      <div class="seo-feature">
-        <strong>Drag & Drop</strong>
-        <span>Drop a .json file directly onto the editor — no file picker needed.</span>
-      </div>
-      <div class="seo-feature">
-        <strong>Download Output</strong>
-        <span>Save the formatted result as a .json or .csv file instantly.</span>
-      </div>
-    </div>
-
-    <h2>How to use</h2>
-    <p>Paste your JSON into the input panel on the left. The formatter validates and beautifies it automatically. Use the control panel to minify, sort keys, convert to CSV, or adjust indentation. Click Copy to copy the output to your clipboard, or Download to save it as a file.</p>
-    <p>Keyboard shortcuts: <kbd>Ctrl+Enter</kbd> to beautify, <kbd>Ctrl+M</kbd> to minify, <kbd>Ctrl+K</kbd> to clear.</p>
-
-    <h2>Privacy & Security</h2>
-    <p>This tool processes all JSON client-side in your browser using the native <code>JSON.parse</code> and <code>JSON.stringify</code> APIs. No network requests are made with your data. The output panel uses DOM <code>textContent</code> exclusively — never <code>innerHTML</code> — which prevents any possibility of cross-site scripting (XSS) from malicious JSON payloads. There is no save, share, or "recent links" feature, which eliminates the primary data-exposure vector found in other online JSON formatters.</p>
-
-  </section>
-
 </div>
 
-<!-- TOAST -->
-<div class="toast" id="toast" role="alert" aria-live="assertive"></div>
-
+<script src="/assets/tools.js"></script>
 <script>
-"use strict";
+(function () {
+  'use strict';
+  const { $, $$, el, debounce, copy, download, msg } = DevTools;
 
-const inp       = document.getElementById('input');
-const outPre    = document.getElementById('output');
-const statusEl  = document.getElementById('status-msg');
-const inSizeEl  = document.getElementById('in-size');
-const outSizeEl = document.getElementById('out-size');
-const statSize  = document.getElementById('status-size');
-const sKeys     = document.getElementById('s-keys');
-const sDepth    = document.getElementById('s-depth');
-const toastEl   = document.getElementById('toast');
+  // ==CORE==
+  function byteLen(s) { return new TextEncoder().encode(s).length; }
 
-let toastTimer = null;
+  function escapeNonAscii(s) {
+    return s.replace(/[\u0080-\uffff]/g, ch => '\\u' + ch.charCodeAt(0).toString(16).padStart(4, '0'));
+  }
 
-/* ── HELPERS ── */
-function fmtSize(str) {
-  const b = new Blob([str]).size;
-  return b < 1024 ? b + ' B' : (b / 1024).toFixed(1) + ' KB';
-}
-function setStatus(msg, type) {
-  statusEl.textContent = msg;
-  statusEl.className   = 'status-msg ' + type;
-}
-function showToast(msg) {
-  clearTimeout(toastTimer);
-  toastEl.textContent = msg;
-  toastEl.classList.add('show');
-  toastTimer = setTimeout(() => toastEl.classList.remove('show'), 1800);
-}
-function getIndent() {
-  const v = document.getElementById('indent').value;
-  return v === '\t' ? '\t' : parseInt(v, 10);
-}
-
-/* ── SAFE SYNTAX HIGHLIGHTER (DOM only — no innerHTML) ── */
-function highlightSafe(json) {
-  outPre.textContent = '';
-  const lines = json.split('\n');
-  lines.forEach((line, i) => {
-    const keyMatch = line.match(/^(\s*)("(?:[^"\\]|\\.)*")(\s*:)(.*)/);
-    const lineFrag = document.createDocumentFragment();
-    if (keyMatch) {
-      lineFrag.appendChild(document.createTextNode(keyMatch[1]));
-      const ks = document.createElement('span');
-      ks.className   = 't-key';
-      ks.textContent = keyMatch[2];  /* textContent — safe */
-      lineFrag.appendChild(ks);
-      const cs = document.createElement('span');
-      cs.className   = 't-punct';
-      cs.textContent = keyMatch[3];
-      lineFrag.appendChild(cs);
-      lineFrag.appendChild(tokeniseValue(keyMatch[4]));
-    } else {
-      lineFrag.appendChild(tokeniseValue(line));
+  /* ── Lossless JSON parser: keeps number source text and duplicate keys ──
+     Nodes: { t: 'o', e: [[key, node], ...] }  { t: 'a', e: [node, ...] }  { t: 's', v }  { t: 'n', raw }
+            { t: 'b', v }  { t: 'z' } (null). Errors are SyntaxErrors with .pos (offset), .line and .col. */
+  const LJ_STR = /"[^"\\\u0000-\u001f]*(?:\\(?:["\\/bfnrt]|u[0-9a-fA-F]{4})[^"\\\u0000-\u001f]*)*"/y;
+  const LJ_NUM = /-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?/y;
+  function lineColAt(text, pos) {
+    let line = 1, last = -1;
+    for (let k = text.indexOf('\n'); k !== -1 && k < pos; k = text.indexOf('\n', k + 1)) { line++; last = k; }
+    return { line, col: pos - last };
+  }
+  function parseLossless(text) {
+    let i = 0;
+    const dups = [];
+    function fail(message, pos) {
+      if (pos !== undefined) i = pos;
+      const e = new SyntaxError(message);
+      const lc = lineColAt(text, i);
+      e.pos = i; e.line = lc.line; e.col = lc.col;
+      throw e;
     }
-    outPre.appendChild(lineFrag);
-    if (i < lines.length - 1) outPre.appendChild(document.createTextNode('\n'));
-  });
-}
-
-function tokeniseValue(str) {
-  const frag = document.createDocumentFragment();
-  const patterns = [
-    { re: /^(\s*)("(?:[^"\\]|\\.)*")(.*)/, cls: 't-str'  },
-    { re: /^(\s*)(-?\d[\d.eE+\-]*)(.*)/, cls: 't-num'  },
-    { re: /^(\s*)(true|false)(.*)/,        cls: 't-bool' },
-    { re: /^(\s*)(null)(.*)/,              cls: 't-null' },
-    { re: /^(\s*)([{}\[\],])(.*)/,         cls: 't-punct'},
-  ];
-  let rest = str;
-  while (rest.length > 0) {
-    let matched = false;
-    for (const { re, cls } of patterns) {
-      const m = rest.match(re);
-      if (m) {
-        if (m[1]) frag.appendChild(document.createTextNode(m[1]));
-        const s = document.createElement('span');
-        s.className   = cls;
-        s.textContent = m[2]; /* textContent — safe */
-        frag.appendChild(s);
-        rest    = m[3];
-        matched = true;
-        break;
+    function ch() { return i < text.length ? JSON.stringify(text[i]) : 'end of input'; }
+    function ws() {
+      for (;;) { const c = text.charCodeAt(i); if (c === 32 || c === 10 || c === 13 || c === 9) i++; else return; }
+    }
+    function strFail() {
+      for (let k = i + 1; k < text.length; k++) {
+        const c = text.charCodeAt(k);
+        if (c === 34) break;
+        if (c < 32) fail('Unescaped control character in a string — write it as an escape such as \\n or \\t.', k);
+        if (c === 92) {
+          const n = text[k + 1];
+          if (n === 'u') { if (!/^[0-9a-fA-F]{4}$/.test(text.substr(k + 2, 4))) fail('Invalid \\u escape — it needs exactly 4 hex digits.', k); k += 5; }
+          else if (n !== undefined && '"\\/bfnrt'.includes(n)) k++;
+          else fail('Invalid escape sequence "\\' + (n || '') + '" — only \\" \\\\ \\/ \\b \\f \\n \\r \\t and \\uXXXX are allowed.', k);
+        }
+      }
+      fail('Unterminated string — add the closing double quote (").', i);
+    }
+    function str() {
+      LJ_STR.lastIndex = i;
+      const m = LJ_STR.exec(text);
+      if (!m) strFail();
+      i = LJ_STR.lastIndex;
+      const s = m[0];
+      return s.indexOf('\\') < 0 ? s.slice(1, -1) : JSON.parse(s);
+    }
+    function badValue() {
+      const c = text[i];
+      if (i >= text.length) fail('Unexpected end of input — a value, closing bracket or brace is missing.');
+      if (c === "'") fail('Strings must use double quotes (") — single quotes are not valid JSON.');
+      if (c === '}' || c === ']') fail('Unexpected ' + ch() + ' — remove the trailing comma before it, or add a value.');
+      const word = /^[A-Za-z_$][\w$]*/.exec(text.slice(i, i + 32));
+      if (word) fail('Unexpected word "' + word[0] + '" — JSON only allows true, false, null, numbers and "strings".');
+      fail('Unexpected ' + ch() + ' — expected a value.');
+    }
+    function value() {
+      ws();
+      const c = text.charCodeAt(i);
+      if (c === 34) return { t: 's', v: str() };
+      if (c === 123) {
+        i++; ws();
+        const e = [];
+        if (text.charCodeAt(i) === 125) { i++; return { t: 'o', e }; }
+        const seen = new Set();
+        for (;;) {
+          ws();
+          if (text.charCodeAt(i) !== 34) {
+            if (text[i] === "'") fail('Property names must use double quotes (") — single quotes are not valid JSON.');
+            if (text[i] === '}') fail('Trailing comma before "}" — remove the last comma.');
+            if (i >= text.length) fail('Unexpected end of input — a closing "}" is missing.');
+            fail('Expected a double-quoted property name, found ' + ch() + '.');
+          }
+          const kpos = i, k = str();
+          ws();
+          if (text.charCodeAt(i) !== 58) fail('Expected ":" after property name ' + JSON.stringify(k) + ', found ' + ch() + '.');
+          i++;
+          const v = value();
+          if (seen.has(k)) dups.push({ key: k, pos: kpos }); else seen.add(k);
+          e.push([k, v]);
+          ws();
+          const d = text.charCodeAt(i);
+          if (d === 44) { i++; continue; }
+          if (d === 125) { i++; return { t: 'o', e }; }
+          if (i >= text.length) fail('Unexpected end of input — a closing "}" is missing.');
+          fail('Expected "," or "}" after a property value, found ' + ch() + '.');
+        }
+      }
+      if (c === 91) {
+        i++; ws();
+        const e = [];
+        if (text.charCodeAt(i) === 93) { i++; return { t: 'a', e }; }
+        for (;;) {
+          e.push(value());
+          ws();
+          const d = text.charCodeAt(i);
+          if (d === 44) { i++; continue; }
+          if (d === 93) { i++; return { t: 'a', e }; }
+          if (i >= text.length) fail('Unexpected end of input — a closing "]" is missing.');
+          fail('Expected "," or "]" after an array element, found ' + ch() + '.');
+        }
+      }
+      if (c === 45 || (c >= 48 && c <= 57)) {
+        LJ_NUM.lastIndex = i;
+        const m = LJ_NUM.exec(text);
+        if (!m) fail('Invalid number — a digit must follow "-".');
+        i = LJ_NUM.lastIndex;
+        const n = text.charCodeAt(i);
+        if (n >= 48 && n <= 57) fail('Invalid number — leading zeros are not allowed.', i - 1);
+        if (n === 46 || n === 101 || n === 69) fail('Invalid number — a digit must follow "' + text[i] + '".');
+        return { t: 'n', raw: m[0] };
+      }
+      if (text.startsWith('true', i)) { i += 4; return { t: 'b', v: true }; }
+      if (text.startsWith('false', i)) { i += 5; return { t: 'b', v: false }; }
+      if (text.startsWith('null', i)) { i += 4; return { t: 'z' }; }
+      badValue();
+    }
+    let root;
+    try {
+      root = value();
+    } catch (e) {
+      if (e instanceof RangeError) { const r = new SyntaxError('The JSON is nested too deeply to process.'); r.pos = -1; throw r; }
+      throw e;
+    }
+    ws();
+    if (i < text.length) fail('Unexpected ' + ch() + ' after the end of the JSON value — remove it, or wrap several values in an array.');
+    return { root, dups };
+  }
+  /** Describe duplicate keys for a message (null when there are none). */
+  function describeDups(text, dups, label) {
+    if (!dups.length) return null;
+    const first = dups[0], lc = lineColAt(text, first.pos);
+    return (label ? label + ': d' : 'D') + 'uplicate key ' + JSON.stringify(first.key) + ' at line ' + lc.line +
+      ' — later value wins in most parsers' + (dups.length > 1 ? ' (' + (dups.length - 1) + ' more duplicate' + (dups.length > 2 ? 's' : '') + ')' : '') + '.';
+  }
+  /** Serialize a node like JSON.stringify(value, null, indent), keeping number text and duplicate keys. */
+  function stringifyNode(node, indent, sortKeys) {
+    const ind = typeof indent === 'number' ? ' '.repeat(Math.max(0, Math.min(10, indent))) : (indent || '');
+    const colon = ind ? ': ' : ':', out = [];
+    const byKey = (a, b) => (a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0);
+    function w(n, pad) {
+      switch (n.t) {
+        case 's': out.push(JSON.stringify(n.v)); return;
+        case 'n': out.push(n.raw); return;
+        case 'b': out.push(n.v ? 'true' : 'false'); return;
+        case 'z': out.push('null'); return;
+        case 'a': case 'o': {
+          const obj = n.t === 'o', list = obj && sortKeys ? n.e.slice().sort(byKey) : n.e;
+          const open = obj ? '{' : '[', close = obj ? '}' : ']';
+          if (!list.length) { out.push(open + close); return; }
+          const p2 = pad + ind, sep = ind ? ',\n' + p2 : ',';
+          out.push(ind ? open + '\n' + p2 : open);
+          for (let k = 0; k < list.length; k++) {
+            if (k) out.push(sep);
+            if (obj) { out.push(JSON.stringify(list[k][0]) + colon); w(list[k][1], p2); } else w(list[k], p2);
+          }
+          out.push(ind ? '\n' + pad + close : close);
+        }
       }
     }
-    if (!matched) {
-      /* consume one char to avoid infinite loop on unmatched chars */
-      frag.appendChild(document.createTextNode(rest[0]));
-      rest = rest.slice(1);
+    w(node, '');
+    return out.join('');
+  }
+
+  /** CSV from a parsed node: an object or an array of objects. Numbers keep their source text. */
+  function toCsv(root) {
+    const rows = root.t === 'a' ? root.e : [root];
+    const keys = [], keySet = new Set(), maps = [];
+    for (const r of rows) {
+      const m = new Map();
+      if (r.t === 'o') for (const [k, v] of r.e) { m.set(k, v); if (!keySet.has(k)) { keySet.add(k); keys.push(k); } }
+      maps.push(m);
     }
-  }
-  return frag;
-}
-
-/* ── STATS ── */
-function countKeys(o) {
-  if (typeof o !== 'object' || o === null) return 0;
-  if (Array.isArray(o)) return o.reduce((a, v) => a + countKeys(v), 0);
-  return Object.keys(o).length + Object.values(o).reduce((a, v) => a + countKeys(v), 0);
-}
-function maxDepth(o) {
-  if (typeof o !== 'object' || o === null) return 0;
-  const vals = Array.isArray(o) ? o : Object.values(o);
-  return vals.length === 0 ? 1 : 1 + Math.max(...vals.map(maxDepth));
-}
-function updateStats(p) {
-  sKeys.textContent  = (p !== null && typeof p === 'object') ? countKeys(p) : '—';
-  sDepth.textContent = (p !== null && typeof p === 'object') ? maxDepth(p)  : '—';
-}
-function updateSizes(inStr, outStr) {
-  inSizeEl.textContent  = inStr  ? fmtSize(inStr)  : '';
-  outSizeEl.textContent = outStr ? fmtSize(outStr)  : '';
-  statSize.textContent  = outStr ? fmtSize(outStr) + ' output' : '';
-}
-
-/* ── PARSE ── */
-function parseInput() {
-  const v = inp.value.trim();
-  if (!v) throw new Error('Empty input');
-  return JSON.parse(v); /* native — no eval, no external lib */
-}
-
-/* ── ACTIONS ── */
-function beautify() {
-  try {
-    const o   = parseInput();
-    const str = JSON.stringify(o, null, getIndent());
-    highlightSafe(str);
-    setStatus('✓  Valid JSON', 'ok');
-    updateStats(o); updateSizes(inp.value, str);
-  } catch (e) {
-    outPre.textContent = '';
-    setStatus('✗  ' + e.message, 'err');
-    updateStats(null); updateSizes(inp.value, '');
-  }
-}
-function minify() {
-  try {
-    const o   = parseInput();
-    const str = JSON.stringify(o);
-    outPre.textContent = str; /* minified output — textContent */
-    setStatus('✓  Minified — ' + fmtSize(str), 'ok');
-    updateStats(o); updateSizes(inp.value, str);
-  } catch (e) { setStatus('✗  ' + e.message, 'err'); }
-}
-function validate_only() {
-  try   { parseInput(); setStatus('✓  Valid JSON — no errors found', 'ok'); }
-  catch (e) { setStatus('✗  ' + e.message, 'err'); }
-}
-function sort_keys() {
-  try {
-    const sortObj = v => {
-      if (Array.isArray(v)) return v.map(sortObj);
-      if (v && typeof v === 'object')
-        return Object.keys(v).sort().reduce((a, k) => { a[k] = sortObj(v[k]); return a; }, {});
-      return v;
+    if (!keys.length) throw new Error('CSV needs an object or an array of objects — the input is ' + (root.t === 'a' ? 'an array without objects.' : 'a single value.'));
+    const quote = s => /[",\r\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+    const cell = n => {
+      if (!n || n.t === 'z') return '';
+      if (n.t === 's') return quote(n.v);
+      if (n.t === 'n') return n.raw;
+      if (n.t === 'b') return n.v ? 'true' : 'false';
+      return quote(stringifyNode(n, 0));
     };
-    const sorted = sortObj(parseInput());
-    const str    = JSON.stringify(sorted, null, getIndent());
-    highlightSafe(str);
-    setStatus('✓  Keys sorted alphabetically', 'ok');
-    updateStats(sorted); updateSizes(inp.value, str);
-  } catch (e) { setStatus('✗  ' + e.message, 'err'); }
-}
-function to_csv() {
-  try {
-    let o = parseInput();
-    if (!Array.isArray(o)) o = [o];
-    const keys = [...new Set(o.flatMap(r => r && typeof r === 'object' ? Object.keys(r) : []))];
-    const rows = o.map(r =>
-      keys.map(k => {
-        const v = (r && r[k] !== undefined) ? String(r[k]) : '';
-        return (v.includes(',') || v.includes('"') || v.includes('\n'))
-          ? '"' + v.replace(/"/g, '""') + '"' : v;
-      }).join(',')
-    );
-    const csv = [keys.join(','), ...rows].join('\n');
-    outPre.textContent = csv; /* textContent — safe */
-    setStatus('✓  Converted to CSV — ' + rows.length + ' rows', 'ok');
-    sKeys.textContent = rows.length; sDepth.textContent = keys.length;
-    updateSizes(inp.value, csv);
-  } catch (e) { setStatus('✗  ' + e.message, 'err'); }
-}
-function copy_output() {
-  const t = outPre.textContent;
-  if (!t) { showToast('Nothing to copy'); return; }
-  navigator.clipboard.writeText(t).then(() => showToast('Copied ✓'));
-}
-function download_output() {
-  const t = outPre.textContent;
-  if (!t) { showToast('Nothing to download'); return; }
-  const ext  = (t.includes(',') && !t.trimStart().startsWith('{')) ? 'csv' : 'json';
-  const blob = new Blob([t], { type: 'text/' + ext });
-  const url  = URL.createObjectURL(blob);
-  const a    = document.createElement('a');
-  a.href = url; a.download = 'output.' + ext; a.click();
-  URL.revokeObjectURL(url);
-  showToast('Downloaded ✓');
-}
-function clear_all() {
-  inp.value = ''; outPre.textContent = '';
-  setStatus('Ready — paste JSON to begin', 'idle');
-  inSizeEl.textContent = outSizeEl.textContent = statSize.textContent = '';
-  sKeys.textContent = sDepth.textContent = '—';
-}
-function load_sample() {
-  inp.value = JSON.stringify({
-    isSuccess: true, code: "200", message: "OK", processNo: 1001,
-    customer: {
-      id: 42, name: "Ahmet", surname: "Yılmaz",
-      workingStatusCode: "E", monthlyIncome: 15000,
-      birthDate: "1985-03-15T00:00:00Z", birthCountryCode: "TR",
-      birthPlace: "İstanbul", email: "ahmet@example.com",
-      addressList: [{ type: 1, cityCode: "34", city: "İstanbul", district: "Kadıköy" }]
+    const lines = maps.map(m => keys.map(k => cell(m.get(k))).join(','));
+    return { csv: [keys.map(quote).join(','), ...lines].join('\n'), rows: lines.length, cols: keys.length };
+  }
+
+  /** Key count (duplicates included) and nesting depth of a parsed node. */
+  function nodeStats(root) {
+    let keys = 0, depth = 0;
+    const stack = [[root, 0]];
+    while (stack.length) {
+      const [n, d] = stack.pop();
+      if (n.t !== 'o' && n.t !== 'a') continue;
+      if (d + 1 > depth) depth = d + 1;
+      if (n.t === 'o') { keys += n.e.length; for (const p of n.e) stack.push([p[1], d + 1]); }
+      else for (const x of n.e) stack.push([x, d + 1]);
     }
-  }, null, 2);
-  beautify();
-}
+    return { keys, depth };
+  }
 
-/* ── AUTO-FORMAT (debounced) ── */
-inp.addEventListener('input', () => {
-  updateSizes(inp.value, outPre.textContent);
-  if (!inp.value.trim()) { setStatus('Ready — paste JSON to begin', 'idle'); return; }
-  clearTimeout(inp._t);
-  inp._t = setTimeout(beautify, 300);
-});
+  /** mode: beautify | minify | sort | csv. indent: number or '\t'. Lossless: number text and duplicate keys are kept. */
+  function formatJson(text, mode, indent, escape) {
+    const { root, dups } = parseLossless(text);
+    let out, extra = {};
+    if (mode === 'minify') out = stringifyNode(root, 0);
+    else if (mode === 'sort') out = stringifyNode(root, indent, true);
+    else if (mode === 'csv') { const r = toCsv(root); out = r.csv; extra = { rows: r.rows, cols: r.cols }; }
+    else out = stringifyNode(root, indent);
+    if (escape && mode !== 'csv') out = escapeNonAscii(out);
+    return Object.assign({ root, dups, out }, extra);
+  }
 
-/* ── KEYBOARD SHORTCUTS ── */
-document.addEventListener('keydown', e => {
-  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); beautify(); }
-  if ((e.ctrlKey || e.metaKey) && e.key === 'm')     { e.preventDefault(); minify(); }
-  if ((e.ctrlKey || e.metaKey) && e.key === 'k')     { e.preventDefault(); clear_all(); }
-});
+  /* Single-pass highlighter (sticky regex, O(length)). Calls emit(cls, text) with adjacent tokens of the same
+     class merged (fewer DOM nodes); cls '' = plain text. */
+  const HL_RE = /("[^"\\\n]*(?:\\.[^"\\\n]*)*")(\s*:)?|(-?\d[\d.eE+-]*)|(true|false)|(null)|([{}[\],:])|([^"\-\d{}[\],:tfn]+|.)/ys;
+  function highlightTokens(text, emit) {
+    let cls = '', buf = '';
+    const put = (c, t) => { if (c === cls) buf += t; else { if (buf) emit(cls, buf); cls = c; buf = t; } };
+    HL_RE.lastIndex = 0;
+    for (let m; HL_RE.lastIndex < text.length && (m = HL_RE.exec(text));) {
+      if (m[7] !== undefined) put('', m[7]);
+      else if (m[1] !== undefined) {
+        if (m[2]) { put('t-key', m[1]); const sp = m[2].length - 1; if (sp) put('', m[2].slice(0, sp)); put('t-punct', ':'); }
+        else put('t-str', m[1]);
+      } else if (m[3] !== undefined) put('t-num', m[3]);
+      else if (m[4] !== undefined) put('t-bool', m[4]);
+      else if (m[5] !== undefined) put('t-null', m[5]);
+      else put('t-punct', m[6]);
+    }
+    if (buf) emit(cls, buf);
+  }
+  // ==/CORE==
 
-/* ── DRAG & DROP ── */
-inp.addEventListener('dragover',  e => { e.preventDefault(); inp.style.background = '#0f1217'; });
-inp.addEventListener('dragleave', () => { inp.style.background = ''; });
-inp.addEventListener('drop', e => {
-  e.preventDefault(); inp.style.background = '';
-  const file = e.dataTransfer.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = ev => { inp.value = ev.target.result; beautify(); };
-  reader.readAsText(file);
-});
+  const input = $('#input'), outPre = $('#output'), msgEl = $('#msg'), stats = $('#stats');
+  let mode = 'beautify', indentV = '2', lastOut = '', lastKind = 'json';
+  const HIGHLIGHT_LIMIT = 400000;
+
+  function getIndent() { return indentV === 'tab' ? '\t' : parseInt(indentV, 10); }
+
+  /* ── SAFE SYNTAX HIGHLIGHTER (DOM only — no innerHTML) ── */
+  function span(cls, text) { const s = document.createElement('span'); s.className = cls; s.textContent = text; return s; }
+  function highlightInto(target, json) {
+    const frag = document.createDocumentFragment();
+    highlightTokens(json, (cls, text) => frag.appendChild(cls ? span(cls, text) : document.createTextNode(text)));
+    target.replaceChildren(frag);
+  }
+
+  function fmtBytes(n) { return n < 1024 ? n + ' bytes' : n < 1048576 ? (n / 1024).toFixed(1) + ' KB' : (n / 1048576).toFixed(2) + ' MB'; }
+
+  function renderStats(inText, outText, root, extra) {
+    if (!inText) { stats.replaceChildren(); stats.hidden = true; return; }
+    const a = byteLen(inText), parts = [el('span', null, 'Original: ', el('b', null, fmtBytes(a)))];
+    if (outText) {
+      const b = byteLen(outText), d = b - a;
+      const pct = a ? ' (' + (d > 0 ? '+' : '') + (d / a * 100).toFixed(1) + '%)' : '';
+      parts.push(el('span', null, 'Result: ', el('b', null, fmtBytes(b))));
+      parts.push(el('span', null, 'Diff: ', el('b', null, (d > 0 ? '+' : d < 0 ? '−' : '') + fmtBytes(Math.abs(d)) + pct)));
+    }
+    if (root && (root.t === 'o' || root.t === 'a')) {
+      const st = nodeStats(root);
+      parts.push(el('span', null, 'Keys: ', el('b', null, String(st.keys))));
+      parts.push(el('span', null, 'Depth: ', el('b', null, String(st.depth))));
+    }
+    if (extra && extra.rows != null) parts.push(el('span', null, 'CSV: ', el('b', null, extra.rows + ' rows × ' + extra.cols + ' columns')));
+    stats.replaceChildren(...parts); stats.hidden = false;
+  }
+
+  function showError(text, e) {
+    const hasPos = typeof e.line === 'number' && e.pos >= 0;
+    msg(msgEl, 'error', '✗ Invalid JSON: ' + e.message + (hasPos ? ' Line ' + e.line + ', column ' + e.col + '.' : ''));
+    DevTools.invalid(input, true);
+    lastOut = '';
+    $('#out-meta').textContent = '';
+    if (hasPos) {
+      // show the offending line with a caret under the column
+      const src = text.split('\n')[e.line - 1] || '';
+      const start = Math.max(0, e.col - 60);
+      const snippet = src.slice(start, start + 120);
+      outPre.replaceChildren(
+        span('t-null', 'Line ' + e.line + ':\n'),
+        document.createTextNode(snippet + '\n'),
+        span('t-err', ' '.repeat(Math.max(0, e.col - 1 - start)) + '^')
+      );
+    } else outPre.replaceChildren();
+    renderStats(text, '', null);
+  }
+
+  function run(validateOnly) {
+    const text = input.value;
+    $('#in-meta').textContent = text ? text.length.toLocaleString() + ' chars' : '';
+    if (!text.trim()) {
+      outPre.replaceChildren(); lastOut = ''; $('#out-meta').textContent = '';
+      msg(msgEl, ''); DevTools.invalid(input, false); renderStats('', ''); return;
+    }
+    let r;
+    try { r = formatJson(text, mode, getIndent(), $('#escape').checked); }
+    catch (e) {
+      if (e instanceof SyntaxError) showError(text, e);
+      else { msg(msgEl, 'error', '✗ ' + e.message); DevTools.invalid(input, false); outPre.replaceChildren(); lastOut = ''; renderStats(text, '', null); }
+      return;
+    }
+    DevTools.invalid(input, false);
+    lastOut = r.out; lastKind = mode === 'csv' ? 'csv' : 'json';
+    $('#dl').textContent = 'Download .' + lastKind;
+    if (mode === 'csv' || r.out.length > HIGHLIGHT_LIMIT) outPre.textContent = r.out;
+    else highlightInto(outPre, r.out);
+    $('#out-meta').textContent = r.out.length.toLocaleString() + ' chars';
+    const label = validateOnly ? 'Valid JSON — no errors found'
+      : { beautify: 'Valid JSON — formatted', minify: 'Valid JSON — minified', sort: 'Keys sorted alphabetically', csv: 'Converted to CSV — ' + r.rows + (r.rows === 1 ? ' row' : ' rows') }[mode];
+    const dupNote = describeDups(text, r.dups);
+    if (dupNote) msg(msgEl, 'warn', '⚠ ' + label + '. ' + dupNote + (mode === 'csv' ? ' CSV uses the later value.' : ' Both entries are kept in the output.'));
+    else msg(msgEl, 'ok', '✓ ' + label);
+    renderStats(text, r.out, r.root, r);
+  }
+
+  function setSeg(id, v) { $$('#' + id + ' button').forEach(b => b.classList.toggle('on', b.dataset.v === v)); }
+  function setMode(v) { mode = v; setSeg('mode', v); run(); }
+
+  $$('#mode button').forEach(b => b.addEventListener('click', () => setMode(b.dataset.v)));
+  $$('#indent button').forEach(b => b.addEventListener('click', () => { indentV = b.dataset.v; setSeg('indent', indentV); run(); }));
+  $('#escape').addEventListener('change', () => run());
+  $('#validate').addEventListener('click', () => run(true));
+  input.addEventListener('input', debounce(() => run(), 250));
+
+  function clearAll() { input.value = ''; run(); input.focus(); }
+  $('#clear').addEventListener('click', clearAll);
+  $('#copy').addEventListener('click', e => { if (lastOut) copy(lastOut, e.currentTarget); });
+  $('#dl').addEventListener('click', () => {
+    if (!lastOut) return;
+    if (lastKind === 'csv') download('output.csv', lastOut, 'text/csv;charset=utf-8');
+    else download('output.json', lastOut, 'application/json;charset=utf-8');
+  });
+
+  $('#sample').addEventListener('click', () => {
+    input.value = JSON.stringify({
+      isSuccess: true, code: '200', message: 'OK', processNo: 1001,
+      customer: {
+        id: 42, name: 'Ahmet', surname: 'Yılmaz', workingStatusCode: 'E', monthlyIncome: 15000.5,
+        birthDate: '1985-03-15T00:00:00Z', birthCountryCode: 'TR', birthPlace: 'İstanbul', email: 'ahmet@example.com',
+        tags: ['vip', 'newsletter'], manager: null,
+        addressList: [{ type: 1, cityCode: '34', city: 'İstanbul', district: 'Kadıköy' }]
+      }
+    }, null, 2);
+    run();
+  });
+
+  /* ── FILE OPEN + DRAG & DROP ── */
+  function readFile(file) {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => { input.value = String(ev.target.result || ''); run(); };
+    reader.onerror = () => msg(msgEl, 'error', 'Could not read the file.');
+    reader.readAsText(file);
+  }
+  $('#open').addEventListener('click', () => $('#file').click());
+  $('#file').addEventListener('change', e => { readFile(e.target.files[0]); e.target.value = ''; });
+  input.addEventListener('dragover', e => { e.preventDefault(); input.classList.add('drag'); });
+  input.addEventListener('dragleave', () => input.classList.remove('drag'));
+  input.addEventListener('drop', e => { e.preventDefault(); input.classList.remove('drag'); readFile(e.dataTransfer.files[0]); });
+
+  /* ── FULLSCREEN (native modal dialog: inert background, Esc closes, focus returns to the opener) ── */
+  let dlg = null;
+  $('#fs').addEventListener('click', e => {
+    if (dlg) return;
+    const opener = e.currentTarget;
+    const pre = outPre.cloneNode(true); pre.removeAttribute('id'); pre.removeAttribute('aria-live'); pre.setAttribute('tabindex', '0');
+    const closeBtn = el('button', { class: 'btn sm', onclick: () => dlg.close() }, 'Close (Esc)');
+    dlg = el('dialog', { class: 'fs-overlay', 'aria-label': 'Output fullscreen' },
+      el('div', { class: 'fs-bar' },
+        el('span', { class: 'panel-title' }, 'Output'),
+        el('button', { class: 'btn sm', onclick: ev => copy(lastOut, ev.currentTarget) }, 'Copy'),
+        closeBtn),
+      el('div', { class: 'fs-body' }, pre));
+    dlg.addEventListener('close', () => {
+      dlg.remove(); dlg = null; document.body.style.overflow = '';
+      if (opener.isConnected) opener.focus();
+    });
+    document.body.appendChild(dlg); document.body.style.overflow = 'hidden';
+    dlg.showModal();
+    closeBtn.focus();
+  });
+
+  /* ── KEYBOARD SHORTCUTS ── Ctrl/⌘+Enter runs the selected action (Esc is handled by the dialog). */
+  document.addEventListener('keydown', e => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); run(); }
+  });
+
+  stats.hidden = true;
+  run();
+})();
 </script>
 </body>
 </html>

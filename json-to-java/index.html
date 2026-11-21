@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-QkdRsBBw3UauOPvhx9krNduR1YzX1/WPkx/w8NFOxqQ='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self';" />
+  <title>JSON to Java Class Generator — POJOs, Records, Lombok, Jackson</title>
+  <meta name="description" content="Turn JSON into Java POJOs or records with optional Lombok @Data, Jackson @JsonProperty annotations, getters and setters. Runs entirely in your browser." />
+  <meta name="keywords" content="json to java, json to pojo, json to java class, json to java record, jackson jsonproperty, lombok data" />
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large" />
+  <link rel="canonical" href="https://devtool-moya.netlify.app/json-to-java" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="JSON to Java — POJOs and Records from JSON" />
+  <meta property="og:description" content="Generate Java classes or records from JSON in your browser. Nothing leaves your machine." />
+  <meta property="og:url" content="https://devtool-moya.netlify.app/json-to-java" />
+  <meta property="og:site_name" content="DevTools" />
+  <meta name="twitter:card" content="summary" />
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "JSON to Java",
+    "url": "https://devtool-moya.netlify.app/json-to-java",
+    "description": "Free online JSON to Java converter generating POJOs or records with Lombok and Jackson options. Runs client-side.",
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "Any",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+    "featureList": ["Java POJOs or records","Jackson @JsonProperty","Lombok @Data","Getters and setters","Nested static classes and List<T>","Client-side only"],
+    "isAccessibleForFree": true
+  }
+  </script>
+  <script type="application/ld+json">
+  { "@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://devtool-moya.netlify.app/" },
+    { "@type": "ListItem", "position": 2, "name": "JSON to Java", "item": "https://devtool-moya.netlify.app/json-to-java" } ] }
+  </script>
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="/assets/app.css" />
+  <style>
+    #input, #output { min-height: 420px; }
+    #output { white-space: pre; overflow-wrap: normal; overflow-x: auto; }
+    .options input[type=text] { width: 170px; }
+    .fs-bar { display: flex; align-items: center; gap: 8px; }
+    .fs-bar .panel-title { flex: 1; }
+    .fs-overlay textarea { height: 100%; min-height: 0; border: none; background: transparent; white-space: pre; resize: none; }
+    dialog.fs-overlay { width: 100%; height: 100%; max-width: none; max-height: none; margin: 0; border: 0; color: var(--text); }
+    dialog.fs-overlay::backdrop { background: var(--bg); }
+  </style>
+</head>
+<body>
+<div class="shell">
+  <header id="site-header"></header>
+  <aside id="sidebar"></aside>
+  <div class="nav-backdrop"></div>
+
+  <main class="page">
+    <section class="tool-head">
+      <h1>JSON to Java</h1>
+      <p>Generate Java classes or records from a JSON sample.</p>
+    </section>
+
+    <section class="options" aria-label="Options">
+      <label class="opt"><span class="opt-label">Class name</span><input type="text" id="cls" value="Root" spellcheck="false" /></label>
+      <label class="opt"><span class="opt-label">Package</span><input type="text" id="pkg" value="com.example.model" spellcheck="false" /></label>
+      <span class="divider"></span>
+      <label class="check"><input type="checkbox" id="records" /> Records</label>
+      <label class="check"><input type="checkbox" id="lombok" /> Lombok @Data</label>
+      <label class="check"><input type="checkbox" id="jackson" checked /> Jackson @JsonProperty</label>
+      <label class="check"><input type="checkbox" id="accessors" checked /> Getters / setters</label>
+    </section>
+
+    <div class="msg" id="msg" hidden></div>
+
+    <section class="grid-2">
+      <div class="panel">
+        <div class="panel-head">
+          <span class="panel-title">JSON input</span>
+          <span class="panel-actions">
+            <span class="panel-meta" id="in-meta"></span>
+            <button class="btn sm" id="sample">Sample</button>
+            <button class="btn sm" id="clear">Clear</button>
+          </span>
+        </div>
+        <textarea id="input" spellcheck="false" placeholder='Paste a JSON object or an array of objects…'></textarea>
+      </div>
+      <div class="panel">
+        <div class="panel-head">
+          <span class="panel-title">Java code</span>
+          <span class="panel-actions">
+            <span class="panel-meta" id="out-meta"></span>
+            <button class="btn sm" id="fs" title="Fullscreen (Esc to close)" aria-label="Fullscreen Java code"><span aria-hidden="true">⛶</span> Fullscreen</button>
+            <button class="btn sm" id="copy">Copy</button>
+            <button class="btn sm" id="dl">Download .java</button>
+          </span>
+        </div>
+        <textarea id="output" spellcheck="false" readonly wrap="off"></textarea>
+      </div>
+    </section>
+
+    <section class="about">
+      <h2>About this tool</h2>
+      <p>Paste a JSON sample and get a single compilable <code>.java</code> file: the root class plus every nested object as a <code>public static</code> inner class (or nested record). When the root is an array of objects, the item type is generated.</p>
+      <h2>Type mapping</h2>
+      <ul>
+        <li>Whole numbers → <code>Integer</code>, <code>Long</code> outside the 32-bit range, <code>BigInteger</code> beyond 64 bits; numbers with a decimal point or exponent → <code>Double</code>.</li>
+        <li><code>true/false</code> → <code>Boolean</code>; text → <code>String</code>; arrays → <code>List&lt;T&gt;</code>.</li>
+        <li><code>null</code>-only values, empty arrays and mixed arrays → <code>Object</code>.</li>
+        <li>Field names are camelCased; Java keywords and names of <code>Object</code> methods (<code>hashCode</code>, <code>toString</code>, <code>getClass</code>, <code>wait</code>…) get a trailing underscore. Keep <strong>Jackson</strong> on so the original JSON names still map.</li>
+      </ul>
+      <h2>Options</h2>
+      <p><strong>Records</strong> (Java 16+) produce immutable records, so Lombok and accessors are disabled. <strong>Lombok @Data</strong> generates accessors at compile time instead of writing them out.</p>
+      <h2>Privacy</h2>
+      <p>Code is generated entirely in your browser. The JSON you paste is never uploaded, stored or logged.</p>
+    </section>
+  </main>
+</div>
+
+<script src="/assets/tools.js"></script>
+<script>
+(function () {
+  'use strict';
+  const { $, $$, el, debounce, copy, download, msg } = DevTools;
+
+  // ==CORE==
+  /* ── Lossless JSON parser: keeps number source text and duplicate keys ──
+     Nodes: { t: 'o', e: [[key, node], ...] }  { t: 'a', e: [node, ...] }  { t: 's', v }  { t: 'n', raw }
+            { t: 'b', v }  { t: 'z' } (null). Errors are SyntaxErrors with .pos (offset), .line and .col. */
+  const LJ_STR = /"[^"\\\u0000-\u001f]*(?:\\(?:["\\/bfnrt]|u[0-9a-fA-F]{4})[^"\\\u0000-\u001f]*)*"/y;
+  const LJ_NUM = /-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?/y;
+  function lineColAt(text, pos) {
+    let line = 1, last = -1;
+    for (let k = text.indexOf('\n'); k !== -1 && k < pos; k = text.indexOf('\n', k + 1)) { line++; last = k; }
+    return { line, col: pos - last };
+  }
+  function parseLossless(text) {
+    let i = 0;
+    const dups = [];
+    function fail(message, pos) {
+      if (pos !== undefined) i = pos;
+      const e = new SyntaxError(message);
+      const lc = lineColAt(text, i);
+      e.pos = i; e.line = lc.line; e.col = lc.col;
+      throw e;
+    }
+    function ch() { return i < text.length ? JSON.stringify(text[i]) : 'end of input'; }
+    function ws() {
+      for (;;) { const c = text.charCodeAt(i); if (c === 32 || c === 10 || c === 13 || c === 9) i++; else return; }
+    }
+    function strFail() {
+      for (let k = i + 1; k < text.length; k++) {
+        const c = text.charCodeAt(k);
+        if (c === 34) break;
+        if (c < 32) fail('Unescaped control character in a string — write it as an escape such as \\n or \\t.', k);
+        if (c === 92) {
+          const n = text[k + 1];
+          if (n === 'u') { if (!/^[0-9a-fA-F]{4}$/.test(text.substr(k + 2, 4))) fail('Invalid \\u escape — it needs exactly 4 hex digits.', k); k += 5; }
+          else if (n !== undefined && '"\\/bfnrt'.includes(n)) k++;
+          else fail('Invalid escape sequence "\\' + (n || '') + '" — only \\" \\\\ \\/ \\b \\f \\n \\r \\t and \\uXXXX are allowed.', k);
+        }
+      }
+      fail('Unterminated string — add the closing double quote (").', i);
+    }
+    function str() {
+      LJ_STR.lastIndex = i;
+      const m = LJ_STR.exec(text);
+      if (!m) strFail();
+      i = LJ_STR.lastIndex;
+      const s = m[0];
+      return s.indexOf('\\') < 0 ? s.slice(1, -1) : JSON.parse(s);
+    }
+    function badValue() {
+      const c = text[i];
+      if (i >= text.length) fail('Unexpected end of input — a value, closing bracket or brace is missing.');
+      if (c === "'") fail('Strings must use double quotes (") — single quotes are not valid JSON.');
+      if (c === '}' || c === ']') fail('Unexpected ' + ch() + ' — remove the trailing comma before it, or add a value.');
+      const word = /^[A-Za-z_$][\w$]*/.exec(text.slice(i, i + 32));
+      if (word) fail('Unexpected word "' + word[0] + '" — JSON only allows true, false, null, numbers and "strings".');
+      fail('Unexpected ' + ch() + ' — expected a value.');
+    }
+    function value() {
+      ws();
+      const c = text.charCodeAt(i);
+      if (c === 34) return { t: 's', v: str() };
+      if (c === 123) {
+        i++; ws();
+        const e = [];
+        if (text.charCodeAt(i) === 125) { i++; return { t: 'o', e }; }
+        const seen = new Set();
+        for (;;) {
+          ws();
+          if (text.charCodeAt(i) !== 34) {
+            if (text[i] === "'") fail('Property names must use double quotes (") — single quotes are not valid JSON.');
+            if (text[i] === '}') fail('Trailing comma before "}" — remove the last comma.');
+            if (i >= text.length) fail('Unexpected end of input — a closing "}" is missing.');
+            fail('Expected a double-quoted property name, found ' + ch() + '.');
+          }
+          const kpos = i, k = str();
+          ws();
+          if (text.charCodeAt(i) !== 58) fail('Expected ":" after property name ' + JSON.stringify(k) + ', found ' + ch() + '.');
+          i++;
+          const v = value();
+          if (seen.has(k)) dups.push({ key: k, pos: kpos }); else seen.add(k);
+          e.push([k, v]);
+          ws();
+          const d = text.charCodeAt(i);
+          if (d === 44) { i++; continue; }
+          if (d === 125) { i++; return { t: 'o', e }; }
+          if (i >= text.length) fail('Unexpected end of input — a closing "}" is missing.');
+          fail('Expected "," or "}" after a property value, found ' + ch() + '.');
+        }
+      }
+      if (c === 91) {
+        i++; ws();
+        const e = [];
+        if (text.charCodeAt(i) === 93) { i++; return { t: 'a', e }; }
+        for (;;) {
+          e.push(value());
+          ws();
+          const d = text.charCodeAt(i);
+          if (d === 44) { i++; continue; }
+          if (d === 93) { i++; return { t: 'a', e }; }
+          if (i >= text.length) fail('Unexpected end of input — a closing "]" is missing.');
+          fail('Expected "," or "]" after an array element, found ' + ch() + '.');
+        }
+      }
+      if (c === 45 || (c >= 48 && c <= 57)) {
+        LJ_NUM.lastIndex = i;
+        const m = LJ_NUM.exec(text);
+        if (!m) fail('Invalid number — a digit must follow "-".');
+        i = LJ_NUM.lastIndex;
+        const n = text.charCodeAt(i);
+        if (n >= 48 && n <= 57) fail('Invalid number — leading zeros are not allowed.', i - 1);
+        if (n === 46 || n === 101 || n === 69) fail('Invalid number — a digit must follow "' + text[i] + '".');
+        return { t: 'n', raw: m[0] };
+      }
+      if (text.startsWith('true', i)) { i += 4; return { t: 'b', v: true }; }
+      if (text.startsWith('false', i)) { i += 5; return { t: 'b', v: false }; }
+      if (text.startsWith('null', i)) { i += 4; return { t: 'z' }; }
+      badValue();
+    }
+    let root;
+    try {
+      root = value();
+    } catch (e) {
+      if (e instanceof RangeError) { const r = new SyntaxError('The JSON is nested too deeply to process.'); r.pos = -1; throw r; }
+      throw e;
+    }
+    ws();
+    if (i < text.length) fail('Unexpected ' + ch() + ' after the end of the JSON value — remove it, or wrap several values in an array.');
+    return { root, dups };
+  }
+  /** Describe duplicate keys for a message (null when there are none). */
+  function describeDups(text, dups, label) {
+    if (!dups.length) return null;
+    const first = dups[0], lc = lineColAt(text, first.pos);
+    return (label ? label + ': d' : 'D') + 'uplicate key ' + JSON.stringify(first.key) + ' at line ' + lc.line +
+      ' — later value wins in most parsers' + (dups.length > 1 ? ' (' + (dups.length - 1) + ' more duplicate' + (dups.length > 2 ? 's' : '') + ')' : '') + '.';
+  }
+  /** Serialize a node like JSON.stringify(value, null, indent), keeping number text and duplicate keys. */
+  function stringifyNode(node, indent, sortKeys) {
+    const ind = typeof indent === 'number' ? ' '.repeat(Math.max(0, Math.min(10, indent))) : (indent || '');
+    const colon = ind ? ': ' : ':', out = [];
+    const byKey = (a, b) => (a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0);
+    function w(n, pad) {
+      switch (n.t) {
+        case 's': out.push(JSON.stringify(n.v)); return;
+        case 'n': out.push(n.raw); return;
+        case 'b': out.push(n.v ? 'true' : 'false'); return;
+        case 'z': out.push('null'); return;
+        case 'a': case 'o': {
+          const obj = n.t === 'o', list = obj && sortKeys ? n.e.slice().sort(byKey) : n.e;
+          const open = obj ? '{' : '[', close = obj ? '}' : ']';
+          if (!list.length) { out.push(open + close); return; }
+          const p2 = pad + ind, sep = ind ? ',\n' + p2 : ',';
+          out.push(ind ? open + '\n' + p2 : open);
+          for (let k = 0; k < list.length; k++) {
+            if (k) out.push(sep);
+            if (obj) { out.push(JSON.stringify(list[k][0]) + colon); w(list[k][1], p2); } else w(list[k], p2);
+          }
+          out.push(ind ? '\n' + pad + close : close);
+        }
+      }
+    }
+    w(node, '');
+    return out.join('');
+  }
+
+  /* ── JSON type inference (shared by the JSON → code generators) ── */
+  // ISO-8601 date / date-time as System.Text.Json reads it; components are range-checked in isRealDate.
+  const ISO_DATE = /^(\d{4})-(\d{2})-(\d{2})(?:T(\d{2}):(\d{2})(?::(\d{2})(?:\.\d{1,7})?)?(?:Z|[+-](\d{2}):(\d{2}))?)?$/;
+  function isRealDate(s) {
+    const m = ISO_DATE.exec(s);
+    if (!m) return false;
+    const y = +m[1], mo = +m[2], d = +m[3];
+    if (y < 1 || mo < 1 || mo > 12 || d < 1) return false;
+    const dim = [31, (y % 4 === 0 && y % 100 !== 0) || y % 400 === 0 ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][mo - 1];
+    if (d > dim) return false;
+    if (m[4] !== undefined && (+m[4] > 23 || +m[5] > 59 || (m[6] !== undefined && +m[6] > 59))) return false;
+    if (m[7] !== undefined && (+m[7] > 14 || +m[8] > 59)) return false;
+    return true;
+  }
+  const INT32_MIN = -(2n ** 31n), INT32_MAX = 2n ** 31n - 1n;
+  const INT64_MIN = -(2n ** 63n), INT64_MAX = 2n ** 63n - 1n, UINT64_MAX = 2n ** 64n - 1n;
+
+  /** Numeric kind from the number's source text: '.', 'e' → double; integers by range: int, long, ulong (positive,
+      beyond long), big (beyond 64 bits). neg records a negative sample so merging with ulong widens to big. */
+  function numberType(raw) {
+    if (/[.eE]/.test(raw)) return { k: 'double' };
+    const v = BigInt(raw), neg = v < 0n;
+    const k = v >= INT32_MIN && v <= INT32_MAX ? 'int' : v >= INT64_MIN && v <= INT64_MAX ? 'long' : v > 0n && v <= UINT64_MAX ? 'ulong' : 'big';
+    return neg ? { k, neg } : { k };
+  }
+
+  /** Infer the type of a lossless-parser node (see parseLossless). */
+  function inferType(n, opts) {
+    switch (n.t) {
+      case 'z': return { k: 'null' };
+      case 'b': return { k: 'bool' };
+      case 'n': return numberType(n.raw);
+      case 's': return { k: opts && opts.dates && isRealDate(n.v) ? 'date' : 'string' };
+      case 'a': {
+        let elem = null;
+        for (const x of n.e) elem = mergeType(elem, inferType(x, opts));
+        return { k: 'array', elem };
+      }
+    }
+    const fields = new Map();
+    for (const [key, v] of n.e) {
+      const t = inferType(v, opts), prev = fields.get(key); // a duplicate key merges both samples
+      fields.set(key, { type: prev ? mergeType(prev.type, t) : t, optional: false });
+    }
+    return { k: 'object', fields };
+  }
+
+  function family(k) { return k in NUM_RANK ? 'num' : k === 'date' ? 'string' : k; }
+  const NUM_RANK = { int: 0, long: 1, ulong: 2, big: 3, double: 4 };
+  function mergeNum(a, b) {
+    const neg = !!(a.neg || b.neg);
+    let k = NUM_RANK[a.k] >= NUM_RANK[b.k] ? a.k : b.k;
+    if (k === 'ulong' && neg) k = 'big'; // a negative sample cannot be stored in ulong
+    return neg ? { k, neg } : { k };
+  }
+
+  function mergeFields(fa, fb) {
+    const out = new Map();
+    for (const [key, f] of fa) {
+      const g = fb.get(key);
+      out.set(key, g ? { type: mergeType(f.type, g.type), optional: f.optional || g.optional } : { type: f.type, optional: true });
+    }
+    for (const [key, g] of fb) if (!fa.has(key)) out.set(key, { type: g.type, optional: true });
+    return out;
+  }
+
+  function addMember(members, t) {
+    const i = members.findIndex(m => family(m.k) === family(t.k));
+    if (i >= 0) members[i] = mergeType(members[i], t); else members.push(t);
+  }
+
+  /** Merge two inferred types (null = "no information yet"). */
+  function mergeType(a, b) {
+    if (!a) return b;
+    if (!b) return a;
+    if (a.k === 'null' && b.k === 'null') return a;
+    if (a.k === 'null') return Object.assign({}, b, { nullable: true });
+    if (b.k === 'null') return Object.assign({}, a, { nullable: true });
+    const nullable = !!(a.nullable || b.nullable);
+    let r;
+    if (a.k === 'mixed' || b.k === 'mixed' || family(a.k) !== family(b.k)) {
+      const members = [];
+      for (const t of [a, b]) for (const m of (t.k === 'mixed' ? t.members : [t])) addMember(members, Object.assign({}, m, { nullable: false }));
+      r = members.length === 1 ? members[0] : { k: 'mixed', members };
+    } else if (a.k === 'object') r = { k: 'object', fields: mergeFields(a.fields, b.fields) };
+    else if (a.k === 'array') r = { k: 'array', elem: mergeType(a.elem, b.elem) };
+    else if (family(a.k) === 'num') r = mergeNum(a, b);
+    else if (a.k !== b.k) r = { k: 'string' }; // date + string
+    else r = { k: a.k };
+    if (nullable) r = Object.assign({}, r, { nullable: true });
+    return r;
+  }
+
+  function splitWords(s) {
+    return String(s)
+      .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
+      .replace(/([A-Z]+)([A-Z][a-z])/g, '$1 $2')
+      .split(/[^A-Za-z0-9]+/).filter(Boolean)
+      .map(w => (w.length > 1 && w === w.toUpperCase() && /[A-Z]/.test(w)) ? w[0] + w.slice(1).toLowerCase() : w);
+  }
+  function fixLeadingDigit(s) { return /^[0-9]/.test(s) ? '_' + s : s; }
+  function toPascal(s) { const w = splitWords(s); return fixLeadingDigit(w.map(x => x[0].toUpperCase() + x.slice(1)).join('')); }
+  function toCamel(s) {
+    const w = splitWords(s);
+    if (!w.length) return '';
+    return fixLeadingDigit(w[0].toLowerCase() + w.slice(1).map(x => x[0].toUpperCase() + x.slice(1)).join(''));
+  }
+  function sanitizeIdent(s) { const r = String(s).replace(/[^A-Za-z0-9_]/g, '_'); return fixLeadingDigit(r) || '_'; }
+  function singular(name) {
+    if (/ies$/.test(name) && name.length > 3) return name.slice(0, -3) + 'y';
+    if (/(ss|us|is)$/.test(name)) return name + 'Item';
+    if (/s$/.test(name) && name.length > 1) return name.slice(0, -1);
+    return name + 'Item';
+  }
+  function uniqueName(base, used) {
+    let n = base || 'Item', i = 2;
+    while (used.has(n)) n = base + (i++);
+    used.add(n);
+    return n;
+  }
+
+  /** Assign class names to every object type reachable from root; returns them in declaration order. */
+  function collectClasses(root, rootName, reserved, includeMixed) {
+    const used = new Set(reserved || []), classes = [];
+    function visit(t, hint) {
+      if (!t) return;
+      if (t.k === 'object') {
+        t.name = uniqueName(hint, used);
+        classes.push(t);
+        for (const [key, f] of t.fields) visit(f.type, toPascal(key) || 'Field');
+      } else if (t.k === 'array') visit(t.elem, singular(hint));
+      else if (t.k === 'mixed' && includeMixed) t.members.forEach(m => visit(m, hint));
+    }
+    if (root && root.k === 'array') visit(root.elem, rootName); else visit(root, rootName);
+    return classes;
+  }
+
+  /** Parse JSON text losslessly (number text kept) and infer its type. Throws SyntaxError (.line/.col) on invalid JSON. */
+  function analyze(text, opts) {
+    const { root } = parseLossless(text);
+    return { root, type: inferType(root, opts) };
+  }
+
+  /* ── Java generator ── */
+  const JAVA_KEYWORDS = new Set(('abstract assert boolean break byte case catch char class const continue default do double else enum extends final finally float for goto if implements import instanceof int interface long native new package private protected public return short static strictfp super switch synchronized this throw throws transient try void volatile while true false null var record yield').split(' '));
+  const JAVA_RESERVED_TYPES = ['List', 'Object', 'String', 'Integer', 'Long', 'Double', 'Boolean', 'BigInteger', 'JsonProperty', 'Data'];
+  // names that clash with java.lang.Object methods (a record component hashCode would override hashCode())
+  const JAVA_OBJECT_METHODS = new Set(['hashCode', 'toString', 'getClass', 'clone', 'finalize', 'notify', 'notifyAll', 'wait']);
+
+  /** opts: { className, packageName, records, lombok, jackson, accessors } */
+  function generateJava(text, opts) {
+    opts = Object.assign({ className: 'Root', packageName: 'com.example.model', records: false, lombok: false, jackson: true, accessors: true }, opts);
+    const rootName = toPascal(opts.className) || 'Root';
+    const pkg = String(opts.packageName || '').trim();
+    if (pkg && !/^[A-Za-z_][A-Za-z0-9_]*(\.[A-Za-z_][A-Za-z0-9_]*)*$/.test(pkg)) throw new Error('Invalid package name: ' + pkg);
+    const { type } = analyze(text, {});
+    const isRootArray = type.k === 'array';
+    if (!(type.k === 'object' || (isRootArray && type.elem && type.elem.k === 'object'))) {
+      throw new Error('The top-level JSON value must be an object or an array of objects.');
+    }
+    const classes = collectClasses(type, rootName, JAVA_RESERVED_TYPES, false);
+    const useLombok = opts.lombok && !opts.records;
+    const useAccessors = opts.accessors && !opts.records && !useLombok;
+    let usesList = false, usesBig = false;
+
+    function typeStr(t) {
+      if (!t) return 'Object';
+      switch (t.k) {
+        case 'int': return 'Integer';
+        case 'long': return 'Long';
+        case 'ulong': case 'big': usesBig = true; return 'BigInteger';
+        case 'double': return 'Double';
+        case 'bool': return 'Boolean';
+        case 'string': case 'date': return 'String';
+        case 'object': return t.name;
+        case 'array': usesList = true; return 'List<' + typeStr(t.elem) + '>';
+        default: return 'Object';
+      }
+    }
+    function fieldName(key, used) {
+      let n = toCamel(key) || 'field';
+      if (JAVA_KEYWORDS.has(n) || JAVA_OBJECT_METHODS.has(n)) n += '_';
+      return uniqueName(n, used);
+    }
+    const cap = s => s.replace(/^_+/, '').replace(/^./, ch => ch.toUpperCase()) || 'Field';
+    const ann = f => '@JsonProperty(' + JSON.stringify(f.key) + ')';
+
+    function classLines(c, isRoot) {
+      const used = new Set(), fields = [];
+      for (const [key, f] of c.fields) fields.push({ key, name: fieldName(key, used), type: typeStr(f.type) });
+      const nested = isRoot ? classes.filter(x => x !== c) : [];
+      const lines = [];
+      const mod = isRoot ? 'public ' : 'public static ';
+      if (opts.records) {
+        const kw = 'public record ';
+        if (!fields.length) lines.push(kw + c.name + '() {');
+        else {
+          lines.push(kw + c.name + '(');
+          fields.forEach((f, i) => lines.push('    ' + (opts.jackson ? ann(f) + ' ' : '') + f.type + ' ' + f.name + (i < fields.length - 1 ? ',' : '')));
+          lines.push(') {');
+        }
+      } else {
+        if (useLombok) lines.push('@Data');
+        lines.push(mod + 'class ' + c.name + ' {');
+        const vis = (useLombok || useAccessors) ? 'private ' : 'public ';
+        fields.forEach(f => {
+          lines.push('');
+          if (opts.jackson) lines.push('    ' + ann(f));
+          lines.push('    ' + vis + f.type + ' ' + f.name + ';');
+        });
+        if (useAccessors) fields.forEach(f => {
+          const p = cap(f.name);
+          lines.push('', '    public ' + f.type + ' get' + p + '() {', '        return ' + f.name + ';', '    }');
+          lines.push('', '    public void set' + p + '(' + f.type + ' ' + f.name + ') {', '        this.' + f.name + ' = ' + f.name + ';', '    }');
+        });
+      }
+      nested.forEach(n => { lines.push(''); classLines(n, false).forEach(l => lines.push(l ? '    ' + l : l)); });
+      if (opts.records && !nested.length) lines[lines.length - 1] += '}';
+      else lines.push('}');
+      return lines;
+    }
+
+    const body = classLines(classes[0], true);
+    const head = [];
+    if (pkg) head.push('package ' + pkg + ';', '');
+    const imports = [];
+    if (usesBig) imports.push('import java.math.BigInteger;');
+    if (usesList) imports.push('import java.util.List;');
+    if (opts.jackson) imports.push('import com.fasterxml.jackson.annotation.JsonProperty;');
+    if (useLombok) imports.push('import lombok.Data;');
+    if (imports.length) head.push(...imports, '');
+    if (isRootArray) head.push('// The JSON root is an array: deserialize it as List<' + rootName + '>.');
+    return { code: (head.length ? head.join('\n') + '\n' : '') + body.join('\n') + '\n', classes: classes.length, fileName: rootName + '.java' };
+  }
+
+  // ==/CORE==
+
+  const input = $('#input'), output = $('#output'), msgEl = $('#msg');
+  const SAMPLE = "{\n  \"id\": 1024,\n  \"orderNumber\": \"SO-2024-0042\",\n  \"createdAt\": \"2024-05-17T09:30:00Z\",\n  \"total\": 149.95,\n  \"paid\": true,\n  \"notes\": null,\n  \"customer\": {\n    \"id\": 77,\n    \"first_name\": \"Maya\",\n    \"last_name\": \"Lopez\",\n    \"email\": \"maya@example.com\",\n    \"address\": { \"street\": \"12 Harbor Rd\", \"city\": \"Porto\", \"zip\": \"4000-123\" }\n  },\n  \"items\": [\n    { \"sku\": \"KB-01\", \"name\": \"Keyboard\", \"qty\": 1, \"unitPrice\": 89.5 },\n    { \"sku\": \"MS-07\", \"name\": \"Mouse\", \"qty\": 2, \"unitPrice\": 30.225, \"discount\": 0.1 }\n  ],\n  \"tags\": [\"priority\", \"gift\"]\n}";
+
+  function opts() {
+    const records = $('#records').checked, lombok = $('#lombok').checked;
+    // Lombok and accessors do not apply to records; Lombok replaces hand-written accessors.
+    $('#lombok').disabled = records;
+    $('#accessors').disabled = records || lombok;
+    return { className: $('#cls').value.trim() || 'Root', packageName: $('#pkg').value, records, lombok,
+      jackson: $('#jackson').checked, accessors: $('#accessors').checked };
+  }
+
+  function run() {
+    const text = input.value;
+    $('#in-meta').textContent = text ? text.length.toLocaleString() + ' chars' : '';
+    if (!text.trim()) { output.value = ''; $('#out-meta').textContent = ''; msg(msgEl, ''); DevTools.invalid(input, false); return; }
+    try {
+      const r = generateJava(text, opts());
+      output.value = r.code;
+      $('#out-meta').textContent = r.classes + ' class' + (r.classes === 1 ? '' : 's') + ' · ' + r.code.split('\n').length + ' lines';
+      msg(msgEl, '');
+      DevTools.invalid(input, false);
+    } catch (e) {
+      output.value = '';
+      $('#out-meta').textContent = '';
+      const syntax = e instanceof SyntaxError;
+      const where = syntax && typeof e.line === 'number' && e.pos >= 0 ? ' Line ' + e.line + ', column ' + e.col + '.' : '';
+      msg(msgEl, 'error', (syntax ? '✗ Invalid JSON: ' : '✗ ') + e.message + where);
+      DevTools.invalid(input, syntax || /top-level JSON value/.test(e.message));
+    }
+  }
+  const runSoon = debounce(run, 250);
+
+  input.addEventListener('input', runSoon);
+  $$('.options input, .options select').forEach(n => n.addEventListener(n.type === 'text' ? 'input' : 'change', runSoon));
+  $('#clear').addEventListener('click', () => { input.value = ''; run(); input.focus(); });
+  $('#sample').addEventListener('click', () => { input.value = SAMPLE; run(); });
+  $('#copy').addEventListener('click', e => { if (output.value) copy(output.value, e.currentTarget); });
+  $('#dl').addEventListener('click', () => { if (output.value) download((toPascal($('#cls').value) || 'Root') + '.java', output.value); });
+
+  // fullscreen: native modal dialog (inert background, Esc closes, focus returns to the opener)
+  let dlg = null;
+  $('#fs').addEventListener('click', e => {
+    if (dlg) return;
+    const opener = e.currentTarget;
+    const ta = el('textarea', { readonly: true, spellcheck: 'false', wrap: 'off', 'aria-label': 'Generated code' });
+    ta.value = output.value;
+    const closeBtn = el('button', { class: 'btn sm', onclick: () => dlg.close() }, 'Close (Esc)');
+    dlg = el('dialog', { class: 'fs-overlay', 'aria-label': 'Java code fullscreen' },
+      el('div', { class: 'fs-bar' },
+        el('span', { class: 'panel-title' }, 'Java code'),
+        el('button', { class: 'btn sm', onclick: ev => copy(output.value, ev.currentTarget) }, 'Copy'),
+        closeBtn),
+      el('div', { class: 'fs-body' }, ta));
+    dlg.addEventListener('close', () => {
+      dlg.remove(); dlg = null; document.body.style.overflow = '';
+      if (opener.isConnected) opener.focus();
+    });
+    document.body.appendChild(dlg); document.body.style.overflow = 'hidden';
+    dlg.showModal();
+    closeBtn.focus();
+  });
+  // Ctrl/⌘+Enter regenerates immediately
+  document.addEventListener('keydown', e => { if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); run(); } });
+
+  run();
+})();
+</script>
+</body>
+</html>

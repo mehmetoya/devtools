@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-Dk3UkOROrQnuw5F9fwohQsi+cRH2jEDE4BecFliHdCw='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self';" />
+  <title>Trim &amp; Pad Text — Strip Whitespace or Pad to Width</title>
+  <meta name="description" content="Trim whitespace or custom characters from text, or pad it left, right or centred to a fixed width with any fill character. Works per line, in your browser." />
+  <meta name="keywords" content="trim text, trim whitespace, pad string, left pad, right pad, center text, padstart, padend" />
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large" />
+  <link rel="canonical" href="https://devtool-moya.netlify.app/trim-pad" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Trim &amp; Pad Text — Strip Whitespace or Pad to Width" />
+  <meta property="og:description" content="Trim or pad strings and lines to a fixed width in your browser. Nothing leaves your machine." />
+  <meta property="og:url" content="https://devtool-moya.netlify.app/trim-pad" />
+  <meta property="og:site_name" content="DevTools" />
+  <meta name="twitter:card" content="summary" />
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Trim / Pad",
+    "url": "https://devtool-moya.netlify.app/trim-pad",
+    "description": "Free online tool to trim whitespace or custom characters and to pad text left, right or centre to a fixed width. Runs client-side.",
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "Any",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+    "featureList": ["Trim both ends / start / end", "Trim custom characters", "Pad left / right / centre", "Custom pad character", "Per-line processing", "Client-side only"],
+    "isAccessibleForFree": true
+  }
+  </script>
+  <script type="application/ld+json">
+  { "@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://devtool-moya.netlify.app/" },
+    { "@type": "ListItem", "position": 2, "name": "Trim / Pad", "item": "https://devtool-moya.netlify.app/trim-pad" } ] }
+  </script>
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="/assets/app.css" />
+  <style>
+    .seg { flex-wrap: wrap; }
+    #padchar { width: 70px; }
+    #trimchars { width: 140px; }
+  </style>
+</head>
+<body>
+<div class="shell">
+  <header id="site-header"></header>
+  <aside id="sidebar"></aside>
+  <div class="nav-backdrop"></div>
+
+  <main class="page">
+    <section class="tool-head">
+      <h1>Trim / Pad</h1>
+      <p>Strip unwanted characters from the edges of text, or pad it out to a fixed width.</p>
+    </section>
+
+    <section class="options" aria-label="Options">
+      <span class="opt-label">Operation</span>
+      <div class="seg" id="mode">
+        <button data-v="trim" class="on">Trim</button>
+        <button data-v="trimstart">Trim start</button>
+        <button data-v="trimend">Trim end</button>
+        <button data-v="padleft">Pad left</button>
+        <button data-v="padright">Pad right</button>
+        <button data-v="pad">Center</button>
+      </div>
+      <span class="divider"></span>
+      <label class="opt" data-for="trim"><span class="opt-label">Characters</span>
+        <input type="text" id="trimchars" placeholder="whitespace" spellcheck="false" />
+      </label>
+      <label class="opt" data-for="pad"><span class="opt-label">Width</span>
+        <input type="number" id="width" min="0" max="10000" value="20" />
+      </label>
+      <label class="opt" data-for="pad"><span class="opt-label">Pad with</span>
+        <input type="text" id="padchar" placeholder="space" spellcheck="false" />
+      </label>
+      <label class="check"><input type="checkbox" id="perline" checked /> Apply to each line</label>
+    </section>
+
+    <div class="msg" id="msg" hidden></div>
+
+    <section class="grid-2">
+      <div class="panel">
+        <div class="panel-head">
+          <span class="panel-title">Input</span>
+          <span class="panel-actions">
+            <span class="panel-meta" id="in-meta"></span>
+            <button class="btn sm" id="clear">Clear</button>
+          </span>
+        </div>
+        <textarea id="input" spellcheck="false" placeholder="Paste text to trim or pad..."></textarea>
+      </div>
+      <div class="panel">
+        <div class="panel-head">
+          <span class="panel-title">Output</span>
+          <span class="panel-actions">
+            <span class="panel-meta" id="out-meta"></span>
+            <button class="btn sm" id="swap" title="Move output to input">Use as input</button>
+            <button class="btn sm" id="copy">Copy</button>
+            <button class="btn sm" id="dl">Download</button>
+          </span>
+        </div>
+        <textarea id="output" spellcheck="false" readonly></textarea>
+      </div>
+    </section>
+
+    <div class="stats" id="stats" hidden></div>
+
+    <section class="about">
+      <h2>About this tool</h2>
+      <p><b>Trim</b> removes characters from the beginning and/or end of the text. Leave <em>Characters</em> empty to strip any whitespace (spaces, tabs, line breaks, non-breaking spaces), or list the exact characters to strip — for example <code>*-#</code> removes any mix of asterisks, dashes and hashes from the edges.</p>
+      <p><b>Pad</b> extends text to the chosen width. <em>Pad left</em> right-aligns it, <em>Pad right</em> left-aligns it and <em>Center</em> splits the padding (any odd character goes on the right). A multi-character fill such as <code>.-</code> is repeated as needed. Text that is already as wide as the target is left alone. Widths are counted in Unicode code points.</p>
+      <h2>Privacy</h2>
+      <p>All processing happens in your browser. Nothing you type is sent, stored or logged.</p>
+    </section>
+  </main>
+</div>
+
+<script src="/assets/tools.js"></script>
+<script>
+(function () {
+  'use strict';
+  const { el, $, $$, debounce, copy, download, msg } = DevTools;
+
+  /* PURE-START */
+  const MAX_WIDTH = 10000;
+  function trimCps(s, chars, atStart, atEnd) {
+    const a = Array.from(s);
+    const set = chars ? new Set(Array.from(chars)) : null;
+    const hit = set ? c => set.has(c) : c => /\s/u.test(c);
+    let i = 0, j = a.length;
+    if (atStart) while (i < j && hit(a[i])) i++;
+    if (atEnd) while (j > i && hit(a[j - 1])) j--;
+    return a.slice(i, j).join('');
+  }
+  function fill(n, padStr) {
+    if (n <= 0) return '';
+    const p = Array.from(padStr);
+    let out = '';
+    for (let i = 0; i < n; i++) out += p[i % p.length];
+    return out;
+  }
+  function padCps(s, width, padStr, side) {
+    const len = Array.from(s).length;
+    const need = Math.min(width, MAX_WIDTH) - len;
+    if (need <= 0) return s;
+    const pad = padStr || ' ';
+    if (side === 'left') return fill(need, pad) + s;
+    if (side === 'right') return s + fill(need, pad);
+    const left = Math.floor(need / 2);
+    return fill(left, pad) + s + fill(need - left, pad);
+  }
+  function applyOne(s, o) {
+    switch (o.mode) {
+      case 'trim': return trimCps(s, o.chars, true, true);
+      case 'trimstart': return trimCps(s, o.chars, true, false);
+      case 'trimend': return trimCps(s, o.chars, false, true);
+      case 'padleft': return padCps(s, o.width, o.pad, 'left');
+      case 'padright': return padCps(s, o.width, o.pad, 'right');
+      case 'pad': return padCps(s, o.width, o.pad, 'center');
+      default: return s;
+    }
+  }
+  function trimPad(text, o) {
+    return o.perLine ? text.split(/\r\n|\r|\n/).map(l => applyOne(l, o)).join('\n') : applyOne(text, o);
+  }
+  /* PURE-END */
+
+  const input = $('#input'), output = $('#output');
+  let mode = 'trim';
+
+  function opts() {
+    const raw = $('#width').value.trim();
+    let w = parseInt(raw, 10);
+    const widthBad = !/^\d+$/.test(raw);
+    if (!Number.isFinite(w) || w < 0) w = 0;
+    return { mode, chars: $('#trimchars').value, width: w, widthBad, pad: $('#padchar').value, perLine: $('#perline').checked };
+  }
+
+  function stat(k, v) { return el('span', null, k + ' ', el('b', null, String(v))); }
+
+  function run() {
+    const text = input.value;
+    const o = opts();
+    const cps = s => Array.from(s).length;
+    $('#in-meta').textContent = text ? cps(text) + ' chars' : '';
+    msg($('#msg'), '');
+    DevTools.invalid($('#width'), false);
+    if (!mode.startsWith('trim') && o.widthBad) {
+      msg($('#msg'), 'error', 'Width must be a whole number of 0 or more.');
+      DevTools.invalid($('#width'), true);
+      output.value = ''; $('#out-meta').textContent = ''; $('#stats').hidden = true;
+      return;
+    }
+    if (!mode.startsWith('trim') && o.width > MAX_WIDTH) {
+      msg($('#msg'), 'warn', 'Width is capped at ' + MAX_WIDTH + ' characters.');
+    }
+    if (!text) { output.value = ''; $('#out-meta').textContent = ''; $('#stats').hidden = true; return; }
+    output.value = trimPad(text, o);
+    const a = cps(text), b = cps(output.value);
+    $('#out-meta').textContent = b + ' chars';
+    const st = $('#stats');
+    st.replaceChildren(
+      stat('Input:', a + ' chars'), stat('Output:', b + ' chars'),
+      stat('Removed:', Math.max(0, a - b)), stat('Added:', Math.max(0, b - a)),
+    );
+    st.hidden = false;
+    if (a === b && text === output.value) msg($('#msg'), 'info', mode.startsWith('trim') ? 'Nothing to trim — no matching characters at the edges.' : 'Nothing to pad — the text is already at least ' + o.width + ' characters wide.');
+  }
+  const runLater = debounce(run, 150);
+
+  function setMode(v) {
+    mode = v;
+    $$('#mode button').forEach(b => b.classList.toggle('on', b.dataset.v === v));
+    const isTrim = v.startsWith('trim');
+    $$('[data-for="trim"]').forEach(n => { n.hidden = !isTrim; });
+    $$('[data-for="pad"]').forEach(n => { n.hidden = isTrim; });
+    run();
+  }
+
+  $$('#mode button').forEach(b => b.addEventListener('click', () => setMode(b.dataset.v)));
+  ['#trimchars', '#width', '#padchar'].forEach(s => $(s).addEventListener('input', run));
+  $('#perline').addEventListener('change', run);
+  input.addEventListener('input', () => input.value.length > 100000 ? runLater() : run());
+  $('#clear').addEventListener('click', () => { input.value = ''; run(); input.focus(); });
+  $('#copy').addEventListener('click', e => copy(output.value, e.currentTarget));
+  $('#dl').addEventListener('click', () => download('trim-pad.txt', output.value));
+  $('#swap').addEventListener('click', () => { input.value = output.value; run(); });
+  setMode('trim');
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-XjNyqqpJvMnNqOlUkdYotwn76kkXMMDS6q7n1X/msxc='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src http: https:; object-src 'none'; base-uri 'self'; form-action 'self';" />
+  <title>HTTP Client — Send API Requests from Your Browser</title>
+  <meta name="description" content="Build and send HTTP requests (GET, POST, PUT, PATCH, DELETE, HEAD, OPTIONS) from your browser. Query params, headers with presets, JSON and form bodies, timing, status and response headers." />
+  <meta name="keywords" content="http client online, rest client, api tester, send http request, postman alternative, curl online, test api in browser" />
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large" />
+  <link rel="canonical" href="https://devtool-moya.netlify.app/http-client" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="HTTP Client — Send API Requests from Your Browser" />
+  <meta property="og:description" content="A lightweight REST client: params, headers, JSON bodies, timing and pretty-printed responses — straight from your browser." />
+  <meta property="og:url" content="https://devtool-moya.netlify.app/http-client" />
+  <meta property="og:site_name" content="DevTools" />
+  <meta name="twitter:card" content="summary" />
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "HTTP Client",
+    "url": "https://devtool-moya.netlify.app/http-client",
+    "description": "Free in-browser HTTP client for testing REST APIs: methods, query parameters, headers, JSON/text/form bodies, timeout and cancel, status, timing and response headers.",
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "Any",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+    "featureList": ["GET, POST, PUT, PATCH, DELETE, HEAD, OPTIONS", "Query parameter editor synced with the URL", "Header presets", "JSON, text and form-urlencoded bodies", "Timeout and cancel", "Pretty-printed JSON responses", "Copy as cURL"],
+    "isAccessibleForFree": true
+  }
+  </script>
+  <script type="application/ld+json">
+  { "@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://devtool-moya.netlify.app/" },
+    { "@type": "ListItem", "position": 2, "name": "HTTP Client", "item": "https://devtool-moya.netlify.app/http-client" } ] }
+  </script>
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="/assets/app.css" />
+  <style>
+    .req-bar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+    .req-bar select { min-width: 104px; }
+    .req-bar #url { flex: 1 1 320px; min-width: 0; }
+    .req-bar .btn { padding: 7px 18px; font-size: 13px; }
+    .tabs { display: flex; gap: 2px; flex-wrap: wrap; }
+    .tabs button { font-family: var(--sans); font-size: 11px; font-weight: 700; letter-spacing: .6px; text-transform: uppercase; background: none; border: none; color: var(--muted2); padding: 12px 10px; cursor: pointer; border-bottom: 2px solid transparent; }
+    .tabs button.on { color: var(--accent); border-bottom-color: var(--accent); }
+    .tabs .count { font-family: var(--mono); color: var(--muted); margin-left: 4px; }
+    .kv { display: flex; flex-direction: column; gap: 6px; padding: 12px 14px; }
+    .kv-row { display: grid; grid-template-columns: 22px minmax(0, 1fr) minmax(0, 1.4fr) 30px; gap: 6px; align-items: center; }
+    .kv-row input[type=text] { width: 100%; min-width: 0; }
+    .kv-row.off input[type=text] { opacity: .5; }
+    .kv-foot { display: flex; gap: 6px; flex-wrap: wrap; padding: 0 14px 12px; }
+    .icon-btn { background: none; border: 1px solid var(--border); color: var(--muted2); border-radius: 6px; height: 30px; cursor: pointer; font-size: 14px; }
+    .icon-btn:hover { color: var(--danger); border-color: var(--danger); }
+    .body-opts { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; padding: 10px 14px; border-bottom: 1px solid var(--border); }
+    #req-body { min-height: 200px; }
+    .status { font-family: var(--mono); font-size: 12px; font-weight: 500; padding: 2px 9px; border-radius: 20px; border: 1px solid currentColor; }
+    .status.s2 { color: var(--accent); background: var(--accent-dim); }
+    .status.s3 { color: var(--info); background: var(--info-dim); }
+    .status.s4 { color: var(--warn); background: var(--warn-dim); }
+    .status.s5, .status.err { color: var(--danger); background: var(--danger-dim); }
+    .res-meta { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; font-family: var(--mono); font-size: 12px; color: var(--muted2); }
+    #res-body { min-height: 280px; max-height: 70vh; }
+    .res-pane { min-height: 200px; }
+    .res-pane .tbl td:first-child { white-space: nowrap; color: var(--muted2); }
+    .note { font-size: 12px; color: var(--muted2); padding: 10px 14px; border-top: 1px solid var(--border); }
+    dialog.modal-dlg { padding: 0; margin: 60px auto auto; border: 1px solid var(--border2); border-radius: var(--radius-lg); background: var(--surface); color: var(--text); width: calc(100% - 32px); max-width: 640px; max-height: calc(100vh - 80px); overflow: auto; }
+    dialog.modal-dlg::backdrop { background: rgba(0,0,0,.6); }
+    .modal-body { padding: 14px; display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 14px; }
+    .preset-group h3 { font-size: 10px; letter-spacing: 1.2px; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+    .preset-group button { display: block; width: 100%; text-align: left; margin-bottom: 4px; background: var(--surface2); border: 1px solid var(--border); color: var(--text); border-radius: 6px; padding: 6px 8px; cursor: pointer; font-family: var(--mono); font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .preset-group button:hover { border-color: var(--accent); }
+    .preset-group button small { color: var(--muted2); }
+    @media (max-width: 560px) {
+      .kv-row { grid-template-columns: 22px minmax(0, 1fr) 30px; }
+      .kv-row input.v { grid-column: 2 / 3; }
+      .kv-row .icon-btn { grid-row: 1 / 3; grid-column: 3; height: 100%; }
+      .req-bar .btn { flex: 1; }
+    }
+  </style>
+</head>
+<body>
+<div class="shell">
+  <header id="site-header"></header>
+  <aside id="sidebar"></aside>
+  <div class="nav-backdrop"></div>
+
+  <main class="page">
+    <section class="tool-head">
+      <h1>HTTP Client</h1>
+      <p>Compose a request, send it from your browser and inspect the response.</p>
+    </section>
+
+    <section class="options" aria-label="Options">
+      <label class="opt"><span class="opt-label">Sample</span>
+        <select id="preset">
+          <option value="">Choose…</option>
+          <option value="todo">GET a single todo (JSONPlaceholder)</option>
+          <option value="list">GET posts filtered by user (JSONPlaceholder)</option>
+          <option value="create">POST a JSON object (JSONPlaceholder)</option>
+          <option value="patch">PATCH a resource (JSONPlaceholder)</option>
+          <option value="delete">DELETE a resource (JSONPlaceholder)</option>
+          <option value="echo">GET echo of request headers (httpbin)</option>
+          <option value="form">POST form-urlencoded (httpbin)</option>
+          <option value="status">GET a 418 status (httpbin)</option>
+        </select>
+      </label>
+      <span class="divider"></span>
+      <label class="opt"><span class="opt-label">Timeout (s)</span><input type="number" id="timeout" min="1" max="300" value="30" /></label>
+      <label class="check"><input type="checkbox" id="pretty" checked /> Pretty-print JSON</label>
+      <span class="spacer"></span>
+      <button class="btn sm" id="curl" title="Copy the request as a cURL command">Copy as cURL</button>
+      <button class="btn sm" id="reset" title="Reset method, URL, params, headers, body and response">Clear all</button>
+    </section>
+
+    <div class="req-bar">
+      <select id="method" aria-label="HTTP method">
+        <option>GET</option><option>POST</option><option>PUT</option><option>PATCH</option><option>DELETE</option><option>HEAD</option><option>OPTIONS</option>
+      </select>
+      <input type="url" id="url" placeholder="https://api.example.com/resource?key=value" spellcheck="false" autocomplete="off" aria-label="Request URL" />
+      <button class="btn primary" id="send">Send</button>
+    </div>
+
+    <div class="msg" id="msg" hidden></div>
+
+    <section class="grid-2">
+      <div class="panel">
+        <div class="panel-head">
+          <div class="tabs" id="req-tabs" role="tablist">
+            <button data-t="params" class="on" role="tab">Params<span class="count" id="c-params"></span></button>
+            <button data-t="headers" role="tab">Headers<span class="count" id="c-headers"></span></button>
+            <button data-t="body" role="tab">Body</button>
+          </div>
+        </div>
+        <div data-pane="params">
+          <div class="kv" id="params"></div>
+          <div class="kv-foot"><button class="btn sm" id="add-param">+ Add parameter</button></div>
+          <div class="note">Parameters stay in sync with the URL. Untick a row to leave it out without deleting it.</div>
+        </div>
+        <div data-pane="headers" hidden>
+          <div class="kv" id="headers"></div>
+          <div class="kv-foot">
+            <button class="btn sm" id="add-header">+ Add header</button>
+            <button class="btn sm" id="open-presets">Header presets…</button>
+          </div>
+          <div class="note">Browsers silently drop some headers (Host, Cookie, Origin, Referer, Content-Length…) and may ignore User-Agent.</div>
+        </div>
+        <div data-pane="body" hidden>
+          <div class="body-opts">
+            <div class="seg" id="body-type">
+              <button data-v="none" class="on">None</button>
+              <button data-v="json">JSON</button>
+              <button data-v="text">Text</button>
+              <button data-v="form">Form</button>
+            </div>
+            <button class="btn sm" id="fmt-json">Format JSON</button>
+          </div>
+          <textarea id="req-body" spellcheck="false" placeholder="Request body…" hidden></textarea>
+          <div id="form-wrap" hidden>
+            <div class="kv" id="form"></div>
+            <div class="kv-foot"><button class="btn sm" id="add-form">+ Add field</button></div>
+          </div>
+          <div class="note" id="body-note">No body will be sent.</div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <div class="tabs" id="res-tabs" role="tablist">
+            <button data-t="rbody" class="on" role="tab">Response</button>
+            <button data-t="rheaders" role="tab">Headers<span class="count" id="c-rheaders"></span></button>
+            <button data-t="rinfo" role="tab">Request</button>
+          </div>
+          <span class="res-meta"><span id="status"></span><span id="time"></span><span id="size"></span></span>
+        </div>
+        <div data-pane="rbody" class="res-pane">
+          <div class="body-opts" style="justify-content:flex-end">
+            <span class="panel-meta" id="ctype"></span>
+            <span class="spacer"></span>
+            <button class="btn sm" id="copy-res">Copy</button>
+            <button class="btn sm" id="dl-res">Download</button>
+          </div>
+          <textarea id="res-body" readonly spellcheck="false" placeholder="The response body will appear here."></textarea>
+        </div>
+        <div data-pane="rheaders" class="res-pane" hidden>
+          <div class="tbl-wrap"><table class="tbl"><tbody id="res-headers"></tbody></table></div>
+          <div class="note">Cross-origin responses only expose headers the server lists in <code>Access-Control-Expose-Headers</code> (plus a few safe ones).</div>
+        </div>
+        <div data-pane="rinfo" class="res-pane" hidden>
+          <div class="out" id="req-info">Send a request to see exactly what was sent.</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="about">
+      <h2>About this tool</h2>
+      <p>This client runs inside your browser using the <code>fetch</code> API, so it follows the same rules as any web page. Pick a method, enter a URL, add query parameters, headers and an optional body, then press <kbd>Enter</kbd> in the URL field or click <b>Send</b>. Long requests can be cancelled, and they are aborted automatically after the timeout.</p>
+      <h2>Why does my request fail with a network error?</h2>
+      <ul>
+        <li><b>CORS:</b> a page can only read a cross-origin response if the server allows it with <code>Access-Control-Allow-Origin</code>. Many public APIs do; many private ones don't. The browser hides the details, so a blocked request looks like a generic network error. Server-to-server tools like cURL are not subject to CORS.</li>
+        <li><b>Preflight:</b> non-simple requests (e.g. JSON bodies, PUT/DELETE, custom headers) first send an <code>OPTIONS</code> request that the server must answer correctly.</li>
+        <li><b>Mixed content:</b> this page is served over HTTPS, so plain <code>http://</code> URLs are usually blocked.</li>
+        <li><b>Forbidden headers:</b> headers such as Host, Cookie or Origin are controlled by the browser and cannot be set.</li>
+      </ul>
+      <h2>Privacy</h2>
+      <p>Requests go directly from your browser to the URL you enter — this site never sees or proxies them. Nothing is stored.</p>
+    </section>
+  </main>
+</div>
+
+<script src="/assets/tools.js"></script>
+<script>
+(function () {
+  'use strict';
+  const { el, $, $$, copy, download, msg, invalid } = DevTools;
+
+  // @@http-start — pure helpers (also exercised by the Node tests)
+  function safeDecode(s) {
+    try { return decodeURIComponent(s.replace(/\+/g, ' ')); } catch { return s; }
+  }
+  /** Split a URL string into { base, query, hash } without requiring it to be valid. */
+  function splitUrl(url) {
+    let hash = '', i = url.indexOf('#');
+    if (i >= 0) { hash = url.slice(i); url = url.slice(0, i); }
+    let query = '';
+    i = url.indexOf('?');
+    if (i >= 0) { query = url.slice(i + 1); url = url.slice(0, i); }
+    return { base: url, query, hash, hasQ: i >= 0 };
+  }
+  /** Query pairs from a URL string. */
+  function parseQuery(url) {
+    const { query } = splitUrl(url);
+    if (!query) return [];
+    return query.split('&').filter(Boolean).map(part => {
+      const eq = part.indexOf('=');
+      return eq < 0 ? { key: safeDecode(part), value: '' } : { key: safeDecode(part.slice(0, eq)), value: safeDecode(part.slice(eq + 1)) };
+    });
+  }
+  function encodeQ(s) { return encodeURIComponent(s).replace(/%2C/gi, ',').replace(/%3A/gi, ':').replace(/%2F/gi, '/').replace(/%40/gi, '@'); }
+  /** Rebuild the URL's query from rows ({key, value, enabled}). */
+  function buildUrl(url, rows) {
+    const { base, hash } = splitUrl(url);
+    const q = rows.filter(r => r.enabled !== false && r.key !== '').map(r => encodeQ(r.key) + (r.value !== '' ? '=' + encodeQ(r.value) : '')).join('&');
+    return base + (q ? '?' + q : '') + hash;
+  }
+  function encodeForm(rows) {
+    return rows.filter(r => r.enabled !== false && r.key !== '').map(r => encodeURIComponent(r.key).replace(/%20/g, '+') + '=' + encodeURIComponent(r.value).replace(/%20/g, '+')).join('&');
+  }
+  const FORBIDDEN = /^(accept-charset|accept-encoding|access-control-request-headers|access-control-request-method|connection|content-length|cookie|cookie2|date|dnt|expect|host|keep-alive|origin|referer|set-cookie|te|trailer|transfer-encoding|upgrade|via|proxy-.*|sec-.*)$/i;
+  const TOKEN = /^[!#$%&'*+.^_`|~0-9A-Za-z-]+$/;
+  function shellQuote(s) { return "'" + String(s).replace(/'/g, "'\\''") + "'"; }
+  function toCurl(req) {
+    const parts = ['curl'];
+    if (req.method === 'HEAD') parts.push('-I'); else if (req.method !== 'GET') parts.push('-X ' + req.method);
+    parts.push(shellQuote(req.url));
+    req.headers.forEach(([k, v]) => parts.push('-H ' + shellQuote(k + ': ' + v)));
+    if (req.body != null && req.body !== '') parts.push('--data-raw ' + shellQuote(req.body));
+    return parts.join(' \\\n  ');
+  }
+  function fmtBytes(n) { return n < 1024 ? n + ' B' : n < 1048576 ? (n / 1024).toFixed(1) + ' KB' : (n / 1048576).toFixed(2) + ' MB'; }
+  const HEADER_PRESETS = [
+    { group: 'Accept', items: [['Accept', 'application/json'], ['Accept', 'text/plain'], ['Accept', 'text/html'], ['Accept', '*/*'], ['Accept-Language', 'en-US,en;q=0.9']] },
+    { group: 'Content-Type', items: [['Content-Type', 'application/json'], ['Content-Type', 'application/x-www-form-urlencoded'], ['Content-Type', 'text/plain;charset=UTF-8'], ['Content-Type', 'application/xml']] },
+    { group: 'Authorization', items: [['Authorization', 'Bearer <token>'], ['Authorization', 'Basic <base64 user:password>'], ['X-API-Key', '<key>']] },
+    { group: 'Caching', items: [['Cache-Control', 'no-cache'], ['Cache-Control', 'no-store'], ['Pragma', 'no-cache'], ['If-None-Match', '"<etag>"']] },
+    { group: 'Client', items: [['User-Agent', 'DevTools-HTTP-Client/1.0'], ['X-Requested-With', 'XMLHttpRequest'], ['X-Request-ID', '<uuid>']] },
+  ];
+  /** Add a header preset to rows: replaces the value of an existing header with the same name (case-insensitive). */
+  function applyHeaderPreset(rows, name, value) {
+    const hit = rows.find(r => r.key.toLowerCase() === name.toLowerCase());
+    if (hit) { hit.value = value; hit.enabled = true; return rows; }
+    const empty = rows.find(r => !r.key && !r.value);
+    if (empty) { empty.key = name; empty.value = value; empty.enabled = true; return rows; }
+    rows.push({ key: name, value, enabled: true });
+    return rows;
+  }
+  // @@http-end
+
+  const PRESETS = {
+    todo:   { method: 'GET', url: 'https://jsonplaceholder.typicode.com/todos/1', headers: [['Accept', 'application/json']] },
+    list:   { method: 'GET', url: 'https://jsonplaceholder.typicode.com/posts?userId=1&_limit=5', headers: [['Accept', 'application/json']] },
+    create: { method: 'POST', url: 'https://jsonplaceholder.typicode.com/posts', headers: [['Accept', 'application/json']], bodyType: 'json', body: '{\n  "title": "Hello from the browser",\n  "body": "Sent with the DevTools HTTP client.",\n  "userId": 7\n}' },
+    patch:  { method: 'PATCH', url: 'https://jsonplaceholder.typicode.com/posts/1', headers: [], bodyType: 'json', body: '{\n  "title": "A better title"\n}' },
+    delete: { method: 'DELETE', url: 'https://jsonplaceholder.typicode.com/posts/1', headers: [] },
+    echo:   { method: 'GET', url: 'https://httpbin.org/get?source=devtools', headers: [['Accept', 'application/json'], ['X-Demo-Header', 'it works']] },
+    form:   { method: 'POST', url: 'https://httpbin.org/post', headers: [], bodyType: 'form', form: [['name', 'Ada Lovelace'], ['language', 'Analytical Engine']] },
+    status: { method: 'GET', url: 'https://httpbin.org/status/418', headers: [] },
+  };
+
+  const urlIn = $('#url'), methodSel = $('#method'), reqBody = $('#req-body'), resBody = $('#res-body'), msgEl = $('#msg');
+  let params = [], headers = [{ key: '', value: '', enabled: true }], formRows = [{ key: '', value: '', enabled: true }];
+  let bodyType = 'none', inflight = null, lastRes = null;
+
+  // ── key/value row editor ──
+  function renderKv(container, rows, onChange, placeholders) {
+    container.replaceChildren(...rows.map((r, i) => {
+      const cb = el('input', { type: 'checkbox', 'aria-label': 'Enabled' }); cb.checked = r.enabled !== false;
+      const k = el('input', { type: 'text', class: 'k', placeholder: placeholders[0], spellcheck: 'false', 'aria-label': 'Name' }); k.value = r.key;
+      const v = el('input', { type: 'text', class: 'v', placeholder: placeholders[1], spellcheck: 'false', 'aria-label': 'Value' }); v.value = r.value;
+      const row = el('div', { class: 'kv-row' + (r.enabled === false ? ' off' : '') }, cb, k, v,
+        el('button', { class: 'icon-btn', title: 'Remove', 'aria-label': 'Remove row', onclick: () => { rows.splice(i, 1); renderKv(container, rows, onChange, placeholders); onChange(); } }, '×'));
+      cb.addEventListener('change', () => { r.enabled = cb.checked; row.classList.toggle('off', !cb.checked); onChange(); });
+      k.addEventListener('input', () => { r.key = k.value; onChange(); });
+      v.addEventListener('input', () => { r.value = v.value; onChange(); });
+      return row;
+    }));
+    if (!rows.length) container.appendChild(el('div', { class: 'panel-meta' }, 'No rows yet.'));
+  }
+
+  function counts() {
+    $('#c-params').textContent = params.filter(r => r.enabled !== false && r.key).length || '';
+    $('#c-headers').textContent = headers.filter(r => r.enabled !== false && r.key).length || '';
+  }
+
+  const renderParams = () => renderKv($('#params'), params, onParamsEdited, ['key', 'value']);
+  const renderHeaders = () => renderKv($('#headers'), headers, counts, ['Header-Name', 'value']);
+  const renderForm = () => renderKv($('#form'), formRows, () => {}, ['field', 'value']);
+
+  function onParamsEdited() { urlIn.value = buildUrl(urlIn.value, params); counts(); }
+  function onUrlEdited() {
+    const fromUrl = parseQuery(urlIn.value).map(p => ({ key: p.key, value: p.value, enabled: true }));
+    params = fromUrl.concat(params.filter(r => r.enabled === false));
+    renderParams(); counts();
+  }
+
+  // ── tabs ──
+  function bindTabs(tabsSel) {
+    const tabs = $$(tabsSel + ' button');
+    tabs.forEach(b => b.addEventListener('click', () => showTab(tabsSel, b.dataset.t)));
+  }
+  function showTab(tabsSel, t) {
+    const tabs = $$(tabsSel + ' button');
+    tabs.forEach(x => {
+      x.classList.toggle('on', x.dataset.t === t);
+      x.setAttribute('aria-selected', x.dataset.t === t);
+      const pane = $('[data-pane="' + x.dataset.t + '"]'); if (pane) pane.hidden = x.dataset.t !== t;
+    });
+  }
+
+  function setBodyType(v) {
+    bodyType = v;
+    $$('#body-type button').forEach(b => b.classList.toggle('on', b.dataset.v === v));
+    reqBody.hidden = v === 'none' || v === 'form';
+    $('#form-wrap').hidden = v !== 'form';
+    $('#fmt-json').hidden = v !== 'json';
+    reqBody.placeholder = v === 'json' ? '{\n  "key": "value"\n}' : 'Plain text body…';
+    $('#body-note').textContent = {
+      none: 'No body will be sent.',
+      json: 'Sent with Content-Type: application/json unless you set your own Content-Type header.',
+      text: 'Sent with Content-Type: text/plain unless you set your own Content-Type header.',
+      form: 'Sent as application/x-www-form-urlencoded unless you set your own Content-Type header.',
+    }[v];
+  }
+
+  // ── header presets modal: native <dialog> + showModal() (inert background, Esc closes, focus returns) ──
+  let presetDlg = null, focusAfterClose = null;
+  function openPresets() {
+    if (!presetDlg) {
+      const body = el('div', { class: 'modal-body' }, HEADER_PRESETS.map(g => el('div', { class: 'preset-group', role: 'group', 'aria-label': g.group }, el('h3', null, g.group),
+        g.items.map(([k, v]) => el('button', { type: 'button', title: k + ': ' + v, onclick: () => {
+          applyHeaderPreset(headers, k, v.includes('<') ? v.replace(/<[^>]*>/, '').replace(/<.*$/, '') : v);
+          renderHeaders(); counts(); showTab('#req-tabs', 'headers');
+          const row = $$('#headers .kv-row').find(r => $('.k', r).value.toLowerCase() === k.toLowerCase());
+          // Placeholder values (<token>, <key>…) need input: send focus to that value field instead of the opener.
+          focusAfterClose = row && v.includes('<') ? $('.v', row) : null;
+          presetDlg.close();
+        } }, k, el('small', null, ': ' + v))))));
+      presetDlg = el('dialog', { class: 'modal-dlg', 'aria-labelledby': 'presets-title' },
+        el('div', { class: 'panel-head' }, el('span', { class: 'panel-title', id: 'presets-title' }, 'Header presets'),
+          el('button', { class: 'btn sm', type: 'button', onclick: () => presetDlg.close() }, 'Close')),
+        body);
+      // A click on the backdrop lands on the <dialog> element itself.
+      presetDlg.addEventListener('click', e => { if (e.target === presetDlg) presetDlg.close(); });
+      presetDlg.addEventListener('close', () => {
+        const target = focusAfterClose && focusAfterClose.isConnected ? focusAfterClose : $('#open-presets');
+        focusAfterClose = null;
+        target.focus();
+        if (target.setSelectionRange) target.setSelectionRange(target.value.length, target.value.length);
+      });
+      document.body.appendChild(presetDlg);
+    }
+    presetDlg.showModal();
+    const first = $('.modal-body button', presetDlg); if (first) first.focus();
+  }
+
+  // ── request assembly ──
+  /** Error that remembers which form control caused it (marked with DevTools.invalid). */
+  function fieldError(text, field) { const e = new Error(text); e.field = field; return e; }
+  function collectRequest() {
+    let url = urlIn.value.trim();
+    if (!url) throw fieldError('Enter a URL to send the request to.', urlIn);
+    if (!/^[a-z][a-z0-9+.-]*:\/\//i.test(url)) { url = 'https://' + url; urlIn.value = url; }
+    let parsed;
+    if (/\s/.test(url.replace(/^[a-z][a-z0-9+.-]*:\/\//i, '').split(/[/?#]/)[0])) throw fieldError('That URL is not valid: the host contains spaces. Check for typos.', urlIn);
+    try { parsed = new URL(url); } catch { throw fieldError('That URL is not valid. Check for typos, spaces or a missing host.', urlIn); }
+    if (!parsed.hostname || /%|\s/.test(parsed.hostname)) throw fieldError('That URL is not valid: "' + parsed.hostname + '" is not a host name.', urlIn);
+    if (!/^https?:$/.test(parsed.protocol)) throw fieldError('Only http:// and https:// URLs are supported.', urlIn);
+    const method = methodSel.value;
+    const hdrs = [];
+    for (const r of headers) {
+      if (r.enabled === false || !r.key.trim()) continue;
+      const name = r.key.trim();
+      if (!TOKEN.test(name)) throw new Error('Header name "' + name + '" contains characters that are not allowed.');
+      if (/[\r\n]/.test(r.value)) throw new Error('Header "' + name + '" value must not contain line breaks.');
+      hdrs.push([name, r.value]);
+    }
+    let body = null;
+    const hasCT = hdrs.some(([k]) => k.toLowerCase() === 'content-type');
+    if (bodyType !== 'none') {
+      if (method === 'GET' || method === 'HEAD') throw new Error(method + ' requests cannot have a body in the browser. Switch the body to "None" or choose another method.');
+      if (bodyType === 'form') { body = encodeForm(formRows); if (!hasCT) hdrs.push(['Content-Type', 'application/x-www-form-urlencoded']); }
+      else {
+        body = reqBody.value;
+        if (bodyType === 'json') {
+          if (body.trim()) { try { JSON.parse(body); } catch (e) { throw fieldError('The JSON body is not valid: ' + e.message + '. Fix it or switch the body type to Text.', reqBody); } }
+          if (!hasCT) hdrs.push(['Content-Type', 'application/json']);
+        } else if (!hasCT) hdrs.push(['Content-Type', 'text/plain;charset=UTF-8']);
+      }
+    }
+    return { method, url: parsed.href, headers: hdrs, body };
+  }
+
+  /** collectRequest() + aria-invalid on the offending field (cleared on every other field). */
+  function checkedRequest() {
+    try {
+      const req = collectRequest();
+      invalid(urlIn, false); invalid(reqBody, false);
+      return req;
+    } catch (e) {
+      [urlIn, reqBody].forEach(f => invalid(f, f === e.field));
+      if (e.field === reqBody) showTab('#req-tabs', 'body');
+      if (e.field) e.field.focus();
+      throw e;
+    }
+  }
+
+  function warnings(req) {
+    const w = [];
+    const dropped = req.headers.filter(([k]) => FORBIDDEN.test(k)).map(([k]) => k);
+    if (dropped.length) w.push('The browser will not send: ' + dropped.join(', ') + '.');
+    if (location.protocol === 'https:' && req.url.startsWith('http:')) w.push('Plain http:// from an https page is usually blocked as mixed content.');
+    return w;
+  }
+
+  function setBusy(busy) {
+    const b = $('#send');
+    b.textContent = busy ? 'Cancel' : 'Send';
+    b.classList.toggle('primary', !busy);
+    b.classList.toggle('danger', busy);
+  }
+
+  function clearResponse() {
+    $('#status').replaceChildren(); $('#time').textContent = ''; $('#size').textContent = ''; $('#ctype').textContent = '';
+    resBody.value = ''; $('#res-headers').replaceChildren(); $('#c-rheaders').textContent = ''; lastRes = null;
+  }
+
+  function showRequestInfo(req) {
+    const lines = [req.method + ' ' + req.url, ''];
+    lines.push(req.headers.length ? req.headers.map(([k, v]) => k + ': ' + v).join('\n') : '(no custom headers)');
+    if (req.body != null) lines.push('', req.body === '' ? '(empty body)' : req.body);
+    $('#req-info').textContent = lines.join('\n');
+  }
+
+  function renderBody() {
+    if (!lastRes) return;
+    let text = lastRes.text;
+    const looksJson = /json/i.test(lastRes.ctype) || /^\s*[[{]/.test(text);
+    if ($('#pretty').checked && looksJson && text.trim()) {
+      try { text = JSON.stringify(JSON.parse(text), null, 2); } catch { /* not JSON after all */ }
+    }
+    resBody.value = text;
+  }
+
+  async function send() {
+    if (inflight) { inflight.abort('cancel'); return; }
+    msg(msgEl, '');
+    let req;
+    try { req = checkedRequest(); } catch (e) { msg(msgEl, 'error', e.message); return; }
+    const warn = warnings(req);
+    clearResponse();
+    showRequestInfo(req);
+    const ctrl = new AbortController(); inflight = ctrl;
+    let secs = Math.min(300, Math.max(1, Number($('#timeout').value) || 30));
+    $('#timeout').value = secs;
+    let reason = '';
+    const timer = setTimeout(() => { reason = 'timeout'; ctrl.abort(); }, secs * 1000);
+    ctrl.signal.addEventListener('abort', () => { if (!reason) reason = 'cancel'; });
+    setBusy(true);
+    $('#status').replaceChildren(el('span', { class: 'status' }, '…'));
+    const t0 = performance.now();
+    try {
+      const res = await fetch(req.url, { method: req.method, headers: req.headers, body: req.body, signal: ctrl.signal, cache: 'no-store', redirect: 'follow', credentials: 'omit' });
+      const buf = await res.arrayBuffer();
+      const ms = Math.round(performance.now() - t0);
+      const ctype = res.headers.get('content-type') || '';
+      let text;
+      const cs = /charset="?([\w-]+)/i.exec(ctype);
+      try { text = new TextDecoder(cs ? cs[1] : 'utf-8').decode(buf); } catch { text = new TextDecoder().decode(buf); }
+      lastRes = { text, ctype, status: res.status, url: res.url };
+      const cls = 's' + String(res.status)[0];
+      const label = { s2: 'Success', s3: 'Redirect', s4: 'Client error', s5: 'Server error' }[cls] || '';
+      $('#status').replaceChildren(el('span', { class: 'status ' + cls, title: label }, res.status + ' ' + (res.statusText || label)));
+      $('#time').textContent = ms + ' ms';
+      $('#size').textContent = fmtBytes(buf.byteLength);
+      $('#ctype').textContent = ctype || 'no content-type';
+      const hs = []; res.headers.forEach((v, k) => hs.push([k, v]));
+      $('#res-headers').replaceChildren(...hs.map(([k, v]) => el('tr', null, el('td', { class: 'mono' }, k), el('td', { class: 'mono' }, v))));
+      $('#c-rheaders').textContent = hs.length || '';
+      renderBody();
+      if (req.method === 'HEAD' && !buf.byteLength) resBody.value = '(HEAD responses have no body — see the Headers tab)';
+      const notes = warn.slice();
+      if (res.redirected) notes.push('Followed redirect(s) to ' + res.url);
+      msg(msgEl, notes.length ? 'warn' : res.ok ? 'ok' : 'warn', notes.length ? notes.join(' ') : (res.ok ? 'Request completed.' : 'The server responded with an error status.'));
+    } catch (e) {
+      const ms = Math.round(performance.now() - t0);
+      $('#status').replaceChildren(el('span', { class: 'status err' }, reason === 'timeout' ? 'Timed out' : reason === 'cancel' ? 'Cancelled' : 'Failed'));
+      $('#time').textContent = ms + ' ms';
+      if (reason === 'timeout') msg(msgEl, 'error', 'No response within ' + secs + ' s — the request was aborted. Increase the timeout or check the server.');
+      else if (reason === 'cancel') msg(msgEl, 'info', 'Request cancelled.');
+      else if (e && e.name === 'TypeError') {
+        msg(msgEl, 'error', 'The browser could not complete the request (' + e.message + '). This is most often CORS: the server did not allow requests from this site, or rejected the preflight. Other causes: mixed content (http on an https page), DNS/connection failure, an ad-blocker, or an invalid header. ' + warn.join(' '));
+      } else msg(msgEl, 'error', 'Request failed: ' + (e && e.message || e));
+    } finally {
+      clearTimeout(timer);
+      inflight = null;
+      setBusy(false);
+    }
+  }
+
+  function loadPreset(key) {
+    const p = PRESETS[key]; if (!p) return;
+    methodSel.value = p.method;
+    urlIn.value = p.url;
+    params = []; onUrlEdited();
+    headers = p.headers.map(([k, v]) => ({ key: k, value: v, enabled: true }));
+    if (!headers.length) headers.push({ key: '', value: '', enabled: true });
+    renderHeaders();
+    setBodyType(p.bodyType || 'none');
+    reqBody.value = p.body || '';
+    formRows = (p.form || [['', '']]).map(([k, v]) => ({ key: k, value: v, enabled: true }));
+    renderForm();
+    invalid(urlIn, false); invalid(reqBody, false);
+    counts(); clearResponse(); msg(msgEl, '');
+    showTab('#req-tabs', p.bodyType ? 'body' : (p.url.includes('?') ? 'params' : 'headers'));
+  }
+
+  // ── wiring ──
+  bindTabs('#req-tabs'); bindTabs('#res-tabs');
+  $$('#body-type button').forEach(b => b.addEventListener('click', () => setBodyType(b.dataset.v)));
+  urlIn.addEventListener('input', () => { invalid(urlIn, false); onUrlEdited(); });
+  reqBody.addEventListener('input', () => invalid(reqBody, false));
+  urlIn.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); send(); } });
+  $('#send').addEventListener('click', send);
+  $('#add-param').addEventListener('click', () => { params.push({ key: '', value: '', enabled: true }); renderParams(); $$('#params .k').pop().focus(); });
+  $('#add-header').addEventListener('click', () => { headers.push({ key: '', value: '', enabled: true }); renderHeaders(); $$('#headers .k').pop().focus(); });
+  $('#add-form').addEventListener('click', () => { formRows.push({ key: '', value: '', enabled: true }); renderForm(); $$('#form .k').pop().focus(); });
+  $('#open-presets').addEventListener('click', openPresets);
+  $('#fmt-json').addEventListener('click', () => {
+    try { reqBody.value = JSON.stringify(JSON.parse(reqBody.value), null, 2); msg(msgEl, ''); }
+    catch (e) { msg(msgEl, 'error', 'Cannot format: the body is not valid JSON (' + e.message + ').'); }
+  });
+  $('#pretty').addEventListener('change', renderBody);
+  $('#preset').addEventListener('change', e => { loadPreset(e.target.value); e.target.value = ''; });
+  $('#copy-res').addEventListener('click', e => copy(resBody.value, e.currentTarget));
+  $('#dl-res').addEventListener('click', () => {
+    if (!lastRes) return msg(msgEl, 'warn', 'Nothing to download yet.');
+    const ext = /json/i.test(lastRes.ctype) ? 'json' : /html/i.test(lastRes.ctype) ? 'html' : /xml/i.test(lastRes.ctype) ? 'xml' : 'txt';
+    download('response.' + ext, resBody.value, (lastRes.ctype || 'text/plain') + (/charset/i.test(lastRes.ctype) ? '' : ';charset=utf-8'));
+  });
+  $('#curl').addEventListener('click', e => {
+    try { copy(toCurl(checkedRequest()), e.currentTarget); } catch (err) { msg(msgEl, 'error', err.message); }
+  });
+  $('#reset').addEventListener('click', () => {
+    methodSel.value = 'GET'; urlIn.value = ''; params = []; headers = [{ key: '', value: '', enabled: true }];
+    formRows = [{ key: '', value: '', enabled: true }]; reqBody.value = '';
+    renderParams(); renderHeaders(); renderForm(); setBodyType('none'); counts(); clearResponse(); msg(msgEl, '');
+    invalid(urlIn, false); invalid(reqBody, false);
+    $('#req-info').textContent = 'Send a request to see exactly what was sent.';
+    urlIn.focus();
+  });
+
+  setBodyType('none');
+  loadPreset('todo');
+})();
+</script>
+</body>
+</html>

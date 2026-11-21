@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-uGk5ZpWXOExyoacKhYta4lEi6DK/5tE39mFXrUIS+YM='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self';" />
+  <title>DateTime Formatter — .NET Date Format Strings Online</title>
+  <meta name="description" content="Try C#/.NET DateTime format strings live: standard formats (d, D, f, F, o, R, s, u), custom patterns like yyyy-MM-dd HH:mm:ss, and culture-specific month and day names. Runs in your browser." />
+  <meta name="keywords" content="c# datetime format, .net date format string, datetime tostring, yyyy-MM-dd, custom date format, date format tester" />
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large" />
+  <link rel="canonical" href="https://devtool-moya.netlify.app/datetime-formatter" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="DateTime Formatter — .NET Date Format Strings Online" />
+  <meta property="og:description" content="Preview .NET DateTime.ToString formats for any date and culture, right in your browser." />
+  <meta property="og:url" content="https://devtool-moya.netlify.app/datetime-formatter" />
+  <meta property="og:site_name" content="DevTools" />
+  <meta name="twitter:card" content="summary" />
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "DateTime Formatter",
+    "url": "https://devtool-moya.netlify.app/datetime-formatter",
+    "description": "Free online tester for C# / .NET DateTime format strings with standard and custom formats and multiple cultures. Runs client-side.",
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "Any",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+    "featureList": ["Custom .NET date format strings", "Standard formats d D f F g G M o R s t T u U Y", "Culture-specific names", "Unix timestamps", "Format specifier reference", "Client-side only"],
+    "isAccessibleForFree": true
+  }
+  </script>
+  <script type="application/ld+json">
+  { "@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://devtool-moya.netlify.app/" },
+    { "@type": "ListItem", "position": 2, "name": "DateTime Formatter", "item": "https://devtool-moya.netlify.app/datetime-formatter" } ] }
+  </script>
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="/assets/app.css" />
+  <style>
+    .options .opt { max-width: 100%; min-width: 0; }
+    .options select { max-width: 100%; min-width: 0; text-overflow: ellipsis; }
+    .options input[type=datetime-local] { min-width: 0; }
+    .parse-in { flex: 1 1 200px; min-width: 0; }
+    .custom-wrap { padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+    .custom-wrap input { width: 100%; font-size: 15px; }
+    .custom-res { font-family: var(--mono); font-size: 18px; color: var(--accent); word-break: break-all; min-height: 28px; }
+    .custom-res.err { color: var(--danger); font-size: 13px; }
+    .code-line { font-family: var(--mono); font-size: 12px; color: var(--muted2); word-break: break-all; }
+    .tbl-wrap { overflow-x: auto; }
+    .fmt-tbl td.res { font-family: var(--mono); color: var(--accent); word-break: break-word; }
+    .fmt-tbl td.desc { color: var(--muted2); font-size: 12px; }
+    .fmt-tbl td.act { width: 1%; white-space: nowrap; }
+    .fmt-tbl code { cursor: pointer; white-space: nowrap; }
+    .fmt-tbl code:hover { color: var(--accent); }
+    .sec { margin-top: 16px; }
+    @media (max-width: 600px) {
+      .fmt-tbl td.desc, .fmt-tbl th.desc { display: none; }
+      table.tbl th, table.tbl td { padding: 7px 8px; }
+      .fmt-tbl code { white-space: normal; }
+    }
+  </style>
+</head>
+<body>
+<div class="shell">
+  <header id="site-header"></header>
+  <aside id="sidebar"></aside>
+  <div class="nav-backdrop"></div>
+
+  <main class="page">
+    <section class="tool-head">
+      <h1>DateTime Formatter</h1>
+      <p>Preview what <code>DateTime.ToString(format)</code> returns in .NET for any date, format string and culture.</p>
+    </section>
+
+    <section class="options" aria-label="Options">
+      <label class="opt"><span class="opt-label">Date &amp; time</span>
+        <input type="datetime-local" id="dt" step="0.001" aria-label="Date and time" />
+      </label>
+      <button class="btn sm" id="now">Now</button>
+      <label class="opt"><span class="opt-label">Kind</span>
+        <select id="kind" title="DateTimeKind: affects K, z and U">
+          <option value="Local">Local</option>
+          <option value="Utc">Utc</option>
+          <option value="Unspecified">Unspecified</option>
+        </select>
+      </label>
+      <label class="opt"><span class="opt-label">Culture</span>
+        <select id="culture"></select>
+      </label>
+      <span class="divider"></span>
+      <label class="opt" style="flex:1 1 260px"><span class="opt-label">Parse</span>
+        <input type="text" class="parse-in" id="parse" spellcheck="false" placeholder="2024-01-15T14:30:00Z, 1705329000, Jan 15 2024 2:30 PM" aria-label="Parse a date from text" />
+      </label>
+    </section>
+
+    <div class="msg" id="msg" hidden></div>
+
+    <section class="panel">
+      <div class="panel-head">
+        <span class="panel-title">Custom format</span>
+        <span class="panel-actions">
+          <button class="btn sm" id="copy-res">Copy result</button>
+          <button class="btn sm" id="copy-code">Copy code</button>
+        </span>
+      </div>
+      <div class="custom-wrap">
+        <input type="text" id="fmt" value="dddd, dd MMMM yyyy HH:mm:ss" spellcheck="false" aria-label="Format string" />
+        <div class="custom-res" id="res"></div>
+        <div class="code-line" id="code"></div>
+      </div>
+    </section>
+
+    <div class="grid-2 sec">
+      <section class="panel">
+        <div class="panel-head"><span class="panel-title">Standard formats</span></div>
+        <div class="tbl-wrap"><table class="tbl fmt-tbl">
+          <thead><tr><th>Format</th><th class="desc">Name</th><th>Result</th><th></th></tr></thead>
+          <tbody id="std-rows"></tbody>
+        </table></div>
+      </section>
+      <section class="panel">
+        <div class="panel-head"><span class="panel-title">Common patterns</span></div>
+        <div class="tbl-wrap"><table class="tbl fmt-tbl">
+          <thead><tr><th>Format</th><th class="desc">Use</th><th>Result</th><th></th></tr></thead>
+          <tbody id="common-rows"></tbody>
+        </table></div>
+      </section>
+    </div>
+
+    <div class="grid-2 sec">
+      <section class="panel">
+        <div class="panel-head"><span class="panel-title">Individual components</span></div>
+        <div class="tbl-wrap"><table class="tbl fmt-tbl">
+          <thead><tr><th>Format</th><th class="desc">Component</th><th>Result</th><th></th></tr></thead>
+          <tbody id="comp-rows"></tbody>
+        </table></div>
+      </section>
+      <section class="panel">
+        <div class="panel-head"><span class="panel-title">Format specifier reference</span></div>
+        <div class="tbl-wrap"><table class="tbl fmt-tbl">
+          <thead><tr><th>Specifier</th><th>Meaning</th><th>Example</th></tr></thead>
+          <tbody id="ref-rows"></tbody>
+        </table></div>
+      </section>
+    </div>
+
+    <section class="about">
+      <h2>About this tool</h2>
+      <p>The formatter is a JavaScript re-implementation of .NET's DateTime format rules. Click any format in the tables to load it into the custom box.</p>
+      <ul>
+        <li>A single character is a <b>standard format</b> (for example <code>d</code> or <code>o</code>). Use <code>%d</code> to get the custom day specifier on its own.</li>
+        <li>Text in single or double quotes is copied literally, and <code>\</code> escapes one character. <code>/</code> and <code>:</code> become the culture's date and time separators.</li>
+        <li>Month and day names and AM/PM designators come from your browser's locale data (ICU). Culture patterns (<code>d</code>, <code>D</code>, <code>t</code>…) were checked against .NET 10 on ICU, which is what .NET uses on Linux, macOS and Windows 10+. Results depend on the ICU version of both your browser and the .NET runtime, so separators (for example U+202F before AM/PM in en-US) and abbreviations can differ slightly; Windows with the legacy NLS mode differs more.</li>
+        <li><b>Kind</b> mirrors <code>DateTimeKind</code>: it changes <code>K</code>, <code>z</code> and the <code>U</code> format. Like real .NET, <code>R</code> and <code>u</code> do not convert a <code>DateTime</code> to UTC; call <code>ToUniversalTime()</code> first.</li>
+        <li>Browser date inputs carry milliseconds only, so the 4th to 7th fraction digits (<code>ffff</code>…) are always zero.</li>
+      </ul>
+      <h2>Privacy</h2>
+      <p>Everything is computed in your browser. Nothing is sent, stored or logged.</p>
+    </section>
+  </main>
+</div>
+
+<script src="/assets/tools.js"></script>
+<script>
+(function () {
+  'use strict';
+  const { el, $, copy, msg } = DevTools;
+
+  /* #pure */
+  // Culture patterns (.NET on ICU). '/' and ':' inside patterns map to the culture separators.
+  const CULTURES = {
+    'invariant': { name: 'Invariant culture', intl: 'en-US', d: 'MM/dd/yyyy', D: 'dddd, dd MMMM yyyy', t: 'HH:mm', T: 'HH:mm:ss', M: 'MMMM dd', Y: 'yyyy MMMM', dateSep: '/', timeSep: ':', am: 'AM', pm: 'PM', era: 'A.D.' },
+    'en-US': { name: 'English (United States)', d: 'M/d/yyyy', D: 'dddd, MMMM d, yyyy', t: 'h:mm\u202ftt', T: 'h:mm:ss\u202ftt', M: 'MMMM d', Y: 'MMMM yyyy', dateSep: '/', era: 'AD' },
+    'en-GB': { name: 'English (United Kingdom)', d: 'dd/MM/yyyy', D: 'dddd, d MMMM yyyy', t: 'HH:mm', T: 'HH:mm:ss', M: 'd MMMM', Y: 'MMMM yyyy', dateSep: '/', era: 'AD' },
+    'de-DE': { name: 'German (Germany)', d: 'dd.MM.yyyy', D: 'dddd, d. MMMM yyyy', t: 'HH:mm', T: 'HH:mm:ss', M: 'd. MMMM', Y: 'MMMM yyyy', dateSep: '.' },
+    'fr-FR': { name: 'French (France)', d: 'dd/MM/yyyy', D: 'dddd d MMMM yyyy', t: 'HH:mm', T: 'HH:mm:ss', M: 'd MMMM', Y: 'MMMM yyyy', dateSep: '/' },
+    'es-ES': { name: 'Spanish (Spain)', d: 'd/M/yyyy', D: "dddd, d 'de' MMMM 'de' yyyy", t: 'H:mm', T: 'H:mm:ss', M: "d 'de' MMMM", Y: "MMMM 'de' yyyy", dateSep: '/' },
+    'it-IT': { name: 'Italian (Italy)', d: 'dd/MM/yyyy', D: 'dddd d MMMM yyyy', t: 'HH:mm', T: 'HH:mm:ss', M: 'd MMMM', Y: 'MMMM yyyy', dateSep: '/' },
+    'pt-BR': { name: 'Portuguese (Brazil)', d: 'dd/MM/yyyy', D: "dddd, d 'de' MMMM 'de' yyyy", t: 'HH:mm', T: 'HH:mm:ss', M: "d 'de' MMMM", Y: "MMMM 'de' yyyy", dateSep: '/' },
+    'nl-NL': { name: 'Dutch (Netherlands)', d: 'dd-MM-yyyy', D: 'dddd d MMMM yyyy', t: 'HH:mm', T: 'HH:mm:ss', M: 'd MMMM', Y: 'MMMM yyyy', dateSep: '-', am: 'AM', pm: 'PM' },
+    'tr-TR': { name: 'Turkish (Türkiye)', d: 'd.MM.yyyy', D: 'd MMMM yyyy dddd', t: 'HH:mm', T: 'HH:mm:ss', M: 'd MMMM', Y: 'MMMM yyyy', dateSep: '.' },
+    'ru-RU': { name: 'Russian (Russia)', d: 'dd.MM.yyyy', D: "dddd, d MMMM yyyy\u202f'г.'", t: 'HH:mm', T: 'HH:mm:ss', M: 'd MMMM', Y: "MMMM yyyy\u202f'г.'", dateSep: '.',
+      // .NET (ICU) capitalises abbreviated day names and uses these genitive abbreviations after a day number.
+      capDaysAbbr: true, monthsAbbrGen: ['янв.', 'февр.', 'марта', 'апр.', 'мая', 'июня', 'июля', 'авг.', 'сент.', 'окт.', 'нояб.', 'дек.'] },
+    'pl-PL': { name: 'Polish (Poland)', d: 'd.MM.yyyy', D: 'dddd, d MMMM yyyy', t: 'HH:mm', T: 'HH:mm:ss', M: 'd MMMM', Y: 'MMMM yyyy', dateSep: '.' },
+    'ja-JP': { name: 'Japanese (Japan)', d: 'yyyy/MM/dd', D: 'yyyy年M月d日 dddd', t: 'H:mm', T: 'H:mm:ss', M: 'M月d日', Y: 'yyyy年M月', dateSep: '/' },
+    'zh-CN': { name: 'Chinese (Simplified, China)', d: 'yyyy/M/d', D: 'yyyy年M月d日 dddd', t: 'HH:mm', T: 'HH:mm:ss', M: 'M月d日', Y: 'yyyy年M月', dateSep: '/' },
+    'ko-KR': { name: 'Korean (Korea)', d: 'yyyy. M. d.', D: 'yyyy년 M월 d일 dddd', t: 'tt h:mm', T: 'tt h:mm:ss', M: 'M월 d일', Y: 'yyyy년 M월', dateSep: '. ' },
+  };
+  const INFO_CACHE = {};
+
+  function monthPart(locale, opts, m) {
+    const parts = new Intl.DateTimeFormat(locale, Object.assign({ timeZone: 'UTC' }, opts)).formatToParts(Date.UTC(2024, m, 15, 12));
+    const p = parts.find(x => x.type === 'month');
+    return p ? p.value : '';
+  }
+  /**
+   * Stand-alone month name: the whole Intl output, so ja-JP keeps "3月" and ko-KR "3월"
+   * (their month part alone is just the number).
+   */
+  function monthName(locale, opts, m) {
+    return new Intl.DateTimeFormat(locale, Object.assign({ timeZone: 'UTC' }, opts)).format(Date.UTC(2024, m, 15, 12)).trim();
+  }
+
+  /** DateTimeFormatInfo-like object: patterns + localized names. */
+  function getInfo(culture) {
+    if (INFO_CACHE[culture]) return INFO_CACHE[culture];
+    const c = CULTURES[culture];
+    if (!c) throw new Error('Unknown culture ' + culture);
+    const loc = c.intl || culture;
+    const info = Object.assign({ timeSep: ':' }, c);
+    info.months = []; info.monthsGen = []; info.monthsAbbr = []; info.monthsAbbrGen = [];
+    for (let m = 0; m < 12; m++) {
+      const full = monthName(loc, { month: 'long' }, m), abbr = monthName(loc, { month: 'short' }, m);
+      const fullGen = monthPart(loc, { month: 'long', day: 'numeric' }, m), abbrGen = monthPart(loc, { month: 'short', day: 'numeric' }, m);
+      info.months.push(full);
+      info.monthsAbbr.push(abbr);
+      // A numeric month part (ja/zh "M月d日") means the culture has no separate genitive form.
+      info.monthsGen.push(/^\d*$/.test(fullGen) ? full : fullGen);
+      info.monthsAbbrGen.push(c.monthsAbbrGen ? c.monthsAbbrGen[m] : /^\d*$/.test(abbrGen) ? abbr : abbrGen);
+    }
+    const wl = new Intl.DateTimeFormat(loc, { weekday: 'long', timeZone: 'UTC' });
+    const ws = new Intl.DateTimeFormat(loc, { weekday: 'short', timeZone: 'UTC' });
+    info.days = []; info.daysAbbr = [];
+    for (let d = 0; d < 7; d++) {
+      const t = Date.UTC(2024, 0, 7 + d, 12), a = ws.format(t);
+      info.days.push(wl.format(t));
+      info.daysAbbr.push(c.capDaysAbbr ? a.charAt(0).toLocaleUpperCase(loc) + a.slice(1) : a);
+    }
+    if (info.am == null) {
+      const dp = h => { const p = new Intl.DateTimeFormat(loc, { hour: 'numeric', hour12: true, timeZone: 'UTC' }).formatToParts(Date.UTC(2024, 0, 1, h)).find(x => x.type === 'dayPeriod'); return p ? p.value : (h < 12 ? 'AM' : 'PM'); };
+      info.am = dp(9); info.pm = dp(15);
+    }
+    if (info.era == null) {
+      const p = new Intl.DateTimeFormat(loc, { era: 'short', year: 'numeric', timeZone: 'UTC' }).formatToParts(Date.UTC(2024, 0, 1)).find(x => x.type === 'era');
+      info.era = p ? p.value : 'A.D.';
+    }
+    INFO_CACHE[culture] = info;
+    return info;
+  }
+
+  function pad(n, w) { const s = String(Math.abs(n)); return (n < 0 ? '-' : '') + (s.length >= w ? s : '0'.repeat(w - s.length) + s); }
+  function fmtErr(text) { const e = new Error('FormatException: ' + text); e.format = true; return e; }
+
+  /** Date.UTC that keeps years 0–99 as written (Date.UTC maps them to 1900–1999). */
+  function utcMs(y, mo0, d, h, mi, s, ms) {
+    const u = new Date(0);
+    u.setUTCFullYear(y, mo0, d);
+    u.setUTCHours(h || 0, mi || 0, s || 0, ms || 0);
+    return u.getTime();
+  }
+
+  /** Builds the DateTime-like value from wall-clock fields. offsetMin = local UTC offset in minutes (east positive). */
+  function makeValue(y, mo, d, h, mi, s, ms, kind, offsetMin) {
+    const t = utcMs(y, mo - 1, d, h, mi, s, ms);
+    const u = new Date(t);
+    return { year: y, month: mo, day: d, hour: h, minute: mi, second: s, ticks: ms * 10000, dow: u.getUTCDay(), kind, offsetMin: offsetMin || 0 };
+  }
+
+  /** Equivalent of DateTime.ToUniversalTime(). */
+  function toUtc(v) {
+    if (v.kind === 'Utc') return v;
+    const t = utcMs(v.year, v.month - 1, v.day, v.hour, v.minute, v.second, 0) - v.offsetMin * 60000;
+    const u = new Date(t);
+    return { year: u.getUTCFullYear(), month: u.getUTCMonth() + 1, day: u.getUTCDate(), hour: u.getUTCHours(), minute: u.getUTCMinutes(), second: u.getUTCSeconds(), ticks: v.ticks, dow: u.getUTCDay(), kind: 'Utc', offsetMin: 0 };
+  }
+
+  function repeatLen(f, i) { let j = i; while (j < f.length && f[j] === f[i]) j++; return j - i; }
+
+  /** True when the format contains a numeric day (d / dd) so genitive month names apply. */
+  function usesGenitive(f) {
+    let i = 0;
+    while (i < f.length) {
+      const ch = f[i];
+      if (ch === "'" || ch === '"') { const j = f.indexOf(ch, i + 1); i = j < 0 ? f.length : j + 1; continue; }
+      if (ch === '\\') { i += 2; continue; }
+      const n = repeatLen(f, i);
+      if (ch === 'd' && n <= 2) return true;
+      i += n;
+    }
+    return false;
+  }
+
+  function offsetOf(v) { return v.kind === 'Utc' ? 0 : v.offsetMin; }
+
+  /** .NET custom DateTime format. */
+  function formatCustom(v, f, info) {
+    let out = '';
+    const gen = usesGenitive(f);
+    let i = 0;
+    while (i < f.length) {
+      const ch = f[i];
+      let n = 1;
+      switch (ch) {
+        case 'g': n = repeatLen(f, i); out += info.era; break;
+        case 'h': n = repeatLen(f, i); out += pad(v.hour % 12 || 12, Math.min(n, 2)); break;
+        case 'H': n = repeatLen(f, i); out += pad(v.hour, Math.min(n, 2)); break;
+        case 'm': n = repeatLen(f, i); out += pad(v.minute, Math.min(n, 2)); break;
+        case 's': n = repeatLen(f, i); out += pad(v.second, Math.min(n, 2)); break;
+        case 'f': case 'F': {
+          n = repeatLen(f, i);
+          if (n > 7) throw fmtErr('more than 7 "' + ch + '" characters are not allowed.');
+          const digits = pad(Math.floor(v.ticks / Math.pow(10, 7 - n)), n);
+          if (ch === 'f') out += digits;
+          else {
+            const t = digits.replace(/0+$/, '');
+            if (t) out += t; else if (out.endsWith('.')) out = out.slice(0, -1);
+          }
+          break;
+        }
+        case 't': {
+          n = repeatLen(f, i);
+          const des = v.hour < 12 ? info.am : info.pm;
+          out += n === 1 ? (des ? Array.from(des)[0] : '') : des;
+          break;
+        }
+        case 'd': {
+          n = repeatLen(f, i);
+          if (n <= 2) out += pad(v.day, n);
+          else out += n === 3 ? info.daysAbbr[v.dow] : info.days[v.dow];
+          break;
+        }
+        case 'M': {
+          n = repeatLen(f, i);
+          if (n <= 2) out += pad(v.month, n);
+          else if (n === 3) out += (gen ? info.monthsAbbrGen : info.monthsAbbr)[v.month - 1];
+          else out += (gen ? info.monthsGen : info.months)[v.month - 1];
+          break;
+        }
+        case 'y': {
+          n = repeatLen(f, i);
+          out += n <= 2 ? pad(v.year % 100, n) : pad(v.year, n);
+          break;
+        }
+        case 'z': {
+          n = repeatLen(f, i);
+          const off = offsetOf(v), a = Math.abs(off), sg = off < 0 ? '-' : '+';
+          const hh = Math.floor(a / 60), mm = a % 60;
+          out += n === 1 ? sg + hh : n === 2 ? sg + pad(hh, 2) : sg + pad(hh, 2) + ':' + pad(mm, 2);
+          break;
+        }
+        case 'K': {
+          if (v.kind === 'Utc') out += 'Z';
+          else if (v.kind === 'Local') { const off = v.offsetMin, a = Math.abs(off); out += (off < 0 ? '-' : '+') + pad(Math.floor(a / 60), 2) + ':' + pad(a % 60, 2); }
+          break;
+        }
+        case ':': out += info.timeSep; break;
+        case '/': out += info.dateSep; break;
+        case "'": case '"': {
+          let j = i + 1, lit = '';
+          while (j < f.length && f[j] !== ch) {
+            if (f[j] === '\\' && j + 1 < f.length) { lit += f[j + 1]; j += 2; } else { lit += f[j]; j++; }
+          }
+          if (j >= f.length) throw fmtErr('cannot find a matching quote character for ' + ch + '.');
+          out += lit; n = j - i + 1;
+          break;
+        }
+        case '%': {
+          if (i + 1 >= f.length || f[i + 1] === '%') throw fmtErr('"%" must be followed by a single custom specifier.');
+          out += formatCustom(v, f[i + 1], info); n = 2;
+          break;
+        }
+        case '\\': {
+          if (i + 1 >= f.length) throw fmtErr('"\\" at the end of the format string has nothing to escape.');
+          out += f[i + 1]; n = 2;
+          break;
+        }
+        default: out += ch;
+      }
+      i += n;
+    }
+    return out;
+  }
+
+  const STANDARD = {
+    d: 'Short date', D: 'Long date', f: 'Full date, short time', F: 'Full date, long time', g: 'General, short time', G: 'General, long time',
+    M: 'Month / day', O: 'Round-trip (ISO 8601)', R: 'RFC 1123', s: 'Sortable', t: 'Short time', T: 'Long time',
+    u: 'Universal sortable', U: 'Universal full', Y: 'Year / month',
+  };
+
+  /** Expands a standard format letter to {pattern, info, value}. */
+  function expandStandard(v, ch, culture) {
+    const info = getInfo(culture);
+    const inv = getInfo('invariant');
+    switch (ch) {
+      case 'd': return [info.d, info, v];
+      case 'D': return [info.D, info, v];
+      case 'f': return [info.D + ' ' + info.t, info, v];
+      case 'F': return [info.D + ' ' + info.T, info, v];
+      case 'g': return [info.d + ' ' + info.t, info, v];
+      case 'G': return [info.d + ' ' + info.T, info, v];
+      case 'm': case 'M': return [info.M, info, v];
+      case 'o': case 'O': return ["yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fffffffK", inv, v];
+      case 'r': case 'R': return ["ddd, dd MMM yyyy HH':'mm':'ss 'GMT'", inv, v];
+      case 's': return ["yyyy'-'MM'-'dd'T'HH':'mm':'ss", inv, v];
+      case 't': return [info.t, info, v];
+      case 'T': return [info.T, info, v];
+      case 'u': return ["yyyy'-'MM'-'dd HH':'mm':'ss'Z'", inv, v];
+      case 'U': return [info.D + ' ' + info.T, info, toUtc(v)];
+      case 'y': case 'Y': return [info.Y, info, v];
+      default: throw fmtErr('"' + ch + '" is not a standard format. Use "%' + ch + '" for the custom specifier.');
+    }
+  }
+
+  /** DateTime.ToString(format, culture). */
+  function formatDate(v, format, culture) {
+    if (format == null || format === '') format = 'G';
+    if (format.length === 1) {
+      const [pattern, info, val] = expandStandard(v, format, culture);
+      return formatCustom(val, pattern, info);
+    }
+    return formatCustom(v, format, getInfo(culture));
+  }
+  /* #endpure */
+
+  const dtInput = $('#dt'), kindSel = $('#kind'), cultureSel = $('#culture'), fmtInput = $('#fmt');
+  for (const [k, c] of Object.entries(CULTURES)) cultureSel.appendChild(el('option', { value: k }, k === 'invariant' ? 'Invariant' : k + ' — ' + c.name));
+  cultureSel.value = 'en-US';
+
+  function errText(e) { return e && e.message ? e.message : String(e); }
+  function csStr(s) { return '"' + String(s).replace(/\\/g, '\\\\').replace(/"/g, '\\"') + '"'; }
+  function cultureCode() {
+    const c = cultureSel.value;
+    return c === 'invariant' ? 'CultureInfo.InvariantCulture' : 'CultureInfo.GetCultureInfo(' + csStr(c) + ')';
+  }
+  function p2(n) { return String(n).padStart(2, '0'); }
+  function toLocalInput(d) {
+    return d.getFullYear() + '-' + p2(d.getMonth() + 1) + '-' + p2(d.getDate()) + 'T' + p2(d.getHours()) + ':' + p2(d.getMinutes()) + ':' + p2(d.getSeconds()) + '.' + String(d.getMilliseconds()).padStart(3, '0');
+  }
+
+  /** Current value from the inputs, plus the true instant (ms since epoch). */
+  function currentValue() {
+    const m = dtInput.value.match(/^(\d{4,})-(\d\d)-(\d\d)T(\d\d):(\d\d)(?::(\d\d)(?:\.(\d{1,3}))?)?$/);
+    if (!m) return null;
+    const [y, mo, d, h, mi] = [m[1], m[2], m[3], m[4], m[5]].map(Number);
+    const s = Number(m[6] || 0), ms = Number((m[7] || '0').padEnd(3, '0'));
+    const local = new Date(y, mo - 1, d, h, mi, s, ms);
+    local.setFullYear(y);
+    const kind = kindSel.value;
+    const offsetMin = -local.getTimezoneOffset();
+    const v = makeValue(y, mo, d, h, mi, s, ms, kind, offsetMin);
+    const instant = kind === 'Utc' ? utcMs(y, mo - 1, d, h, mi, s, ms) : local.getTime();
+    return { v, instant };
+  }
+
+  function row(fmt, desc, compute, clickable) {
+    let text, err = false;
+    try { text = compute(); } catch (e) { text = errText(e); err = true; }
+    const code = el('code', { title: clickable === false ? null : 'Use this format' }, fmt);
+    if (clickable !== false) code.addEventListener('click', () => { fmtInput.value = fmt; renderCustom(); fmtInput.focus(); });
+    return el('tr', null,
+      el('td', null, code),
+      el('td', { class: 'desc' }, desc),
+      el('td', { class: 'res', style: err ? 'color:var(--danger)' : null }, text),
+      el('td', { class: 'act' }, err ? null : el('button', { class: 'btn sm', 'aria-label': 'Copy result of ' + fmt, onclick: e => copy(text, e.currentTarget) }, 'Copy')));
+  }
+
+  let cur = null;
+
+  function renderCustom() {
+    const res = $('#res');
+    if (!cur) { res.textContent = ''; $('#code').textContent = ''; return; }
+    const f = fmtInput.value;
+    const c = cultureSel.value;
+    $('#code').textContent = 'dateTime.ToString(' + csStr(f) + (c === 'en-US' ? '' : ', ' + cultureCode()) + ')' + (c === 'en-US' ? '  // current culture en-US' : '');
+    try { res.className = 'custom-res'; res.textContent = formatDate(cur.v, f, c); DevTools.invalid(fmtInput, false); }
+    catch (e) { res.className = 'custom-res err'; res.textContent = errText(e); DevTools.invalid(fmtInput, true); }
+  }
+
+  function renderTables() {
+    const c = cultureSel.value, v = cur.v;
+    const fd = f => () => formatDate(v, f, c);
+    $('#std-rows').replaceChildren(...Object.entries(STANDARD).map(([k, name]) => row(k, name, fd(k))));
+
+    const common = [
+      ['yyyy-MM-dd', 'ISO date'], ['dd/MM/yyyy', 'Day first'], ['MM/dd/yyyy', 'Month first (US)'], ['dd MMM yyyy', 'Short month name'],
+      ['MMMM dd', 'Month and day'], ['MMMM yyyy', 'Month and year'], ['yyyy', 'Year only'], ['HH:mm:ss', '24-hour time'], ['hh:mm tt', '12-hour time'],
+      ['dddd', 'Day of week'], ['yyyy-MM-dd HH:mm:ss', 'Log timestamp'], ['yyyyMMddHHmmss', 'Compact (file names)'],
+      ["yyyy-MM-dd'T'HH:mm:ss.fffK", 'ISO 8601 with offset'], ["yyyy-MM-dd'T'HH:mm:ss.fff'Z'", 'ISO 8601 UTC literal'],
+    ];
+    const rowsC = common.map(([f, d]) => row(f, d, fd(f)));
+    if (Number.isFinite(cur.instant)) {
+      const iso = new Date(cur.instant).toISOString();
+      rowsC.push(row('ToUniversalTime().ToString("o")', 'ISO 8601 in UTC', () => formatDate(toUtc(v), 'o', c), false));
+      rowsC.push(row('ToUnixTimeSeconds()', 'Unix seconds (DateTimeOffset)', () => String(Math.floor(cur.instant / 1000)), false));
+      rowsC.push(row('ToUnixTimeMilliseconds()', 'Unix milliseconds', () => String(cur.instant), false));
+      rowsC.push(row('JavaScript toISOString()', 'For comparison', () => iso, false));
+    }
+    $('#common-rows').replaceChildren(...rowsC);
+
+    const comps = [
+      ['yyyy', 'Four-digit year'], ['yy', 'Two-digit year'], ['MM', 'Month 01–12'], ['MMM', 'Abbreviated month'], ['MMMM', 'Full month'],
+      ['dd', 'Day 01–31'], ['ddd', 'Abbreviated weekday'], ['dddd', 'Full weekday'], ['HH', 'Hour 00–23'], ['hh', 'Hour 01–12'],
+      ['mm', 'Minute'], ['ss', 'Second'], ['fff', 'Milliseconds'], ['tt', 'AM/PM designator'], ['zzz', 'UTC offset'], ['%K', 'Kind / offset (K)'],
+    ];
+    $('#comp-rows').replaceChildren(...comps.map(([f, d]) => row(f, d, fd(f))));
+
+    const ref = [
+      ['d', 'Day of month, 1–31', '%d'], ['dd', 'Day of month, 01–31', 'dd'], ['ddd', 'Abbreviated day name', 'ddd'], ['dddd', 'Full day name', 'dddd'],
+      ['f … fffffff', 'Fraction of a second, 1–7 digits', 'fff'], ['F … FFFFFFF', 'Fraction without trailing zeros (and its "." if zero)', 'ss.FFF'],
+      ['g / gg', 'Era', 'gg'], ['h / hh', 'Hour 1–12 / 01–12', 'hh'], ['H / HH', 'Hour 0–23 / 00–23', 'HH'], ['K', 'Time zone info: offset, Z or empty', '%K'],
+      ['m / mm', 'Minute 0–59 / 00–59', 'mm'], ['M / MM', 'Month 1–12 / 01–12', 'MM'], ['MMM / MMMM', 'Abbreviated / full month name', 'MMM / MMMM'],
+      ['s / ss', 'Second 0–59 / 00–59', 'ss'], ['t / tt', 'First character / full AM-PM designator', '%t / tt'],
+      ['y / yy', 'Year mod 100, 1 / 2 digits', '%y / yy'], ['yyy / yyyy / yyyyy', 'Year padded to 3 / 4 / 5 digits', 'yyy / yyyy / yyyyy'],
+      ['z / zz / zzz', 'UTC offset in hours / hours / hours:minutes', '%z / zz / zzz'], [':', 'Culture time separator', 'HH:mm'], ['/', 'Culture date separator', 'dd/MM'],
+      ["'text' or \"text\"", 'Literal text, copied as is', "'at' HH"], ['%c', 'A single custom specifier c (e.g. %d)', '%M'], ['\\c', 'Escape: character c as a literal', '\\h\\h HH'],
+    ];
+    $('#ref-rows').replaceChildren(...ref.map(([s, d, ex]) => {
+      let r;
+      try { r = ex.split(' / ').map(x => x + ' → ' + formatDate(v, x, c)).join(',  '); } catch (e) { r = errText(e); }
+      return el('tr', null, el('td', null, el('code', null, s)), el('td', null, d), el('td', { class: 'res' }, r));
+    }));
+  }
+
+  function renderAll() {
+    cur = currentValue();
+    DevTools.invalid(dtInput, !cur);
+    if (!cur) {
+      msg($('#msg'), 'error', 'Pick a valid date and time.');
+      $('#res').textContent = '';
+      return;
+    }
+    renderCustom();
+    try { renderTables(); } catch (e) { msg($('#msg'), 'error', errText(e)); }
+  }
+
+  function setDate(d, kind) {
+    dtInput.value = toLocalInput(d);
+    if (kind) kindSel.value = kind;
+    msg($('#msg'), '');
+    renderAll();
+  }
+
+  /**
+   * Interprets the parse box. Returns { d: Date, note } or null.
+   * Bare numbers need at least 5 digits to count as Unix time ("2024" is a year), or an
+   * explicit "s" / "ms" suffix. Date-only ISO text is a local date (Date.parse would use UTC).
+   */
+  function parseInput(t) {
+    let m, d = null, note = '';
+    if ((m = t.match(/^(-?\d+)\s*(s|ms)$/i))) { const n = Number(m[1]); d = new Date(m[2].toLowerCase() === 's' ? n * 1000 : n); note = m[2].toLowerCase() === 's' ? 'Unix seconds' : 'Unix milliseconds'; }
+    else if (/^-?\d{5,11}$/.test(t)) { d = new Date(Number(t) * 1000); note = 'Unix seconds'; }
+    else if (/^-?\d{12,16}$/.test(t)) { d = new Date(Number(t)); note = 'Unix milliseconds'; }
+    else if ((m = t.match(/^(\d{4})(?:-(\d\d)(?:-(\d\d))?)?$/))) {
+      const y = Number(m[1]), mo = m[2] ? Number(m[2]) : 1, day = m[3] ? Number(m[3]) : 1;
+      if (mo >= 1 && mo <= 12 && day >= 1 && day <= 31) {
+        d = new Date(2000, mo - 1, day); d.setFullYear(y);
+        if (d.getMonth() !== mo - 1) d = null; // e.g. 2024-02-31
+        note = m[3] ? 'local date' : m[2] ? 'local date, first day of the month' : 'year, local 1 January';
+      }
+    } else {
+      const ms = Date.parse(t);
+      if (!Number.isNaN(ms)) {
+        d = new Date(ms);
+        if (/(Z|[+-]\d\d:?\d\d|GMT|UTC)$/i.test(t)) note = 'converted to local time';
+      }
+    }
+    return d && !Number.isNaN(d.getTime()) ? { d, note } : null;
+  }
+
+  function parseText() {
+    const t = $('#parse').value.trim();
+    DevTools.invalid($('#parse'), false);
+    if (!t) { msg($('#msg'), ''); return; }
+    const r = parseInput(t);
+    const d = r && r.d, note = r ? r.note : '';
+    if (!d) { DevTools.invalid($('#parse'), true); msg($('#msg'), 'error', 'Could not parse "' + t + '". Try ISO 8601 (2024-01-15T14:30:00), a Unix timestamp with at least 5 digits (or a "s" / "ms" suffix), or "Jan 15 2024 14:30".'); return; }
+    setDate(d, 'Local');
+    msg($('#msg'), 'ok', 'Parsed as ' + d.toString() + (note ? ' (' + note + ')' : ''));
+  }
+
+  $('#now').addEventListener('click', () => { $('#parse').value = ''; setDate(new Date()); });
+  dtInput.addEventListener('input', () => { msg($('#msg'), ''); renderAll(); });
+  kindSel.addEventListener('change', renderAll);
+  cultureSel.addEventListener('change', renderAll);
+  fmtInput.addEventListener('input', renderCustom);
+  $('#parse').addEventListener('input', DevTools.debounce(parseText, 400));
+  $('#copy-res').addEventListener('click', e => copy($('#res').textContent, e.currentTarget));
+  $('#copy-code').addEventListener('click', e => copy($('#code').textContent.replace(/\s+\/\/.*$/, ''), e.currentTarget));
+
+  setDate(new Date());
+})();
+</script>
+</body>
+</html>

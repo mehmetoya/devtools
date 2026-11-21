@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-UyYKoCFygOgB6zraZuFiEb99nH6sPsqStGiWCudzF0I='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self';" />
+  <title>Barcode Generator — QR Code, EAN-13 &amp; EAN-8, Free and Client-Side</title>
+  <meta name="description" content="Create QR codes, EAN-13 and EAN-8 barcodes in your browser. Automatic check digits, error correction levels, quick QR templates, PNG and SVG download. Nothing is uploaded." />
+  <meta name="keywords" content="barcode generator, qr code generator, ean-13 generator, ean-8 barcode, check digit calculator, qr code svg, qr code png" />
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large" />
+  <link rel="canonical" href="https://devtool-moya.netlify.app/barcode-generator" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Barcode Generator — QR Code, EAN-13 &amp; EAN-8" />
+  <meta property="og:description" content="Generate QR codes and EAN barcodes locally in your browser and download them as PNG or SVG." />
+  <meta property="og:url" content="https://devtool-moya.netlify.app/barcode-generator" />
+  <meta property="og:site_name" content="DevTools" />
+  <meta name="twitter:card" content="summary" />
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Barcode Generator",
+    "url": "https://devtool-moya.netlify.app/barcode-generator",
+    "description": "Free online generator for QR codes, EAN-13 and EAN-8 barcodes with automatic check digits and PNG/SVG export. Runs client-side.",
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "Any",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+    "featureList": ["QR code generator", "EAN-13 barcodes", "EAN-8 barcodes", "Automatic check digit", "Error correction L/M/Q/H", "PNG and SVG download", "Client-side only"],
+    "isAccessibleForFree": true
+  }
+  </script>
+  <script type="application/ld+json">
+  { "@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://devtool-moya.netlify.app/" },
+    { "@type": "ListItem", "position": 2, "name": "Barcode Generator", "item": "https://devtool-moya.netlify.app/barcode-generator" } ] }
+  </script>
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="/assets/app.css" />
+  <style>
+    .bc-preview { display: flex; align-items: center; justify-content: center; padding: 20px; min-height: 280px; background: var(--surface); overflow: auto; }
+    .bc-preview svg { max-width: 100%; height: auto; display: block; border-radius: 4px; box-shadow: 0 0 0 1px var(--border); }
+    .bc-empty { color: var(--muted); font-size: 13px; text-align: center; }
+    .tpl-row { display: flex; flex-wrap: wrap; gap: 6px; padding: 10px 14px; border-top: 1px solid var(--border); }
+    .tpl-row .opt-label { width: 100%; }
+    #data { min-height: 160px; }
+    input[type=range] { accent-color: var(--accent); width: 140px; }
+    input[type=color] { width: 34px; height: 28px; padding: 0 2px; border: 1px solid var(--border2); border-radius: 6px; background: var(--surface2); cursor: pointer; }
+    .hint { font-size: 12px; color: var(--muted2); padding: 10px 14px; border-top: 1px solid var(--border); }
+    @media (max-width: 560px) { input[type=range] { width: 100px; } }
+  </style>
+</head>
+<body>
+<div class="shell">
+  <header id="site-header"></header>
+  <aside id="sidebar"></aside>
+  <div class="nav-backdrop"></div>
+
+  <main class="page">
+    <section class="tool-head">
+      <h1>Barcode Generator</h1>
+      <p>Make QR codes and EAN-13 / EAN-8 retail barcodes, then save them as PNG or SVG.</p>
+    </section>
+
+    <section class="options" aria-label="Options">
+      <span class="opt-label">Type</span>
+      <div class="seg" id="type">
+        <button data-v="qr" class="on">QR Code</button>
+        <button data-v="ean13">EAN-13</button>
+        <button data-v="ean8">EAN-8</button>
+      </div>
+      <span class="divider"></span>
+      <label class="opt"><span class="opt-label">Size</span>
+        <input type="range" id="size" min="100" max="1000" step="10" value="300" aria-label="Image width in pixels" />
+        <span class="mono" id="size-val">300 px</span>
+      </label>
+      <label class="opt" id="ecl-wrap"><span class="opt-label">Error correction</span>
+        <select id="ecl">
+          <option value="L">L — ~7%</option>
+          <option value="M" selected>M — ~15%</option>
+          <option value="Q">Q — ~25%</option>
+          <option value="H">H — ~30%</option>
+        </select>
+      </label>
+      <label class="opt"><span class="opt-label">Bars</span><input type="color" id="fg" value="#000000" aria-label="Foreground color" /></label>
+      <label class="opt"><span class="opt-label">Background</span><input type="color" id="bg" value="#ffffff" aria-label="Background color" /></label>
+    </section>
+
+    <div class="msg" id="msg" hidden></div>
+
+    <section class="grid-2">
+      <div class="panel">
+        <div class="panel-head">
+          <span class="panel-title" id="in-title">Content</span>
+          <span class="panel-actions">
+            <span class="panel-meta" id="in-meta"></span>
+            <button class="btn sm" id="clear">Clear</button>
+          </span>
+        </div>
+        <textarea id="data" spellcheck="false"></textarea>
+        <div class="tpl-row" id="tpl-row">
+          <span class="opt-label">Quick templates</span>
+          <button class="btn sm" data-tpl="url">Website</button>
+          <button class="btn sm" data-tpl="wifi">Wi-Fi</button>
+          <button class="btn sm" data-tpl="vcard">Contact card</button>
+          <button class="btn sm" data-tpl="email">Email</button>
+          <button class="btn sm" data-tpl="sms">SMS</button>
+          <button class="btn sm" data-tpl="tel">Phone</button>
+        </div>
+        <div class="hint" id="hint"></div>
+      </div>
+      <div class="panel">
+        <div class="panel-head">
+          <span class="panel-title">Preview</span>
+          <span class="panel-actions">
+            <span class="panel-meta" id="out-meta"></span>
+            <button class="btn sm" id="copy" title="Copy the SVG markup">Copy SVG</button>
+            <button class="btn sm" id="dl-svg">Download SVG</button>
+            <button class="btn sm" id="dl-png">Download PNG</button>
+          </span>
+        </div>
+        <div class="bc-preview" id="preview"><span class="bc-empty">Type something to generate a code.</span></div>
+      </div>
+    </section>
+
+    <section class="about">
+      <h2>About this tool</h2>
+      <p><b>QR codes</b> store text, links or structured payloads (Wi-Fi credentials, contact cards, mail and SMS links) in a square matrix. The version (grid size) is picked automatically from the amount of data. A higher error-correction level lets a damaged or partly covered code still scan, at the cost of a denser grid. Text is encoded as UTF-8.</p>
+      <p><b>EAN-13</b> and <b>EAN-8</b> are the retail barcodes printed on most products. Enter 12 (or 7) digits and the final check digit is calculated for you; enter all 13 (or 8) and the check digit is verified. Each digit is drawn with one of three bar patterns — L (odd parity), G (even parity) or R — and for EAN-13 the mix of L and G patterns on the left half encodes the leading digit.</p>
+      <h2>Privacy</h2>
+      <p>Codes are drawn in your browser. Nothing you enter is uploaded, stored or logged.</p>
+    </section>
+  </main>
+</div>
+
+<script src="/assets/tools.js"></script>
+<script src="/assets/vendor/qrcode.js"></script>
+<script>
+(function () {
+  'use strict';
+  const { $, $$, debounce, copy, download, msg, invalid } = DevTools;
+  const SVGNS = 'http://www.w3.org/2000/svg';
+
+  // @@ean-start — pure EAN logic (also exercised by the Node tests)
+  const EAN_L = ['0001101', '0011001', '0010011', '0111101', '0100011', '0110001', '0101111', '0111011', '0110111', '0001011'];
+  const EAN_R = EAN_L.map(p => p.replace(/./g, b => (b === '0' ? '1' : '0')));
+  const EAN_G = EAN_R.map(p => p.split('').reverse().join(''));
+  const EAN13_PARITY = ['LLLLLL', 'LLGLGG', 'LLGGLG', 'LLGGGL', 'LGLLGG', 'LGGLLG', 'LGGGLL', 'LGLGLG', 'LGLGGL', 'LGGLGL'];
+
+  /** Check digit for the data digits (without check digit), weights 3,1,3,... from the right. */
+  function eanCheckDigit(digits) {
+    let sum = 0;
+    for (let i = digits.length - 1, w = 3; i >= 0; i--, w = 4 - w) sum += Number(digits[i]) * w;
+    return String((10 - (sum % 10)) % 10);
+  }
+
+  /** Validate / complete an EAN code. Returns { code } or throws an Error with a user-facing message. */
+  function normalizeEan(raw, len) {
+    const s = String(raw).replace(/[\s-]/g, '');
+    if (!s) throw new Error('Enter ' + (len - 1) + ' digits (the check digit is added automatically).');
+    if (!/^\d+$/.test(s)) throw new Error('Only digits 0–9 are allowed in EAN-' + len + '.');
+    if (s.length === len - 1) return { code: s + eanCheckDigit(s), computed: true };
+    if (s.length === len) {
+      const expected = eanCheckDigit(s.slice(0, -1));
+      if (expected !== s[len - 1]) throw new Error('Invalid check digit: the last digit should be ' + expected + ' (got ' + s[len - 1] + '). Full code: ' + s.slice(0, -1) + expected);
+      return { code: s, computed: false };
+    }
+    throw new Error('EAN-' + len + ' needs ' + (len - 1) + ' or ' + len + ' digits — you entered ' + s.length + '.');
+  }
+
+  /** Returns the module string ('1' = bar) and per-digit pattern letters. */
+  function eanModules(code) {
+    let bits = '101', patterns = '';
+    if (code.length === 13) {
+      const parity = EAN13_PARITY[Number(code[0])];
+      for (let i = 1; i <= 6; i++) { const p = parity[i - 1]; patterns += p; bits += (p === 'L' ? EAN_L : EAN_G)[Number(code[i])]; }
+      bits += '01010';
+      for (let i = 7; i <= 12; i++) { patterns += 'R'; bits += EAN_R[Number(code[i])]; }
+    } else if (code.length === 8) {
+      for (let i = 0; i < 4; i++) { patterns += 'L'; bits += EAN_L[Number(code[i])]; }
+      bits += '01010';
+      for (let i = 4; i < 8; i++) { patterns += 'R'; bits += EAN_R[Number(code[i])]; }
+    } else throw new Error('Unsupported EAN length');
+    bits += '101';
+    return { bits, patterns };
+  }
+  // @@ean-end
+
+  const TEMPLATES = {
+    url: 'https://example.org/welcome',
+    wifi: 'WIFI:T:WPA;S:MyNetwork;P:my-wifi-password;;',
+    vcard: 'BEGIN:VCARD\nVERSION:3.0\nN:Doe;Jamie;;;\nFN:Jamie Doe\nORG:Example Co.\nTITLE:Engineer\nTEL;TYPE=CELL:+1 555 0100\nEMAIL:jamie@example.org\nURL:https://example.org\nEND:VCARD',
+    email: 'mailto:hello@example.org?subject=Hello&body=Hi%20there!',
+    sms: 'SMSTO:+15550100:Running ten minutes late',
+    tel: 'tel:+15550100',
+  };
+
+  const data = $('#data'), size = $('#size'), ecl = $('#ecl'), fg = $('#fg'), bg = $('#bg'), preview = $('#preview');
+  let type = 'qr';
+  const saved = { qr: 'https://example.org', ean13: '590123456789', ean8: '9638507' };
+  let currentSvg = null, currentName = 'barcode';
+
+  if (window.qrcode && qrcode.stringToBytesFuncs && qrcode.stringToBytesFuncs['UTF-8']) qrcode.stringToBytes = qrcode.stringToBytesFuncs['UTF-8'];
+
+  function svgEl(tag, attrs) {
+    const n = document.createElementNS(SVGNS, tag);
+    for (const k in attrs) n.setAttribute(k, attrs[k]);
+    return n;
+  }
+
+  function buildQr(text) {
+    if (typeof qrcode !== 'function') throw new Error('QR library failed to load.');
+    let qr;
+    try { qr = qrcode(0, ecl.value); qr.addData(text, 'Byte'); qr.make(); }
+    catch (e) {
+      throw new Error(/overflow/i.test(String(e && e.message || e)) ? 'Too much data for a QR code at error-correction level ' + ecl.value + '. Shorten the text or choose a lower level.' : 'Could not build the QR code: ' + (e && e.message || e));
+    }
+    const n = qr.getModuleCount(), quiet = 4, total = n + quiet * 2, px = Number(size.value);
+    const svg = svgEl('svg', { xmlns: SVGNS, width: px, height: px, viewBox: '0 0 ' + total + ' ' + total, 'shape-rendering': 'crispEdges' });
+    svg.appendChild(svgEl('rect', { width: total, height: total, fill: bg.value }));
+    let d = '';
+    for (let r = 0; r < n; r++) {
+      for (let c = 0; c < n; c++) {
+        if (!qr.isDark(r, c)) continue;
+        let run = 1; while (c + run < n && qr.isDark(r, c + run)) run++;
+        d += 'M' + (c + quiet) + ' ' + (r + quiet) + 'h' + run + 'v1h-' + run + 'z';
+        c += run - 1;
+      }
+    }
+    svg.appendChild(svgEl('path', { d, fill: fg.value }));
+    const version = (n - 17) / 4;
+    const bytes = qrcode.stringToBytes(text).length;
+    return { svg, meta: 'v' + version + ' · ' + n + '×' + n + ' modules · ' + bytes + ' bytes', name: 'qr-code' };
+  }
+
+  function buildEan(raw, len) {
+    const { code, computed } = normalizeEan(raw, len);
+    const { bits } = eanModules(code);
+    const leftQuiet = len === 13 ? 11 : 7, rightQuiet = 7, total = leftQuiet + bits.length + rightQuiet;
+    const barH = 60, guardH = 66, textY = 74, H = 78;
+    const px = Number(size.value);
+    const svg = svgEl('svg', { xmlns: SVGNS, width: px, height: Math.round(px * H / total), viewBox: '0 0 ' + total + ' ' + H, 'shape-rendering': 'crispEdges' });
+    svg.appendChild(svgEl('rect', { width: total, height: H, fill: bg.value }));
+    const guards = new Set();
+    const mid = len === 13 ? 45 : 31; // index where the middle guard starts
+    [0, 1, 2, mid, mid + 1, mid + 2, mid + 3, mid + 4, bits.length - 3, bits.length - 2, bits.length - 1].forEach(i => guards.add(i));
+    let d = '';
+    for (let i = 0; i < bits.length; i++) {
+      if (bits[i] !== '1') continue;
+      let run = 1; while (i + run < bits.length && bits[i + run] === '1' && guards.has(i + run) === guards.has(i)) run++;
+      const h = guards.has(i) ? guardH : barH;
+      d += 'M' + (leftQuiet + i) + ' 4h' + run + 'v' + h + 'h-' + run + 'z';
+      i += run - 1;
+    }
+    svg.appendChild(svgEl('path', { d, fill: fg.value }));
+    const text = (x, s) => { const t = svgEl('text', { x, y: textY, 'text-anchor': 'middle', 'font-family': 'ui-monospace, Menlo, Consolas, monospace', 'font-size': 9, fill: fg.value }); t.textContent = s; svg.appendChild(t); };
+    if (len === 13) {
+      text(leftQuiet - 5, code[0]);
+      for (let i = 0; i < 6; i++) text(leftQuiet + 3 + i * 7 + 3.5, code[1 + i]);
+      for (let i = 0; i < 6; i++) text(leftQuiet + 50 + i * 7 + 3.5, code[7 + i]);
+    } else {
+      for (let i = 0; i < 4; i++) text(leftQuiet + 3 + i * 7 + 3.5, code[i]);
+      for (let i = 0; i < 4; i++) text(leftQuiet + 36 + i * 7 + 3.5, code[4 + i]);
+    }
+    return { svg, meta: code + (computed ? ' · check digit ' + code[len - 1] + ' added' : ' · check digit OK'), name: 'ean' + len + '-' + code };
+  }
+
+  function render() {
+    const text = type === 'qr' ? data.value : data.value.trim();
+    $('#in-meta').textContent = data.value.length + ' chars';
+    $('#size-val').textContent = size.value + ' px';
+    currentSvg = null;
+    if (!text) {
+      preview.replaceChildren(DevTools.el('span', { class: 'bc-empty' }, 'Type something to generate a code.'));
+      $('#out-meta').textContent = ''; msg($('#msg'), ''); invalid(data, false); return;
+    }
+    try {
+      const r = type === 'qr' ? buildQr(text) : buildEan(text, type === 'ean13' ? 13 : 8);
+      currentSvg = r.svg; currentName = r.name;
+      preview.replaceChildren(r.svg);
+      $('#out-meta').textContent = r.meta;
+      msg($('#msg'), '');
+      invalid(data, false);
+    } catch (e) {
+      preview.replaceChildren(DevTools.el('span', { class: 'bc-empty' }, 'No preview'));
+      $('#out-meta').textContent = '';
+      msg($('#msg'), 'error', e.message);
+      invalid(data, true);
+    }
+  }
+  const renderSoon = debounce(render, 120);
+
+  function svgString() {
+    return '<?xml version="1.0" encoding="UTF-8"?>\n' + new XMLSerializer().serializeToString(currentSvg);
+  }
+
+  function setType(v) {
+    saved[type] = data.value;
+    type = v;
+    $$('#type button').forEach(b => b.classList.toggle('on', b.dataset.v === v));
+    data.value = saved[v] || '';
+    const isQr = v === 'qr';
+    $('#ecl-wrap').hidden = !isQr;
+    $('#tpl-row').hidden = !isQr;
+    $('#in-title').textContent = isQr ? 'Content' : 'Digits';
+    data.placeholder = isQr ? 'Text, URL or payload to encode…' : (v === 'ean13' ? '12 digits, e.g. 590123456789' : '7 digits, e.g. 9638507');
+    data.inputMode = isQr ? 'text' : 'numeric';
+    $('#hint').textContent = isQr
+      ? 'Tip: phones recognise the Wi-Fi, contact, mail, SMS and phone formats and offer the matching action.'
+      : 'Enter ' + (v === 'ean13' ? '12' : '7') + ' digits to get the check digit calculated, or all ' + (v === 'ean13' ? '13' : '8') + ' to verify one. Spaces and dashes are ignored.';
+    render();
+  }
+
+  $$('#type button').forEach(b => b.addEventListener('click', () => setType(b.dataset.v)));
+  $$('#tpl-row [data-tpl]').forEach(b => b.addEventListener('click', () => { data.value = TEMPLATES[b.dataset.tpl]; render(); data.focus(); }));
+  data.addEventListener('input', renderSoon);
+  [ecl, fg, bg].forEach(n => n.addEventListener('change', render));
+  [fg, bg].forEach(n => n.addEventListener('input', renderSoon));
+  size.addEventListener('input', () => { $('#size-val').textContent = size.value + ' px'; renderSoon(); });
+  $('#clear').addEventListener('click', () => { data.value = ''; render(); data.focus(); });
+
+  $('#copy').addEventListener('click', e => { if (!currentSvg) return msg($('#msg'), 'warn', 'Nothing to copy yet.'); copy(svgString(), e.currentTarget); });
+  $('#dl-svg').addEventListener('click', () => { if (!currentSvg) return msg($('#msg'), 'warn', 'Nothing to download yet.'); download(currentName + '.svg', svgString(), 'image/svg+xml'); });
+  $('#dl-png').addEventListener('click', () => {
+    if (!currentSvg) return msg($('#msg'), 'warn', 'Nothing to download yet.');
+    const w = Number(currentSvg.getAttribute('width')), h = Number(currentSvg.getAttribute('height'));
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      const ctx = canvas.getContext('2d');
+      ctx.imageSmoothingEnabled = false;
+      ctx.drawImage(img, 0, 0, w, h);
+      canvas.toBlob(blob => blob ? download(currentName + '.png', blob) : msg($('#msg'), 'error', 'PNG export failed in this browser — try SVG.'), 'image/png');
+    };
+    img.onerror = () => msg($('#msg'), 'error', 'PNG export failed in this browser — try SVG.');
+    img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(new XMLSerializer().serializeToString(currentSvg));
+  });
+
+  data.value = saved.qr;
+  setType('qr');
+})();
+</script>
+</body>
+</html>
