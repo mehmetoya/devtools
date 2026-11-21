@@ -169,7 +169,7 @@
     <section class="about">
       <h2>About this tool</h2>
       <p>The preview is an <code>&lt;iframe&gt;</code> sandbox with a unique, opaque origin. Scripts inside it may run (unless you turn on <b>Sanitize HTML</b>), but they cannot read this site's storage or cookies, open pop-ups, submit forms, show alert dialogs or navigate this page.</p>
-      <p>The preview inherits this site's security policy: inline <code>&lt;style&gt;</code> and <code>&lt;script&gt;</code> work, while external scripts, stylesheets, fonts and remote images are blocked. Embed images as <code>data:</code> URLs if you need them.</p>
+      <p>The preview inherits this site's security policy: inline <code>&lt;style&gt;</code> and <code>&lt;script&gt;</code> work, while external scripts, stylesheets, fonts and remote images are blocked. Embed images as <code>data:</code> URLs if you need them. Scripts in the preview can still open WebRTC connections, so turn on &quot;Sanitize HTML&quot; before previewing HTML you don&#39;t trust.</p>
       <p><b>Sanitize HTML</b> removes <code>&lt;script&gt;</code> elements, inline event handlers such as <code>onclick</code> and <code>javascript:</code> links — handy for previewing HTML from an untrusted source, such as an email body.</p>
       <h2>Privacy</h2>
       <p>Your HTML is rendered locally and never uploaded. A draft is kept in this browser between visits.</p>

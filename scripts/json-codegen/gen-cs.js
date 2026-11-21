@@ -48,7 +48,9 @@
     const blocks = classes.map(c => {
       const used = new Set(), props = [];
       for (const [key, f] of c.fields) props.push({ key, name: propName(key, c.name, used), type: typeStr(f.type, f.optional) });
-      const attr = p => '[' + (opts.records ? 'property: ' : '') + 'JsonPropertyName(' + JSON.stringify(p.key) + ')]';
+      // JSON.stringify leaves U+0085/U+2028/U+2029 raw; C# treats them as newlines inside a string literal
+      const csLit = s => JSON.stringify(s).replace(/[\u0085\u2028\u2029]/g, ch => '\\u' + ch.charCodeAt(0).toString(16).padStart(4, '0'));
+      const attr = p => '[' + (opts.records ? 'property: ' : '') + 'JsonPropertyName(' + csLit(p.key) + ')]';
       if (opts.records) {
         if (!props.length) return 'public record ' + c.name + '();';
         return 'public record ' + c.name + '(\n' +

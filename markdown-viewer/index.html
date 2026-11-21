@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-QiulsWgZnSvhCb5NbOK2foMTHJUU2t0Sp08MxbejlIU='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self';" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-K+xa3WZ3crT4asKQfvtOOh6q3+1/eTqAM3/NGVAQkUs='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self';" />
   <title>Markdown Viewer &amp; Editor — Live Preview, Export HTML</title>
   <meta name="description" content="Write Markdown with a live, sanitized preview (GitHub-flavored tables, task lists, code), then copy or download it as HTML. Drafts stay in your browser." />
   <meta name="keywords" content="markdown viewer, markdown editor online, markdown preview, markdown to html, gfm preview, readme editor" />
@@ -517,7 +517,7 @@ console.log(greet('Markdown'));
   // The exported file gets its own CSP so remote (tracking) images and scripts never load when it is opened.
   // (Attribute order is content-first on purpose: scripts/gen-site.mjs strips lines starting with
   // `<meta http-equiv="Content-Security-Policy"` when it rewrites this page's own CSP.)
-  const EXPORT_CSP = "default-src 'none'; img-src data:; style-src 'unsafe-inline'";
+  const EXPORT_CSP = "default-src 'none'; img-src data:; style-src 'unsafe-inline'; form-action 'none'; base-uri 'none'";
   function standaloneHtml() {
     const h1 = /^#\s+(.+)$/m.exec(input.value);
     const title = escapeHtml(h1 ? h1[1].trim() : 'Document');

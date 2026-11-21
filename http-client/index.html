@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-lxl2//LNa4gIzeC2GQwOkPaCpax1/oNZrs0BYBN3Sco='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src http: https:; object-src 'none'; base-uri 'self'; form-action 'self';" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-hSYcYg63j84vM0vu/Evq4UrWrwLcEXoazq7kEW1+tNs='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src http: https:; object-src 'none'; base-uri 'self'; form-action 'self';" />
   <title>HTTP Client Online — Send API Requests from Your Browser</title>
   <meta name="description" content="Build and send HTTP requests with headers, query params and bodies straight from your browser, inspect responses and copy them as cURL. No proxy server." />
   <meta name="keywords" content="http client online, rest client, api tester, send http request, postman alternative, curl online, test api in browser" />
@@ -321,7 +321,7 @@
   const TOKEN = /^[!#$%&'*+.^_`|~0-9A-Za-z-]+$/;
   function shellQuote(s) { return "'" + String(s).replace(/'/g, "'\\''") + "'"; }
   function toCurl(req) {
-    const parts = ['curl'];
+    const parts = ['curl', '--globoff'];
     if (req.method === 'HEAD') parts.push('-I'); else if (req.method !== 'GET') parts.push('-X ' + req.method);
     parts.push(shellQuote(req.url));
     req.headers.forEach(([k, v]) => parts.push('-H ' + shellQuote(k + ': ' + v)));

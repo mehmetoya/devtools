@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-nNwGeBL2CIi6+Xl6mxgmf+Yovzm+DqS8LFYcv1SKdHQ='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self';" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-qffsZJDYg1wGZnOTf6q2TokjAJKiNCtw4rwxAemXUKc='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self';" />
   <title>JWT Decoder &amp; Encoder Online — Decode, Verify, Generate</title>
   <meta name="description" content="Decode, verify and generate JSON Web Tokens (HS256/384/512) in your browser. Inspect header, payload and claims; tokens and secrets never leave the page." />
   <meta name="keywords" content="jwt decoder, jwt generator, jwt validator, json web token, hs256, verify jwt signature, jwt debugger" />
@@ -375,7 +375,7 @@
   }
 
   async function hmacKey(alg, keyBytes, usage) {
-    if (!HASHES[alg]) throw new Error('Unsupported algorithm "' + alg + '". Only HS256, HS384 and HS512 are supported.');
+    if (!Object.hasOwn(HASHES, alg)) throw new Error('Unsupported algorithm "' + alg + '". Only HS256, HS384 and HS512 are supported.');
     if (!keyBytes.length) throw new Error('A secret is required.');
     return globalThis.crypto.subtle.importKey('raw', keyBytes, { name: 'HMAC', hash: HASHES[alg] }, false, [usage]);
   }
@@ -612,7 +612,7 @@
     }
     const alg = d.header.alg;
     if (alg === 'none') rows.push({ state: 'fail', text: 'Algorithm "none" is not allowed' });
-    else if (!HASHES[alg]) rows.push({ state: 'fail', text: 'Algorithm "' + alg + '" cannot be verified here (HS256/HS384/HS512 only)' });
+    else if (!Object.hasOwn(HASHES, alg)) rows.push({ state: 'fail', text: 'Algorithm "' + alg + '" cannot be verified here (HS256/HS384/HS512 only)' });
     else {
       const secret = $('#v-secret').value;
       if (!secret) rows.push({ state: 'fail', text: 'Signature: enter the secret to verify it' });
