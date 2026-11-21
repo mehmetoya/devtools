@@ -19,6 +19,15 @@
 /assets/fonts/*
   Cache-Control: public, max-age=31536000, immutable
 
+/manifest.webmanifest
+  Content-Type: application/manifest+json; charset=utf-8
+
+/llms.txt
+  Content-Type: text/plain; charset=utf-8
+
+/.well-known/security.txt
+  Content-Type: text/plain; charset=utf-8
+
 /
   Content-Security-Policy: default-src 'self'; script-src 'self' 'sha256-Uz+vpTzubPnWnOcSERFDXNU4Y6YzeimsqD9lrFCIk3o='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';
 
