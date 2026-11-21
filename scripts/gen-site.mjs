@@ -62,7 +62,7 @@ const ld = JSON.stringify({
   author: { '@type': 'Person', name: 'Mehmet Oya', url: 'https://mehmetoya.com' },
   isPartOf: { '@type': 'WebSite', name: 'Mehmet Oya', url: 'https://mehmetoya.com' },
   hasPart: tools.map(t => ({ '@type': 'WebApplication', name: t.name, url: SITE_URL + '/' + t.route, description: t.desc, applicationCategory: 'DeveloperApplication', operatingSystem: 'Any' })),
-}, null, 2);
+}, null, 2).replace(/</g, "\\u003c");
 
 // sheet index: every tool as a numbered drawing sheet (same numbers as the sidebar and title block)
 const sheetNo = (route) => String(tools.findIndex(t => t.route === route) + 1).padStart(2, '0');
@@ -202,7 +202,7 @@ function seoHead(html, route) {
     data.inLanguage = 'en';
     data.browserRequirements = 'Requires JavaScript';
     data.dateModified = toolByRoute.get(route).rev.replace(/\./g, '-');
-    return a + '\n  ' + JSON.stringify(data, null, 2).split('\n').join('\n  ') + '\n  ' + c;
+    return a + '\n  ' + JSON.stringify(data, null, 2).replace(/</g, '\\u003c').split('\n').join('\n  ') + '\n  ' + c;
   });
   return head + html.slice(end);
 }

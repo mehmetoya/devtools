@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-6MXvfMme0ByaAfvHmCbEtDGHHd7VcSXgJYKT8tPpDKY='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self';" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-JSyvZMV0GZ70e6WdW3eT66cPc9gdEouDAx6rt1uTfYQ='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self';" />
   <title>JSON to C# Class Generator — Classes &amp; Records, Client-Side</title>
   <meta name="description" content="Convert JSON into C# classes or records with System.Text.Json attributes, nullable types, DateTime detection and PascalCase properties. Runs in your browser." />
   <meta name="keywords" content="json to c#, json to csharp, json to c# class, json to c# record, generate c# class from json, system.text.json" />
@@ -33,7 +33,7 @@
       "JsonPropertyName attributes",
       "Nullable types",
       "DateTime detection",
-      "Nested classes and List<T>",
+      "Nested classes and List\u003cT>",
       "Client-side only"
     ],
     "isAccessibleForFree": true,
@@ -547,7 +547,9 @@
     const blocks = classes.map(c => {
       const used = new Set(), props = [];
       for (const [key, f] of c.fields) props.push({ key, name: propName(key, c.name, used), type: typeStr(f.type, f.optional) });
-      const attr = p => '[' + (opts.records ? 'property: ' : '') + 'JsonPropertyName(' + JSON.stringify(p.key) + ')]';
+      // JSON.stringify leaves U+0085/U+2028/U+2029 raw; C# treats them as newlines inside a string literal
+      const csLit = s => JSON.stringify(s).replace(/[\u0085\u2028\u2029]/g, ch => '\\u' + ch.charCodeAt(0).toString(16).padStart(4, '0'));
+      const attr = p => '[' + (opts.records ? 'property: ' : '') + 'JsonPropertyName(' + csLit(p.key) + ')]';
       if (opts.records) {
         if (!props.length) return 'public record ' + c.name + '();';
         return 'public record ' + c.name + '(\n' +

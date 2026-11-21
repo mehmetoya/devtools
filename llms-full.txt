@@ -857,7 +857,7 @@ Sandboxed live HTML preview.
 #### About this tool
 
 The preview is an `<iframe>` sandbox with a unique, opaque origin. Scripts inside it may run (unless you turn on Sanitize HTML), but they cannot read this site's storage or cookies, open pop-ups, submit forms, show alert dialogs or navigate this page.
-The preview inherits this site's security policy: inline `<style>` and `<script>` work, while external scripts, stylesheets, fonts and remote images are blocked. Embed images as `data:` URLs if you need them.
+The preview inherits this site's security policy: inline `<style>` and `<script>` work, while external scripts, stylesheets, fonts and remote images are blocked. Embed images as `data:` URLs if you need them. Scripts in the preview can still open WebRTC connections, so turn on "Sanitize HTML" before previewing HTML you don't trust.
 Sanitize HTML removes `<script>` elements, inline event handlers such as `onclick` and `javascript:` links — handy for previewing HTML from an untrusted source, such as an email body.
 
 #### Privacy
