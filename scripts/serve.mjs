@@ -15,7 +15,7 @@ const TYPES = {
   '.txt': 'text/plain; charset=utf-8', '.xml': 'application/xml', '.md': 'text/plain; charset=utf-8',
 };
 
-const glob = (pat) => new RegExp('^' + pat.replace(/[.+?^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '.*') + '$');
+const glob = (pat, flags) => new RegExp('^' + pat.replace(/[.+?^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '.*') + '$', flags);
 
 function headerRules() {
   const rules = []; let cur = null;
@@ -33,7 +33,7 @@ function hiddenRules() {
   const toml = fs.readFileSync(path.join(root, 'netlify.toml'), 'utf8');
   return toml.split('[[redirects]]').slice(1)
     .filter(b => /status\s*=\s*404/.test(b) && /force\s*=\s*true/.test(b))
-    .map(b => (b.match(/from\s*=\s*"([^"]+)"/) || [])[1]).filter(Boolean).map(glob);
+    .map(b => (b.match(/from\s*=\s*"([^"]+)"/) || [])[1]).filter(f => f && f.startsWith('/')).map(f => glob(f, 'i'));
 }
 
 // Resolve a URL path to a file strictly inside root; null if it escapes or does not exist.
@@ -48,13 +48,20 @@ function resolve(urlPath) {
   return fs.existsSync(file) && fs.statSync(file).isFile() ? file : null;
 }
 
+const HOSTS = new Set([`127.0.0.1:${port}`, `localhost:${port}`, `[::1]:${port}`]);
+
 http.createServer((req, res) => {
+  // DNS-rebinding guard: only answer requests addressed to this machine
+  if (!HOSTS.has(String(req.headers.host || '').toLowerCase())) { res.writeHead(403); return res.end('forbidden host'); }
   let p;
   try { p = decodeURIComponent(new URL(req.url, 'http://localhost').pathname); }
   catch { res.writeHead(400); return res.end('bad request'); }
   if (p.includes('\0')) { res.writeHead(400); return res.end('bad request'); }
+  // normalise before matching hidden rules: /a/../README.md, /README.md/ and dot-folders (.git) included
+  p = path.posix.normalize(p).replace(/(.)\/+$/, '$1');
+  const dotted = p.split('/').some(seg => seg.startsWith('.'));
 
-  const hidden = hiddenRules().some(re => re.test(p));
+  const hidden = dotted || hiddenRules().some(re => re.test(p));
   let file = hidden ? null : resolve(p);
   let status = 200;
   if (!file) { file = path.join(root, '404.html'); status = 404; }
@@ -64,5 +71,5 @@ http.createServer((req, res) => {
   headers['Content-Type'] = TYPES[path.extname(file)] || 'application/octet-stream';
   res.writeHead(status, headers);
   if (req.method === 'HEAD') return res.end();
-  fs.createReadStream(file).pipe(res);
+  fs.createReadStream(file).on('error', () => res.destroy()).pipe(res);
 }).listen(port, '127.0.0.1', () => console.log(`serving ${root} on http://127.0.0.1:${port}`));

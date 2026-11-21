@@ -79,15 +79,20 @@ Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
 ├── 404.html                ← Not-found page (generated)
 ├── assets/
 │   ├── app.css             ← Shared styles
-│   ├── tools.js            ← Tool registry, header, sidebar (search + favorites), helpers
-│   ├── fonts/              ← Self-hosted Syne + IBM Plex Mono (OFL)
+│   ├── tools.js            ← Tool registry (+aliases, rev), header, sidebar, command palette, favorites, title block, colophon, helpers
+│   ├── fonts/              ← Self-hosted IBM Plex Sans Condensed, Plex Sans, Plex Mono (OFL, sha256 in VERSIONS.txt)
 │   ├── regex-worker.js     ← Runs user regexes off the main thread with a timeout
 │   └── vendor/             ← Pinned third-party libs + VERSIONS.txt (versions, sources, sha256)
 ├── <route>/index.html      ← One folder per tool
 ├── scripts/gen-site.mjs    ← Generates index.html, 404.html, _headers, netlify.toml, sitemap.xml, robots.txt; syncs page heads + CSP hashes
 ├── scripts/json-codegen/   ← Generates the three JSON → code pages from shared inference code
-├── scripts/check.mjs       ← Quality gate (Netlify build command)
+├── scripts/site.mjs        ← SITE_URL (https://tool.mehmetoya.com) and previous origins
+├── scripts/check.mjs       ← Quality gate (first half of the Netlify build command)
+├── scripts/build-dist.mjs  ← Copies the public allow-list into dist/ (Netlify publishes only dist/)
+├── scripts/serve.mjs       ← Local Netlify-like server: _headers CSP, rewrites, hidden paths (127.0.0.1 only)
+├── scripts/scan.mjs        ← Browser scan via Chrome DevTools Protocol: CSP, errors, overflow, palette, drawer
 ├── scripts/smoke.mjs       ← Post-deploy smoke test against a live URL
+├── docs/                   ← Specs, plans, task lists (never published)
 ├── _headers                ← Netlify HTTP response headers (generated)
 ├── netlify.toml            ← Netlify config (generated)
 └── README.md
@@ -95,9 +100,10 @@ Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
 
 Adding a new tool:
 
-1. Add it to `CATEGORIES` in `assets/tools.js`
+1. Add it to `CATEGORIES` in `assets/tools.js` (with `aliases` and a `rev` of `YYYY.MM.DD`)
 2. Create `<route>/index.html` (copy `base64/index.html` as a template)
-3. Run `node scripts/gen-site.mjs .` to regenerate the home page, headers and CSP hashes, then `node scripts/check.mjs`
+3. Nothing else to register: `scripts/build-dist.mjs` publishes every route in the registry
+4. Run `node scripts/gen-site.mjs .` to regenerate the home page, headers and CSP hashes, then `node scripts/check.mjs`
 
 ---
 
@@ -111,14 +117,17 @@ Adding a new tool:
 - **Syntax Highlighting** — keys, strings, numbers, booleans, null — all DOM text nodes, no innerHTML
 - **Drag & Drop** — drop a `.json` file directly onto the editor
 - **Download** — save formatted output as `.json` or `.csv`
-- **Keyboard shortcuts** — `Ctrl+Enter` beautify · `Ctrl+M` minify · `Ctrl+K` clear
+- **Keyboard shortcut** — `Ctrl/⌘+Enter` runs the selected action (`⌘K` / `Ctrl+K` and `/` open the site-wide tool palette)
 - **Stats** — total key count + max nesting depth
 
 ---
 
 ## Deployment
 
-The site deploys automatically via Netlify on every push to `main`.
+The site deploys automatically via Netlify on every push to `main`. The build command is
+`node scripts/check.mjs && node scripts/build-dist.mjs` and the publish folder is `dist/`, so a failing
+gate stops the deploy and repository files are never published (Netlify matches paths case-insensitively,
+so path rules alone cannot hide them).
 
 ### Manual deploy (first time)
 
@@ -136,10 +145,11 @@ Netlify picks up the push and deploys within ~30 seconds.
 
 ### Environment
 
-No bundler and no `npm install`. Pages are plain static files, but asset paths are absolute (`/assets/...`), so serve the folder instead of opening files directly, e.g.:
+No bundler and no `npm install`. Pages are plain static files, but asset paths are absolute (`/assets/...`), so serve the folder instead of opening files directly:
 
 ```bash
-npx serve .
+node scripts/serve.mjs . 8888                  # applies _headers CSP, rewrites and hidden paths, like Netlify
+node scripts/scan.mjs http://127.0.0.1:8888    # every page at 375/1280px: CSP violations, errors, overflow, palette
 ```
 
 Generated files — edit the generators, not the output:
@@ -148,6 +158,7 @@ Generated files — edit the generators, not the output:
 node scripts/json-codegen/build-gen-pages.js   # json-to-csharp / java / typescript pages
 node scripts/gen-site.mjs .                    # home, 404, _headers, netlify.toml, sitemap, robots, page <head>s + CSP hashes
 node scripts/check.mjs                         # quality gate (also runs as the Netlify build command)
+node scripts/build-dist.mjs                    # dist/ = what Netlify publishes
 node scripts/smoke.mjs https://tool.mehmetoya.com   # post-deploy smoke test (or a deploy-preview URL)
 ```
 

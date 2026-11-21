@@ -137,10 +137,10 @@ Registry'ye `aliases` alanı eklenir. `rankTools` saf bir fonksiyon olarak dış
 **Bağımlılık:** T6 · **Dosyalar:** `assets/tools.js`, `assets/app.css` · **Kapsam:** M
 
 ### Kontrol noktası B: klavye
-- [ ] Fare kullanmadan tam tur: ana sayfa → palet → araç → favori kısayolu → skip link → mobil çekmece.
-- [ ] QA Odası'nın A-01…A-09 düzeltmelerinde gerileme yok (tek tek kontrol edilir).
-- [ ] `developers-room`: palet, kısayollar, favoriler, `tools.js`, `serve.mjs`, `scan.mjs`. Bulgular düzeltildi.
-- [ ] `security-audit` (yönlendirmeli mod, `CLIENT-SIDE.md`): kabuk DOM sink'leri, `localStorage`, klavye olayları, CSP değişmezleri, `serve.mjs` path traversal. Bulgular düzeltildi.
+- [x] Fare kullanmadan tam tur: ana sayfa → palet → araç → favori kısayolu → skip link → mobil çekmece.
+- [x] QA Odası'nın A-01…A-09 düzeltmelerinde gerileme yok (tek tek kontrol edilir).
+- [x] `developers-room`: palet, kısayollar, favoriler, `tools.js`, `serve.mjs`, `scan.mjs`. Bulgular düzeltildi.
+- [x] `security-audit` (yönlendirmeli mod, `CLIENT-SIDE.md`): kabuk DOM sink'leri, `localStorage`, klavye olayları, CSP değişmezleri, `serve.mjs` path traversal. Bulgular düzeltildi.
 
 ---
 
@@ -152,9 +152,9 @@ Registry'ye `aliases` alanı eklenir. `rankTools` saf bir fonksiyon olarak dış
 - `check.mjs` kontrol (b) eklenir: `rev` alanı `YYYY.MM.DD` biçiminde olmalı.
 
 **Kabul kriterleri:**
-- [ ] Pafta numarası, araç registry'deki sırasıyla eşleşiyor (01–28).
-- [ ] Biçimi bozuk bir `rev` değeri kapıyı kırmızı yakıyor.
-- [ ] Antet kutusu 375 px'te taşmıyor (hücreler 2 sütuna iniyor).
+- [x] Pafta numarası, araç registry'deki sırasıyla eşleşiyor (01–28).
+- [x] Biçimi bozuk bir `rev` değeri kapıyı kırmızı yakıyor.
+- [x] Antet kutusu 375 px'te taşmıyor (hücreler 2 sütuna iniyor).
 
 **Doğrulama:** Standart kapı geçiyor; `scan.mjs` temiz.
 
@@ -169,16 +169,16 @@ Registry'ye `aliases` alanı eklenir. `rankTools` saf bir fonksiyon olarak dış
 404 sayfası aynı dizini ve kolofonu taşır. Inline style ve script hash'lerini `gen-site.mjs` üretir.
 
 **Kabul kriterleri:**
-- [ ] Ana sayfada tam olarak bir `h1` var; head sözleşmesi ve CSP hash'leri `check.mjs`'ten geçiyor.
-- [ ] Dizindeki numaralar sidebar ve antet kutusundaki numaralarla aynı.
-- [ ] 404 sayfası noindex kalıyor ve meta CSP içeriyor.
+- [x] Ana sayfada tam olarak bir `h1` var; head sözleşmesi ve CSP hash'leri `check.mjs`'ten geçiyor.
+- [x] Dizindeki numaralar sidebar ve antet kutusundaki numaralarla aynı.
+- [x] 404 sayfası noindex kalıyor ve meta CSP içeriyor.
 
 **Doğrulama:** Standart kapı geçiyor; `scan.mjs` temiz; ana sayfanın 375 ve 1280 px ekran görüntüleri.
 
 **Bağımlılık:** T8 · **Dosyalar:** `scripts/gen-site.mjs`, `assets/app.css` (`index.html` ve `404.html` üretiliyor) · **Kapsam:** M
 
 ### Kontrol noktası C: tamamlanma
-- [ ] Spec'teki başarı ölçütleri 1–8 tek tek işaretlendi. Ölçüt 9, yani ziyaretçi testi, yayından sonra yapılacak.
+- [x] Spec'teki başarı ölçütleri 1–8 tek tek işaretlendi. Ölçüt 9, yani ziyaretçi testi, yayından sonra yapılacak.
 
 ---
 
@@ -191,8 +191,8 @@ Registry'ye `aliases` alanı eklenir. `rankTools` saf bir fonksiyon olarak dış
 - İlk yüklemedeki font baytları T2 ölçümüyle karşılaştırılır.
 
 **Kabul kriterleri:**
-- [ ] İlk yüklemede indirilen font baytları T2 ölçümünü aşmıyor (spec ölçütü 4).
-- [ ] Silinmiş bir font dosyasına referans kalırsa kapı kırmızı yanıyor.
+- [x] İlk yüklemede indirilen font baytları T2 ölçümünü aşmıyor (spec ölçütü 4).
+- [x] Silinmiş bir font dosyasına referans kalırsa kapı kırmızı yanıyor.
 
 **Doğrulama:** Standart kapı geçiyor; `scan.mjs` temiz.
 

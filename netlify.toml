@@ -4,13 +4,20 @@
 # Security headers live in _headers.
 
 [build]
-  publish = "."
+  publish = "dist"
   # Quality gate: registry/headers/sitemap consistency, generator drift, CSP hashes,
   # HTML-sink allow-list, vendor hashes. A failing check stops the deploy.
-  command = "node scripts/check.mjs"
+  command = "node scripts/check.mjs && node scripts/build-dist.mjs"
 
 [build.environment]
   NODE_VERSION = "22"
+
+# Old public origins move permanently to SITE_URL (deploy previews use other hosts and are unaffected).
+[[redirects]]
+  from   = "https://devtool-moya.netlify.app/*"
+  to     = "https://tool.mehmetoya.com/:splat"
+  status = 301
+  force  = true
 
 # Serve /<route> directly (200) instead of Netlify's 301 to /<route>/, so links, canonicals
 # and the per-path CSP in _headers all use the same URL.
@@ -180,13 +187,6 @@
   from   = "/diagram-viewer"
   to     = "/diagram-viewer/index.html"
   status = 200
-  force  = true
-
-# Old public origins move permanently to SITE_URL (deploy previews use other hosts and are unaffected).
-[[redirects]]
-  from   = "https://devtool-moya.netlify.app/*"
-  to     = "https://tool.mehmetoya.com/:splat"
-  status = 301
   force  = true
 
 # Repository files that should not be served.

@@ -8,7 +8,7 @@ import path from 'node:path';
 import vm from 'node:vm';
 import os from 'node:os';
 import crypto from 'node:crypto';
-import { SITE_URL } from './site.mjs';
+import { SITE_URL, PREVIOUS_ORIGINS } from './site.mjs';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
@@ -38,9 +38,10 @@ vm.runInNewContext(read('assets/tools.js'), ctx);
 const tools = ctx.window.DevTools.CATEGORIES.flatMap(c => c.tools);
 const routes = tools.map(t => t.route);
 if (new Set(routes).size !== routes.length) fail('registry', 'duplicate routes');
+for (const t of tools) if (!/^\d{4}\.(0[1-9]|1[0-2])\.(0[1-9]|[12]\d|3[01])$/.test(t.rev || '')) fail('registry', `/${t.route}: rev must be YYYY.MM.DD (got "${t.rev || ''}")`);
 
 const dirs = fs.readdirSync(ROOT, { withFileTypes: true })
-  .filter(d => d.isDirectory() && fs.existsSync(path.join(ROOT, d.name, 'index.html'))).map(d => d.name);
+  .filter(d => d.isDirectory() && d.name !== 'dist' && fs.existsSync(path.join(ROOT, d.name, 'index.html'))).map(d => d.name);
 for (const r of routes) if (!dirs.includes(r)) fail('registry', `/${r} has no ${r}/index.html`);
 for (const d of dirs) if (!routes.includes(d)) fail(d, 'folder with index.html is not in the registry');
 
@@ -56,6 +57,10 @@ for (const r of routes) {
   const D = ctx.window.DevTools;
   if (typeof D.rankTools !== 'function') fail('assets/tools.js', 'DevTools.rankTools is missing');
   else {
+    const n = (q) => D.rankTools(q, D.allTools(), []).map(t => t.route).join(',');
+    if (n('İSO') !== n('iso') || n('ıso') !== n('iso')) fail('assets/tools.js', 'palette: Turkish İ/ı must fold to i');
+    if (n('basé64') !== n('base64') || !n('base64').startsWith('base64')) fail('assets/tools.js', 'palette: accents must be ignored');
+    if (n('   ') !== n('') || n('zzzzzz') !== '') fail('assets/tools.js', 'palette: blank/unknown query handling changed');
     const all = D.allTools();
     const prefixes = (w) => [1, 2, 3, 4].map(n => w.slice(0, n)).filter(Boolean);
     for (const t of all) {
@@ -67,10 +72,16 @@ for (const r of routes) {
   }
 }
 
+// old public origins must not survive anywhere in the published pages
+for (const f of ['index.html', '404.html', ...routes.map(r => `${r}/index.html`), 'sitemap.xml', 'robots.txt']) {
+  const src = read(f);
+  for (const o of PREVIOUS_ORIGINS) if (src.includes(o)) fail(f, `still references the old origin ${o}`);
+}
+
 // ── generator drift: run generators on a temp copy and diff ──
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'devtools-check-'));
 try {
-  fs.cpSync(ROOT, tmp, { recursive: true, filter: s => !s.includes(`${path.sep}.git`) });
+  fs.cpSync(ROOT, tmp, { recursive: true, filter: s => !s.includes(`${path.sep}.git`) && !s.startsWith(path.join(ROOT, 'dist')) });
   execFileSync(process.execPath, [path.join(tmp, 'scripts/json-codegen/build-gen-pages.js')], { stdio: 'ignore' });
   execFileSync(process.execPath, [path.join(tmp, 'scripts/gen-site.mjs'), tmp], { stdio: 'ignore' });
   const generated = ['index.html', '404.html', '_headers', 'netlify.toml', 'robots.txt', 'sitemap.xml',
@@ -145,6 +156,20 @@ function scanSinks(file, src) {
   });
 }
 for (const f of fs.readdirSync(path.join(ROOT, 'assets')).filter(f => f.endsWith('.js'))) scanSinks('assets/' + f, read('assets/' + f));
+
+// only dist/ is published (Netlify serves files case-insensitively, so path rules alone can't hide repo files)
+{
+  const toml = read('netlify.toml');
+  if (!/^\s*publish\s*=\s*"dist"/m.test(toml)) fail('netlify.toml', 'publish must be "dist" (built by scripts/build-dist.mjs)');
+  if (!/command\s*=\s*"node scripts\/check\.mjs && node scripts\/build-dist\.mjs"/.test(toml)) fail('netlify.toml', 'build command must run check.mjs then build-dist.mjs');
+  const bd = read('scripts/build-dist.mjs');
+  for (const h of MUST_HIDE.filter(x => x !== '/_headers')) {
+    const top = h.replace(/^\//, '').replace(/\/\*$/, '');
+    if (new RegExp(`['"]${top.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}['"]`).test(bd.slice(bd.indexOf('const PUBLIC'), bd.indexOf('];', bd.indexOf('const PUBLIC'))))) fail('scripts/build-dist.mjs', `${top} must not be in the PUBLIC allow-list`);
+  }
+  const firstRewrite = toml.indexOf('to     = "/' );
+  for (const m of toml.matchAll(/from\s*=\s*"(https?:\/\/[^"]+)"/g)) if (firstRewrite >= 0 && m.index > firstRewrite) fail('netlify.toml', `host redirect ${m[1]} must come before the path rewrites (first match wins)`);
+}
 
 // repository files must be hidden: forced 404 redirect in netlify.toml, and not crawlable
 {
@@ -223,6 +248,15 @@ for (const l of versions) {
   const [file, , , sha] = l.split('|').map(s => s.trim());
   const actual = crypto.createHash('sha256').update(fs.readFileSync(path.join(ROOT, 'assets/vendor', file))).digest('hex');
   if (actual !== sha) fail(`assets/vendor/${file}`, 'sha256 does not match VERSIONS.txt');
+}
+
+// fonts: every @font-face url exists; the retired Syne face is referenced nowhere in the site
+{
+  const css = read('assets/app.css');
+  for (const m of css.matchAll(/url\((\/assets\/fonts\/[^)]+)\)/g)) {
+    if (!fs.existsSync(path.join(ROOT, m[1]))) fail('assets/app.css', `@font-face points at missing ${m[1]}`);
+  }
+  for (const f of [...pages, 'assets/app.css', 'assets/tools.js']) if (/\bSyne\b/.test(read(f))) fail(f, 'references the retired Syne font');
 }
 
 // font hashes: every woff2 is listed, every listed file exists and matches

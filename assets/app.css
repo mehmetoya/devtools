@@ -1,7 +1,5 @@
 /* ── DevTools shared styles — "technical drawing" system (docs/specs/ui-redesign.md) ── */
 /* Self-hosted fonts (OFL, see assets/fonts/LICENSE-*.txt) — no third-party requests. */
-@font-face { font-family: 'IBM Plex Sans Condensed'; font-style: normal; font-weight: 500; font-display: swap; src: url(/assets/fonts/ibm-plex-sans-condensed-latin-ext-500-normal.woff2) format('woff2'); unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF; }
-@font-face { font-family: 'IBM Plex Sans Condensed'; font-style: normal; font-weight: 500; font-display: swap; src: url(/assets/fonts/ibm-plex-sans-condensed-latin-500-normal.woff2) format('woff2'); unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
 @font-face { font-family: 'IBM Plex Sans Condensed'; font-style: normal; font-weight: 600; font-display: swap; src: url(/assets/fonts/ibm-plex-sans-condensed-latin-ext-600-normal.woff2) format('woff2'); unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF; }
 @font-face { font-family: 'IBM Plex Sans Condensed'; font-style: normal; font-weight: 600; font-display: swap; src: url(/assets/fonts/ibm-plex-sans-condensed-latin-600-normal.woff2) format('woff2'); unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
 @font-face { font-family: 'IBM Plex Sans'; font-style: normal; font-weight: 400; font-display: swap; src: url(/assets/fonts/ibm-plex-sans-latin-ext-400-normal.woff2) format('woff2'); unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF; }
@@ -139,7 +137,7 @@ dialog.palette::after { bottom: 0; right: 0; border-width: 0 2px 2px 0; }
 .side-key { font-size: 10px; padding: 0 4px; }
 .side-item:hover .side-link { color: var(--text); }
 .side-item.active .side-link, .side-item.active .side-num { color: var(--accent); }
-.fav-btn { background: none; border: none; color: var(--muted); cursor: pointer; padding: 4px 8px; font-size: 13px; opacity: 0; }
+.fav-btn { background: none; border: none; color: var(--muted); cursor: pointer; padding: 4px 8px; font: inherit; font-size: 13px; opacity: 0; }
 .side-item:hover .fav-btn, .fav-btn.on, .fav-btn:focus-visible { opacity: 1; }
 .fav-btn.on { color: var(--warn); }
 .side-foot { margin-top: 24px; padding: 12px 10px 0; border-top: 1px solid var(--border); }
@@ -203,7 +201,7 @@ input[type=checkbox]:focus-visible, input[type=radio]:focus-visible, input[type=
 input:not([type=checkbox]):not([type=radio]):focus-visible, select:focus-visible { box-shadow: 0 0 0 1px var(--accent); }
 main:focus { outline: none; }
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
-.skip-link { position: absolute; left: 12px; top: -60px; z-index: 200; background: var(--accent); color: var(--on-accent); font-weight: 700; padding: 8px 14px; border-radius: var(--radius); text-decoration: none; }
+.skip-link { position: absolute; left: 12px; top: -60px; z-index: 200; background: var(--accent); color: var(--on-accent); font-family: var(--sans); font-weight: 600; padding: 8px 14px; border-radius: var(--radius); text-decoration: none; }
 .skip-link:focus { top: 10px; }
 .tbl-wrap { overflow-x: auto; max-width: 100%; }
 textarea { width: 100%; min-height: 280px; resize: vertical; line-height: 1.6; padding: 14px; tab-size: 2; }
@@ -279,6 +277,39 @@ details.info > div { padding: 0 16px 16px; color: var(--muted2); }
 .about h2 { color: var(--text); font-size: 13px; letter-spacing: 0.12em; text-transform: uppercase; margin: 22px 0 6px; }
 .about ul { padding-left: 18px; }
 
+/* ── HOME: sheet index ── */
+.hero { padding: 24px 0 8px; }
+.hero-kicker { font-family: var(--sans); font-size: 11px; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); }
+.hero h1 { margin-top: 8px; font-size: 44px; line-height: 1.05; letter-spacing: 0.02em; text-transform: uppercase; max-width: 18ch; }
+.hero h1 em { font-style: normal; color: var(--accent); }
+.hero-lede { margin-top: 12px; max-width: 64ch; color: var(--muted2); font-family: var(--prose); font-size: 15px; line-height: 1.6; }
+.hero-find { display: flex; align-items: center; gap: 12px; margin-top: 22px; width: min(520px, 100%); height: 48px; padding: 0 12px 0 16px;
+  font-family: var(--mono); font-size: 14px; color: var(--muted2); background: var(--surface2); border: 1px solid var(--border-input); cursor: pointer; }
+.hero-find span { flex: 1; text-align: left; }
+.hero-find:hover { border-color: var(--accent); color: var(--text); }
+.sheet-cat { margin-top: 32px; }
+.sheet-cat h2 { font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); padding-bottom: 6px; border-bottom: 1px solid var(--border2); }
+#home-favs h2 { color: var(--warn); }
+.sheet-list { list-style: none; display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); column-gap: 24px; }
+.sheet { display: grid; grid-template-columns: 28px minmax(0, 1fr); column-gap: 12px; padding: 10px 8px; border-bottom: 1px solid var(--border); text-decoration: none; background: var(--bg); }
+.sheet:hover { background: var(--surface2); }
+.sheet:hover .sheet-name, .sheet:focus-visible .sheet-name { color: var(--accent); }
+.sheet-no { grid-row: span 2; font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums; padding-top: 2px; }
+.sheet-name { color: var(--text); font-size: 14px; }
+.sheet-desc { color: var(--muted2); font-size: 12px; font-family: var(--prose); }
+
+/* ── DRAWING TITLE BLOCK + COLOPHON ── */
+.titleblock { margin: 32px 0 0 auto; width: min(560px, 100%); display: grid; grid-template-columns: 1.5fr 1fr 1fr; border: 1px solid var(--border2); background: var(--surface); font-family: var(--mono); font-size: 11px; }
+.tb-cell { padding: 6px 10px; border-right: 1px solid var(--border2); border-bottom: 1px solid var(--border2); min-width: 0; }
+.tb-cell:nth-child(3n) { border-right: 0; }
+.tb-cell:nth-last-child(-n+3) { border-bottom: 0; }
+.titleblock dt { font-family: var(--sans); font-size: 10px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
+.titleblock dd { margin: 0; font-family: var(--sans); font-size: 13px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text); overflow-wrap: anywhere; }
+.tb-sig dd { color: var(--accent); }
+.colophon { display: flex; flex-wrap: wrap; gap: 6px 20px; margin-top: 40px; padding: 16px 0 8px; border-top: 1px solid var(--border2); font-size: 11px; color: var(--muted); }
+.colophon a { color: var(--muted2); }
+.colophon a:hover { color: var(--accent); }
+
 /* fullscreen helper */
 .fs-overlay { position: fixed; inset: 0; z-index: 500; background: var(--bg); display: flex; flex-direction: column; padding: 16px; gap: 10px; }
 .fs-overlay .fs-body { flex: 1; overflow: auto; background: var(--surface); border: 1px solid var(--border2); border-radius: var(--radius-lg); }
@@ -298,9 +329,16 @@ dialog::backdrop { background: rgba(5, 8, 11, 0.7); }
   body.nav-open #sidebar { transform: none; visibility: visible; transition: transform 0.18s; }
   body.nav-open .nav-backdrop { display: block; position: fixed; inset: var(--header-h) 0 0 0; background: rgba(0,0,0,0.5); z-index: 80; }
   .grid-2, .grid-3 { grid-template-columns: 1fr; }
+  .titleblock { grid-template-columns: 1fr 1fr; }
+  .tb-cell:nth-child(3n) { border-right: 1px solid var(--border2); }
+  .tb-cell:nth-child(2n) { border-right: 0; }
+  .tb-cell:nth-last-child(-n+3) { border-bottom: 1px solid var(--border2); }
+  .tb-cell:nth-last-child(-n+2) { border-bottom: 0; }
   .badge-long { display: none; }
   .badge-short { display: inline; }
   .header-tool, .sheet-count { display: none; }
+  .hero h1 { font-size: 30px; }
+  .sheet-list { grid-template-columns: 1fr; }
   .find-btn { min-width: 0; flex: 1 1 auto; margin-left: 0; height: 40px; }
   .find-btn kbd, #site-header .spacer { display: none; }
   .find-long { display: none; }

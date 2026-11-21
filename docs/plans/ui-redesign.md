@@ -63,19 +63,19 @@ Her kapı bir kontrol noktasında çalışır. Kapının bulguları düzeltilmed
 - [x] T7: Header, sidebar, favori kısayolları ve kısayol anahtarı
 
 ### Kontrol noktası B: klavye
-- [ ] Fare kullanmadan tur: palet, `g` kısayolları, skip link, mobil çekmece
+- [x] Fare kullanmadan tur: palet, `g` kısayolları, skip link, mobil çekmece
 - [ ] QA Odası'nın A-01…A-09 düzeltmelerinde gerileme yok
-- [ ] `developers-room` ve `security-audit` (kabuk kodu) tamamlandı; bulgular düzeltildi
+- [x] `developers-room` ve `security-audit` (kabuk kodu) tamamlandı; bulgular düzeltildi
 
 ### Aşama 3: İmza
-- [ ] T8: Antet kutusu ve kolofon
-- [ ] T9: Ana sayfa (pafta dizini) ve 404 sayfası
+- [x] T8: Antet kutusu ve kolofon
+- [x] T9: Ana sayfa (pafta dizini) ve 404 sayfası
 
 ### Kontrol noktası C: tamamlanma
 - [ ] Spec'teki başarı ölçütleri 1–8 sağlandı
 
 ### Aşama 4: Temizlik ve yayın
-- [ ] T10: Syne'yi kaldır, README'yi ve bütçe ölçümünü güncelle
+- [x] T10: Syne'yi kaldır, README'yi ve bütçe ölçümünü güncelle
 - [ ] T11: Oda kapıları (Designers → Developers + Security → QA → Ops), PR, preview smoke testi, merge onayı
 
 ## Paralellik
@@ -108,6 +108,28 @@ Her kapı bir kontrol noktasında çalışır. Kapının bulguları düzeltilmed
 - `scan.mjs`: her sayfada "/" paleti açıyor, odak arama alanında; Esc paleti kapatıyor ve odak açan öğeye dönüyor. Esc'nin kapatmadığı bozuk bir kopyada 29 sayfa kırmızı yandı.
 - Not: Native `<dialog>` odağı kendisi de geri veriyor. Bu yüzden kendi geri verme kodumuzu silen bozma testi yakalayamaz; testi Esc üzerinden kanıtladık.
 - Tek tuş kısayolu `/` artık `devtools:shortcuts` ayarına bağlı; ayarın arayüzü T7'de gelecek.
+
+## Kontrol noktası B ve T8–T10 notları (2026-11-21)
+- **Güvenlik:**
+  - SEC-01: Netlify dosya yollarını büyük/küçük harfe duyarsız eşliyor; `/Scripts/…` ve `/Readme.md` 200 dönüyordu. Artık yalnız `dist/` yayınlanıyor; `scripts/build-dist.mjs` izin listesiyle kopyalıyor. `check.mjs` yayın klasörünü, build komutunu ve izin listesini denetliyor; smoke testi büyük/küçük harf varyantlarını da deniyor.
+  - SEC-02: `serve.mjs` artık Host başlığını denetliyor (DNS rebinding), nokta ile başlayan yolları ve büyük/küçük harf varyantlarını gizliyor, dosya okuma hatasında çökmüyor. Sekiz yol 404, yabancı Host 403 döndü.
+  - Netlify'da ilk eşleşen kural kazandığı için eski origin'den 301 kuralı artık path rewrite'larından önce; `check.mjs` bu sırayı denetliyor.
+  - `readFavs()` yalnız string kabul ediyor, en çok 64 öğe.
+- **Developers:**
+  - B-01: Ekran genişleyince açık çekmece kapanıyor.
+  - B-02: `scan.mjs`'e palet senaryosu eklendi (↓ → Enter → doğru sayfa; sonuç yokken Enter yerinde kalıyor). Çekmece senaryosu da eklendi; bozuk kopyada kırmızı yandı.
+  - B-03: Backdrop'ta yalnız gerçek tıklama paleti kapatıyor; tuşlar diyaloğun her yerinde çalışıyor.
+  - B-04: IME ile yazarken basılan Enter yok sayılıyor.
+  - B-05: `msg()` artık `!important` gibi metinleri yutmuyor.
+  - B-06: Favoriler yazılmadan önce taze okunuyor, böylece başka sekmenin değişikliği ezilmiyor.
+  - B-08: Eski origin yalnız `<head>` içinde yeniden yazılıyor ve `check.mjs` sayfalarda eski origin'i arıyor.
+  - B-09: CDP çağrılarına zaman aşımı eklendi; geçici profil her durumda temizleniyor.
+  - B-10: `norm()` için birim kontrolleri eklendi.
+  - `aria-expanded`, sonuç yoksa `false`.
+  - B-07 (Ctrl+K textarea içinde de paleti açıyor) spec gereği bırakıldı.
+- **T8:** Antet kutusu ve kolofon eklendi; `rev` biçimi `check.mjs` ile denetleniyor.
+- **T9:** Ana sayfa ve 404 numaralı pafta dizini oldu; ana sayfadaki büyük "Find a tool" düğmesi paleti açıyor.
+- **T10:** Syne ve kullanılmayan Condensed 500 kaldırıldı. Ana sayfanın ilk yüklemesi **3 font, 58.729 bayt** (başlangıçta 72.763 bayt). Skip link ve yıldız düğmesi artık yüklenmemiş ağırlık ya da Arial istemiyor.
 
 ## Riskler ve önlemler
 | Risk | Etki | Önlem |

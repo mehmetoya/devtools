@@ -7,44 +7,44 @@
 
   const CATEGORIES = [
     { id: 'text', name: 'Text Operations', tools: [
-      { route: 'case-converter',  name: 'Case Converter',     desc: 'camelCase, snake_case, PascalCase, kebab-case and more.', aliases: ['camel', 'snake', 'kebab', 'pascal', 'upper', 'lower'] },
-      { route: 'reverse',         name: 'String Reverse',     desc: 'Reverse strings, lines, words or each word.', aliases: ['rev', 'backwards'] },
-      { route: 'trim-pad',        name: 'Trim / Pad',         desc: 'Trim whitespace or pad text to a width.', aliases: ['trim', 'pad', 'whitespace'] },
-      { route: 'line-counter',    name: 'Line Counter',       desc: 'Lines, words, characters, bytes and more.', aliases: ['count', 'wc', 'words', 'chars'] },
-      { route: 'line-operations', name: 'Line Operations',    desc: 'Sort, dedupe, filter, number, join lines.', aliases: ['sort', 'dedupe', 'unique', 'lines'] },
-      { route: 'compare',         name: 'String Compare',     desc: 'Compare two strings line by line.', aliases: ['diff', 'text diff'] },
+      { route: 'case-converter',  name: 'Case Converter',     desc: 'camelCase, snake_case, PascalCase, kebab-case and more.', aliases: ['camel', 'snake', 'kebab', 'pascal', 'upper', 'lower'], rev: '2026.11.21' },
+      { route: 'reverse',         name: 'String Reverse',     desc: 'Reverse strings, lines, words or each word.', aliases: ['rev', 'backwards'], rev: '2026.11.21' },
+      { route: 'trim-pad',        name: 'Trim / Pad',         desc: 'Trim whitespace or pad text to a width.', aliases: ['trim', 'pad', 'whitespace'], rev: '2026.11.21' },
+      { route: 'line-counter',    name: 'Line Counter',       desc: 'Lines, words, characters, bytes and more.', aliases: ['count', 'wc', 'words', 'chars'], rev: '2026.11.21' },
+      { route: 'line-operations', name: 'Line Operations',    desc: 'Sort, dedupe, filter, number, join lines.', aliases: ['sort', 'dedupe', 'unique', 'lines'], rev: '2026.11.21' },
+      { route: 'compare',         name: 'String Compare',     desc: 'Compare two strings line by line.', aliases: ['diff', 'text diff'], rev: '2026.11.21' },
     ]},
     { id: 'encode', name: 'Encode / Decode', tools: [
-      { route: 'base64',          name: 'Base64',             desc: 'Encode and decode Base64 (UTF-8, ASCII, UTF-16, UTF-32).', aliases: ['b64', 'atob', 'btoa'] },
-      { route: 'url-encode',      name: 'URL Encode',         desc: 'Percent-encode or decode URL strings.', aliases: ['url', 'percent', 'uri'] },
-      { route: 'hash-generator',  name: 'Hash Generator',     desc: 'MD5, SHA-1, SHA-256, SHA-384, SHA-512 + verify.', aliases: ['md5', 'sha', 'sha256', 'checksum'] },
-      { route: 'jwt-tool',        name: 'JWT Tool',           desc: 'Generate, decode and validate JSON Web Tokens.', aliases: ['jwt', 'token', 'bearer'] },
+      { route: 'base64',          name: 'Base64',             desc: 'Encode and decode Base64 (UTF-8, ASCII, UTF-16, UTF-32).', aliases: ['b64', 'atob', 'btoa'], rev: '2026.11.21' },
+      { route: 'url-encode',      name: 'URL Encode',         desc: 'Percent-encode or decode URL strings.', aliases: ['url', 'percent', 'uri'], rev: '2026.11.21' },
+      { route: 'hash-generator',  name: 'Hash Generator',     desc: 'MD5, SHA-1, SHA-256, SHA-384, SHA-512 + verify.', aliases: ['md5', 'sha', 'sha256', 'checksum'], rev: '2026.11.21' },
+      { route: 'jwt-tool',        name: 'JWT Tool',           desc: 'Generate, decode and validate JSON Web Tokens.', aliases: ['jwt', 'token', 'bearer'], rev: '2026.11.21' },
     ]},
     { id: 'json', name: 'JSON Tools', tools: [
-      { route: 'json-formatter',     name: 'JSON Formatter',  desc: 'Validate, beautify, minify, sort keys.', aliases: ['json', 'pretty', 'beautify', 'minify'] },
-      { route: 'json-compare',       name: 'JSON Compare',    desc: 'Structural diff of two JSON documents.', aliases: ['jdiff', 'json diff'] },
-      { route: 'json-to-csharp',     name: 'JSON to C#',      desc: 'Generate C# classes or records from JSON.', aliases: ['c#', 'cs', 'csharp', 'dotnet'] },
-      { route: 'json-to-java',       name: 'JSON to Java',    desc: 'Generate Java POJOs / records from JSON.', aliases: ['java', 'pojo'] },
-      { route: 'json-to-typescript', name: 'JSON to TypeScript', desc: 'Generate TypeScript interfaces / types.', aliases: ['ts', 'typescript', 'interface'] },
+      { route: 'json-formatter',     name: 'JSON Formatter',  desc: 'Validate, beautify, minify, sort keys.', aliases: ['json', 'pretty', 'beautify', 'minify'], rev: '2026.11.21' },
+      { route: 'json-compare',       name: 'JSON Compare',    desc: 'Structural diff of two JSON documents.', aliases: ['jdiff', 'json diff'], rev: '2026.11.21' },
+      { route: 'json-to-csharp',     name: 'JSON to C#',      desc: 'Generate C# classes or records from JSON.', aliases: ['c#', 'cs', 'csharp', 'dotnet'], rev: '2026.11.21' },
+      { route: 'json-to-java',       name: 'JSON to Java',    desc: 'Generate Java POJOs / records from JSON.', aliases: ['java', 'pojo'], rev: '2026.11.21' },
+      { route: 'json-to-typescript', name: 'JSON to TypeScript', desc: 'Generate TypeScript interfaces / types.', aliases: ['ts', 'typescript', 'interface'], rev: '2026.11.21' },
     ]},
     { id: 'regex', name: 'Regex Tools', tools: [
-      { route: 'regex-search',    name: 'Regex Search',       desc: 'Find matches and capture groups.', aliases: ['regex', 'regexp', 'match'] },
-      { route: 'regex-replace',   name: 'Regex Replace',      desc: 'Find and replace with group references.', aliases: ['replace', 'sub'] },
-      { route: 'extract',         name: 'String Extract',     desc: 'Extract by position, delimiters, regex or line range.', aliases: ['substring', 'slice', 'between'] },
+      { route: 'regex-search',    name: 'Regex Search',       desc: 'Find matches and capture groups.', aliases: ['regex', 'regexp', 'match'], rev: '2026.11.21' },
+      { route: 'regex-replace',   name: 'Regex Replace',      desc: 'Find and replace with group references.', aliases: ['replace', 'sub'], rev: '2026.11.21' },
+      { route: 'extract',         name: 'String Extract',     desc: 'Extract by position, delimiters, regex or line range.', aliases: ['substring', 'slice', 'between'], rev: '2026.11.21' },
     ]},
     { id: 'dev', name: 'Developer Tools', tools: [
-      { route: 'datetime-formatter', name: 'DateTime Formatter', desc: '.NET-style date/time format strings.', aliases: ['date', 'time', 'datetime'] },
-      { route: 'string-formatter',   name: 'String Formatter',   desc: 'Numeric formats, padding, composite formatting.', aliases: ['format', 'printf', 'numeric'] },
-      { route: 'guid-generator',     name: 'GUID Generator',     desc: 'Generate and parse GUIDs / UUIDs.', aliases: ['guid', 'uuid'] },
-      { route: 'password-generator', name: 'Password Generator', desc: 'Secure passwords with custom rules.', aliases: ['password', 'pwd', 'secret'] },
-      { route: 'number-converter',   name: 'Number Converter',   desc: 'Binary, decimal, hexadecimal, octal.', aliases: ['hex', 'binary', 'octal', 'radix'] },
-      { route: 'barcode-generator',  name: 'Barcode Generator',  desc: 'QR codes, EAN-13 and EAN-8 barcodes.', aliases: ['qr', 'ean', 'barcode'] },
-      { route: 'http-client',        name: 'HTTP Client',        desc: 'Build and send HTTP requests.', aliases: ['http', 'curl', 'rest', 'api', 'fetch'] },
+      { route: 'datetime-formatter', name: 'DateTime Formatter', desc: '.NET-style date/time format strings.', aliases: ['date', 'time', 'datetime'], rev: '2026.11.21' },
+      { route: 'string-formatter',   name: 'String Formatter',   desc: 'Numeric formats, padding, composite formatting.', aliases: ['format', 'printf', 'numeric'], rev: '2026.11.21' },
+      { route: 'guid-generator',     name: 'GUID Generator',     desc: 'Generate and parse GUIDs / UUIDs.', aliases: ['guid', 'uuid'], rev: '2026.11.21' },
+      { route: 'password-generator', name: 'Password Generator', desc: 'Secure passwords with custom rules.', aliases: ['password', 'pwd', 'secret'], rev: '2026.11.21' },
+      { route: 'number-converter',   name: 'Number Converter',   desc: 'Binary, decimal, hexadecimal, octal.', aliases: ['hex', 'binary', 'octal', 'radix'], rev: '2026.11.21' },
+      { route: 'barcode-generator',  name: 'Barcode Generator',  desc: 'QR codes, EAN-13 and EAN-8 barcodes.', aliases: ['qr', 'ean', 'barcode'], rev: '2026.11.21' },
+      { route: 'http-client',        name: 'HTTP Client',        desc: 'Build and send HTTP requests.', aliases: ['http', 'curl', 'rest', 'api', 'fetch'], rev: '2026.11.21' },
     ]},
     { id: 'viewers', name: 'Viewers', tools: [
-      { route: 'markdown-viewer',  name: 'Markdown Viewer',     desc: 'Live Markdown preview and export.', aliases: ['md', 'markdown'] },
-      { route: 'html-viewer',      name: 'HTML Viewer',         desc: 'Sandboxed live HTML preview.', aliases: ['html', 'preview'] },
-      { route: 'diagram-viewer',   name: 'Diagram Viewer',      desc: 'Mermaid diagrams to SVG / PNG.', aliases: ['mermaid', 'diagram', 'chart'] },
+      { route: 'markdown-viewer',  name: 'Markdown Viewer',     desc: 'Live Markdown preview and export.', aliases: ['md', 'markdown'], rev: '2026.11.21' },
+      { route: 'html-viewer',      name: 'HTML Viewer',         desc: 'Sandboxed live HTML preview.', aliases: ['html', 'preview'], rev: '2026.11.21' },
+      { route: 'diagram-viewer',   name: 'Diagram Viewer',      desc: 'Mermaid diagrams to SVG / PNG.', aliases: ['mermaid', 'diagram', 'chart'], rev: '2026.11.21' },
     ]},
   ];
 
@@ -52,7 +52,7 @@
 
   // ── storage (never required for the page to work) ──
   function readFavs() {
-    try { const v = JSON.parse(localStorage.getItem(FAV_KEY) || '[]'); return Array.isArray(v) ? v : []; }
+    try { const v = JSON.parse(localStorage.getItem(FAV_KEY) || '[]'); return Array.isArray(v) ? v.filter(x => typeof x === 'string').slice(0, 64) : []; }
     catch { return []; }
   }
   function writeFavs(list) { try { localStorage.setItem(FAV_KEY, JSON.stringify(list)); } catch { /* ignore */ } }
@@ -145,7 +145,7 @@
     node.className = 'msg' + (kind ? ' msg-' + kind : '');
     node.setAttribute('role', kind === 'error' ? 'alert' : 'status');
     // app.css draws the status glyph (.msg-*::before); drop a glyph the caller already put in the text
-    node.textContent = kind ? String(text || '').replace(/^\s*[✓✔✕✗⚠ℹ!]️?\s*/, '') : (text || '');
+    node.textContent = kind ? String(text || '').replace(/^\s*[✓✔✕✗⚠ℹ]\uFE0F?\s+/, '') : (text || '');
     node.hidden = !kind || !text;
   }
 
@@ -232,6 +232,7 @@
       }, el('span', { class: 'pal-name' }, (favs.includes(t.route) ? '★ ' : '') + t.name),
          el('span', { class: 'pal-cat' }, t.category))));
       empty.hidden = items.length > 0;
+      input.setAttribute('aria-expanded', String(items.length > 0));
       setActive(0);
       announce(items.length === 1 ? '1 tool' : items.length + ' tools');
     }
@@ -246,9 +247,13 @@
     }
     function close() { if (dlg.open) dlg.close(); }
     dlg.addEventListener('close', () => { if (opener && document.contains(opener)) opener.focus(); opener = null; });
-    dlg.addEventListener('click', (e) => { if (e.target === dlg) close(); }); // backdrop click
+    let downOnBackdrop = false;
+    dlg.addEventListener('mousedown', (e) => { downOnBackdrop = e.target === dlg; });
+    dlg.addEventListener('click', (e) => { if (e.target === dlg && downOnBackdrop) close(); downOnBackdrop = false; }); // backdrop click
     input.addEventListener('input', render);
-    input.addEventListener('keydown', (e) => {
+    dlg.addEventListener('keydown', (e) => {
+      if (e.isComposing || e.keyCode === 229) return; // IME candidate selection (DEV-B-04)
+      if (e.target !== input && /^(ArrowDown|ArrowUp|Home|End|Enter)$/.test(e.key)) input.focus();
       if (e.key === 'ArrowDown') { e.preventDefault(); setActive(active + 1); }
       else if (e.key === 'ArrowUp') { e.preventDefault(); setActive(active - 1); }
       else if (e.key === 'Home' && items.length) { e.preventDefault(); setActive(0); }
@@ -376,6 +381,7 @@
     }
 
     function toggleFav(route) {
+      favs.splice(0, favs.length, ...readFavs()); // another tab may have changed them
       const i = favs.indexOf(route);
       if (i >= 0) favs.splice(i, 1); else favs.push(route);
       writeFavs(favs);
@@ -401,6 +407,34 @@
     render();
   }
 
+  /** Drawing title block for a tool page: tool, sheet, revision, signature. Presentation only. */
+  function buildTitleBlock(active) {
+    const main = $('main');
+    if (!main || !active || $('.titleblock', main)) return;
+    const cell = (label, value, cls) => el('div', { class: 'tb-cell' + (cls ? ' ' + cls : '') }, el('dt', null, label), el('dd', null, value));
+    const block = el('dl', { class: 'titleblock', 'aria-label': 'Drawing title block' },
+      cell('Tool', active.name, 'tb-tool'),
+      cell('Sheet', `${sheetNo(active.route)} / ${total}`),
+      cell('Rev.', active.rev || '—'),
+      cell('Drawn by', 'M. Oya', 'tb-sig'),
+      cell('Scale', '1 : 1'),
+      cell('Runs', 'Client-only'));
+    const about = $('.about', main);
+    if (about) main.insertBefore(block, about); else main.appendChild(block);
+  }
+
+  /** Colophon on every page: who made it, how it is set, what it does not do. */
+  function buildColophon(active) {
+    const main = $('main');
+    if (!main || $('.colophon', main)) return;
+    const latest = allTools().map(t => t.rev || '').sort().pop();
+    main.appendChild(el('footer', { class: 'colophon' },
+      el('span', null, 'Made by hand by ', el('a', { href: 'https://github.com/mehmetoya', rel: 'author noopener' }, 'mehmetoya')),
+      el('span', null, 'Set in IBM Plex Sans Condensed, Plex Sans & Plex Mono'),
+      el('span', null, 'No trackers · no server · CSP-locked'),
+      el('span', null, 'Rev. ' + ((active && active.rev) || latest))));
+  }
+
   /** g then 1–9 within a second opens that favorite. */
   function wireFavoriteKeys() {
     let armed = 0;
@@ -422,11 +456,15 @@
     buildHeader(active);
     buildSidebar(route);
     wireFavoriteKeys();
+    buildTitleBlock(active);
+    buildColophon(active);
     const main = $('main');
     if (main && !main.id) main.id = 'main';
     if (main && !main.hasAttribute('tabindex')) main.setAttribute('tabindex', '-1');
     wireSegments();
     labelTextareas();
+    const narrow = window.matchMedia('(max-width: 860px)');
+    narrow.addEventListener('change', () => { if (!narrow.matches && document.body.classList.contains('nav-open')) setNav(false, false); });
     // close mobile nav on backdrop click or Escape
     document.addEventListener('click', (e) => {
       if (document.body.classList.contains('nav-open') && e.target.classList && e.target.classList.contains('nav-backdrop')) setNav(false);

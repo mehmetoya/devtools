@@ -45,7 +45,8 @@ for (const r of routes) {
 }
 await page('/this-page-does-not-exist', null, 404);
 
-for (const p of ['/README.md', '/LICENSE', '/netlify.toml', '/_headers', '/scripts/check.mjs', '/scripts/gen-site.mjs', '/docs/specs/ui-redesign.md']) {
+for (const p of ['/README.md', '/LICENSE', '/netlify.toml', '/_headers', '/scripts/check.mjs', '/scripts/gen-site.mjs', '/docs/specs/ui-redesign.md',
+  '/Scripts/gen-site.mjs', '/Readme.md', '/README.MD', '/Docs/specs/ui-redesign.md', '/License', '/Netlify.toml', '/.git/config']) {
   const res = await get(p);
   if (res.status !== 404) fail(p, `repository file served (status ${res.status})`);
 }

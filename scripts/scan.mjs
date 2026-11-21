@@ -27,7 +27,13 @@ const PAGES = [['/', 200], ...routes.map(r => ['/' + r, 200]), ['/this-page-does
 // ── launch Chrome and connect ──
 if (!fs.existsSync(CHROME)) { console.error(`Chrome not found at ${CHROME} (set CHROME_PATH)`); process.exit(2); }
 const profile = fs.mkdtempSync(path.join(os.tmpdir(), 'devtools-scan-'));
-const chrome = spawn(CHROME, ['--headless=new', '--remote-debugging-port=0', `--user-data-dir=${profile}`,
+let chrome = null;
+function cleanup() {
+  if (chrome && chrome.exitCode === null) chrome.kill();
+  try { fs.rmSync(profile, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 }); } catch { /* temp profile; OS cleans up */ }
+}
+process.on('exit', cleanup);
+chrome = spawn(CHROME, ['--headless=new', '--remote-debugging-port=0', `--user-data-dir=${profile}`,
   '--no-first-run', '--no-default-browser-check', '--disable-extensions', '--hide-scrollbars', 'about:blank'],
   { stdio: ['ignore', 'ignore', 'pipe'] });
 const wsUrl = await new Promise((resolve, reject) => {
@@ -50,9 +56,12 @@ ws.onmessage = (ev) => {
   } else if (msg.method) for (const l of listeners) l(msg);
 };
 const send = (method, params = {}, sessionId) => new Promise((resolve, reject) => {
-  const id = ++nextId; pending.set(id, { resolve, reject });
+  const id = ++nextId;
+  const timer = setTimeout(() => { pending.delete(id); reject(new Error(`CDP ${method} timed out`)); }, 20000);
+  pending.set(id, { resolve: (v) => { clearTimeout(timer); resolve(v); }, reject: (e) => { clearTimeout(timer); reject(e); } });
   ws.send(JSON.stringify({ id, method, params, ...(sessionId && { sessionId }) }));
 });
+ws.onclose = () => { for (const { reject } of pending.values()) reject(new Error('CDP connection closed')); pending.clear(); };
 
 // ── scan one page ──
 async function scan(pathname, expectStatus, width) {
@@ -140,15 +149,67 @@ async function scan(pathname, expectStatus, width) {
   return { page: pathname, width, issues: [...new Set(issues)], fontBytes: fontsBeforeInteraction, fontFiles: fontFilesBefore };
 }
 
+async function scenarios() {
+  const issues = [];
+  const { targetId } = await send('Target.createTarget', { url: 'about:blank' });
+  const { sessionId } = await send('Target.attachToTarget', { targetId, flatten: true });
+  const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+  const js = async (expression) => (await send('Runtime.evaluate', { expression, returnByValue: true, awaitPromise: true }, sessionId)).result.value;
+  const key = async (k, code, keyCode, text) => {
+    await send('Input.dispatchKeyEvent', { type: 'keyDown', key: k, code, windowsVirtualKeyCode: keyCode, ...(text ? { text } : {}) }, sessionId);
+    await send('Input.dispatchKeyEvent', { type: 'keyUp', key: k, code, windowsVirtualKeyCode: keyCode }, sessionId);
+  };
+  const typeText = async (t) => { for (const ch of t) await key(ch, '', ch.toUpperCase().charCodeAt(0), ch); };
+  const go = async (url, width) => {
+    await send('Emulation.setDeviceMetricsOverride', { width, height: 850, deviceScaleFactor: 1, mobile: width < 500 }, sessionId);
+    await send('Page.navigate', { url }, sessionId);
+    for (let i = 0; i < 100 && (await js('document.readyState').catch(() => '')) !== 'complete'; i++) await sleep(50);
+    await sleep(150);
+  };
+  try {
+    await send('Page.enable', {}, sessionId);
+    // palette: type → ↓ moves aria-activedescendant → Enter navigates; Enter with no results stays
+    await go(BASE + '/base64', 1280);
+    await js("document.activeElement && document.activeElement.blur()");
+    await key('/', 'Slash', 191, '/'); await sleep(100);
+    await typeText('jso'); await sleep(100);
+    const first = await js("document.querySelector('.pal-input').getAttribute('aria-activedescendant')");
+    await key('ArrowDown', 'ArrowDown', 40); await sleep(50);
+    const second = await js("document.querySelector('.pal-input').getAttribute('aria-activedescendant')");
+    if (!first || first === second) issues.push(`palette: ↓ did not move the active option (${first} → ${second})`);
+    await key('Enter', 'Enter', 13, '\r'); await sleep(600);
+    const landed = await js('location.pathname');
+    if (landed !== '/' + String(second).replace('pal-opt-', '')) issues.push(`palette: Enter opened ${landed}, expected the active option ${second}`);
+    await key('/', 'Slash', 191, '/'); await sleep(100);
+    await typeText('zzzz'); await sleep(100);
+    const expanded = await js("document.querySelector('.pal-input').getAttribute('aria-expanded')");
+    if (expanded !== 'false') issues.push('palette: aria-expanded should be false with no results');
+    await key('Enter', 'Enter', 13, '\r'); await sleep(300);
+    if ((await js('location.pathname')) !== landed) issues.push('palette: Enter with no results navigated away');
+    // drawer: open at 375, widen to 1280 → drawer closes and main is no longer inert
+    await go(BASE + '/base64', 375);
+    await js("document.querySelector('.menu-toggle').click()"); await sleep(200);
+    if (!(await js("document.querySelector('main').inert"))) issues.push('drawer: main is not inert while the drawer is open');
+    await send('Emulation.setDeviceMetricsOverride', { width: 1280, height: 850, deviceScaleFactor: 1, mobile: false }, sessionId); await sleep(300);
+    if (await js("document.querySelector('main').inert || document.body.classList.contains('nav-open')")) issues.push('drawer: still open / main inert after widening to desktop');
+  } catch (e) {
+    issues.push('scenario error: ' + e.message);
+  } finally {
+    await send('Target.closeTarget', { targetId }).catch(() => {});
+  }
+  return { page: 'scenarios', width: 0, issues, fontBytes: 0, fontFiles: 0 };
+}
+
 const results = [];
 try {
   for (const width of WIDTHS) for (const [p, s] of PAGES) results.push(await scan(p, s, width));
+  results.push(await scenarios());
 } finally {
   ws.close();
   const exited = new Promise(r => chrome.once('exit', r));
   chrome.kill();
   await Promise.race([exited, new Promise(r => setTimeout(r, 5000))]);
-  try { fs.rmSync(profile, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 }); } catch { /* temp profile; OS cleans up */ }
+  cleanup();
 }
 
 const bad = results.filter(r => r.issues.length);
@@ -159,4 +220,4 @@ else {
   console.log(`home first load: ${home?.fontFiles} font files, ${home?.fontBytes} bytes`);
 }
 if (bad.length) { console.error(`\n${bad.length} page/width combination(s) with problems on ${BASE}`); process.exit(1); }
-console.log(`✓ ${BASE}: ${PAGES.length} pages × ${WIDTHS.join('/')}px — no CSP violations, errors, third-party requests or overflow.`);
+console.log(`✓ ${BASE}: ${PAGES.length} pages × ${WIDTHS.join('/')}px + palette/drawer scenarios — no CSP violations, errors, third-party requests or overflow.`);
