@@ -54,6 +54,8 @@ const shellClose = `</div>
 const ld = JSON.stringify({
   '@context': 'https://schema.org', '@type': 'WebSite', name: 'DevTools', url: SITE_URL + '/',
   description: 'Free, private, client-side developer tools.',
+  author: { '@type': 'Person', name: 'Mehmet Oya', url: 'https://mehmetoya.com' },
+  isPartOf: { '@type': 'WebSite', name: 'Mehmet Oya', url: 'https://mehmetoya.com' },
   hasPart: tools.map(t => ({ '@type': 'WebApplication', name: t.name, url: SITE_URL + '/' + t.route, description: t.desc, applicationCategory: 'DeveloperApplication', operatingSystem: 'Any' })),
 }, null, 2);
 
@@ -73,7 +75,7 @@ const home = `${head('DevTools — Free, Private, Client-Side Developer Tools',
 ${shellOpen}
   <main class="page">
     <section class="hero">
-      <p class="hero-kicker">Drawing set · ${tools.length} sheets · Drawn by <a href="https://github.com/mehmetoya" rel="author noopener">M. Oya</a> · rev. ${tools.map(t => t.rev).sort().pop()}</p>
+      <p class="hero-kicker">Drawing set · ${tools.length} sheets · Drawn by <a href="https://mehmetoya.com" rel="author">Mehmet Oya</a> · rev. ${tools.map(t => t.rev).sort().pop()}</p>
       <h1>Developer tools that <em>never see your data</em>.</h1>
       <p class="hero-lede">${tools.length} utilities for text, encoding, JSON, regex and everyday development. No backend, no logging, no share links — everything runs in your browser.</p>
       <button type="button" class="hero-find" id="home-find" aria-keyshortcuts="Control+K Meta+K /"><span>Find a tool…</span><kbd aria-hidden="true">/</kbd></button>

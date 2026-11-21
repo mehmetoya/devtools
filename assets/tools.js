@@ -427,7 +427,7 @@
       cell('Tool', active.name, 'tb-tool'),
       cell('Sheet', `${sheetNo(active.route)} / ${total}`),
       cell('Rev.', active.rev || '—'),
-      cell('Drawn by', 'M. Oya', 'tb-sig'),
+      cell('Drawn by', el('a', { href: 'https://mehmetoya.com', rel: 'author' }, 'M. Oya'), 'tb-sig'),
       cell('Scale', '1 : 1'),
       cell('Runs', 'Client-only'));
     const about = $('.about', main);
@@ -440,7 +440,9 @@
     if (!main || $('.colophon', main)) return;
     const latest = allTools().map(t => t.rev || '').sort().pop();
     main.appendChild(el('footer', { class: 'colophon' },
-      el('span', null, 'Made by hand by ', el('a', { href: 'https://github.com/mehmetoya', rel: 'author noopener' }, 'mehmetoya')),
+      el('span', null, 'Made by hand by ', el('a', { href: 'https://mehmetoya.com', rel: 'author' }, 'Mehmet Oya'),
+        ' · ', el('a', { href: 'https://github.com/mehmetoya/devtools', rel: 'noopener' }, 'source on GitHub')),
+      el('span', null, 'Part of ', el('a', { href: 'https://mehmetoya.com' }, 'mehmetoya.com')),
       el('span', null, 'Set in IBM Plex Sans Condensed, Plex Sans & Plex Mono'),
       el('span', null, 'No trackers · no server · CSP-locked'),
       el('span', null, 'Rev. ' + ((active && active.rev) || latest))));
