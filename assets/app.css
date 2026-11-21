@@ -89,6 +89,7 @@ a { color: var(--accent); }
 .find-short { display: none; }
 
 [data-shortcuts=off] .find-btn kbd, [data-shortcuts=off] .hero-find kbd, [data-shortcuts=off] .k-single { display: none; }
+@media (max-width: 360px) { .badge-short { display: none !important; } .badge-private { padding: 3px 6px; } }
 @media (hover: none) and (pointer: coarse) { .side-key, .side-help, .pal-hint, .find-btn kbd, .hero-find kbd { display: none; } }
 
 /* ── COMMAND PALETTE ── */
@@ -331,10 +332,12 @@ dialog::backdrop { background: rgba(5, 8, 11, 0.7); }
 @media (max-width: 860px) {
   .shell { grid-template-columns: minmax(0, 1fr); }
   .page { grid-column: 1; padding: 18px 16px 40px; }
-  .menu-toggle { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; }
+  .menu-toggle { display: inline-flex; align-items: center; justify-content: center; flex: 0 0 44px; width: 44px; height: 44px; }
+  #site-header { gap: 10px; padding: 0 12px; }
+  .logo, .badge-private { flex-shrink: 0; }
   /* closed drawer is hidden from focus/AT, not just moved off-screen */
-  #sidebar { position: fixed; top: var(--header-h); left: 0; bottom: 0; width: 280px; height: auto; z-index: 90; transform: translateX(-100%); visibility: hidden; transition: transform 0.18s, visibility 0s linear 0.18s; }
-  body.nav-open #sidebar { transform: none; visibility: visible; transition: transform 0.18s; }
+  #sidebar { position: fixed; top: var(--header-h); left: 0; bottom: 0; width: 280px; height: auto; z-index: 90; transform: translateX(-100%); visibility: hidden; transition: transform 0.12s, visibility 0s linear 0.12s; }
+  body.nav-open #sidebar { transform: none; visibility: visible; transition: transform 0.12s; }
   body.nav-open .nav-backdrop { display: block; position: fixed; inset: var(--header-h) 0 0 0; background: rgba(0,0,0,0.5); z-index: 80; }
   .grid-2, .grid-3 { grid-template-columns: 1fr; }
   .titleblock { grid-template-columns: 1fr 1fr; }

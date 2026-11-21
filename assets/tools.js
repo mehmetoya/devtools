@@ -52,7 +52,7 @@
 
   // ── storage (never required for the page to work) ──
   function readFavs() {
-    try { const v = JSON.parse(localStorage.getItem(FAV_KEY) || '[]'); return Array.isArray(v) ? v.filter(x => typeof x === 'string').slice(0, 64) : []; }
+    try { const v = JSON.parse(localStorage.getItem(FAV_KEY) || '[]'); return Array.isArray(v) ? [...new Set(v.filter(x => typeof x === 'string'))].slice(0, 64) : []; }
     catch { return []; }
   }
   function writeFavs(list) { try { localStorage.setItem(FAV_KEY, JSON.stringify(list)); } catch { /* ignore */ } }
@@ -118,12 +118,17 @@
     if (!node) return;
     if (isInvalid) {
       node.setAttribute('aria-invalid', 'true');
-      // point the field at the visible error message so returning to it explains why
-      const err = $$('.msg.msg-error').find(m => !m.hidden && m.textContent);
-      if (err) {
+      // point the field at the visible error message so returning to it explains why;
+      // pages may set the message right after calling invalid(), so look again on the next tick
+      const link = () => {
+        if (node.getAttribute('aria-invalid') !== 'true') return false;
+        const err = $$('.msg.msg-error').find(m => !m.hidden && m.textContent);
+        if (!err) return false;
         if (!err.id) err.id = 'msg-' + Math.random().toString(36).slice(2, 8);
         node.setAttribute('aria-describedby', err.id);
-      }
+        return true;
+      };
+      if (!link()) setTimeout(link, 0);
     } else {
       node.removeAttribute('aria-invalid');
       const d = node.getAttribute('aria-describedby');
@@ -255,6 +260,7 @@
     input.addEventListener('input', render);
     dlg.addEventListener('keydown', (e) => {
       if (e.isComposing || e.keyCode === 229) return; // IME candidate selection (DEV-B-04)
+      if (e.target !== input && e.target.tagName === 'BUTTON' && (e.key === 'Enter' || e.key === ' ')) return;
       if (e.target !== input && /^(ArrowDown|ArrowUp|Home|End|Enter)$/.test(e.key)) input.focus();
       if (e.key === 'ArrowDown') { e.preventDefault(); setActive(active + 1); }
       else if (e.key === 'ArrowUp') { e.preventDefault(); setActive(active - 1); }

@@ -13,10 +13,12 @@ import { fileURLToPath } from 'node:url';
 
 const args = process.argv.slice(2);
 const BASE = (args.find(a => !a.startsWith('--')) || 'http://127.0.0.1:8888').replace(/\/$/, '');
-const WIDTHS = ((args.find(a => a.startsWith('--widths=')) || '--widths=375,1280').split('=')[1]).split(',').map(Number);
+const WIDTHS = ((args.find(a => a.startsWith('--widths=')) || '--widths=320,375,1280').split('=')[1]).split(',').map(Number);
 const JSON_OUT = args.includes('--json');
 const CHROME = process.env.CHROME_PATH || '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 const ORIGIN = new URL(BASE).origin;
+// deploy previews get Netlify's own drawer script (/.netlify/scripts/cdp) — ignore what it triggers there
+const NETLIFY_PREVIEW = /^deploy-preview-\d+--/.test(new URL(BASE).hostname);
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const ctx = { window: {}, document: { readyState: 'loading', addEventListener() {} } };
@@ -74,12 +76,14 @@ async function scan(pathname, expectStatus, width) {
     const p = msg.params;
     switch (msg.method) {
       case 'Runtime.consoleAPICalled':
+        if (NETLIFY_PREVIEW && p.args.some(a => /netlify/i.test(String(a.value ?? '')))) break;
         if (p.type === 'error') issues.push('console: ' + p.args.map(a => a.value ?? a.description ?? '').join(' ').slice(0, 240));
         break;
       case 'Runtime.exceptionThrown':
         issues.push('exception: ' + (p.exceptionDetails.exception?.description || p.exceptionDetails.text).split('\n')[0].slice(0, 240));
         break;
       case 'Log.entryAdded':
+        if (NETLIFY_PREVIEW && /netlify/i.test(p.entry.text + ' ' + (p.entry.url || ''))) break;
         if (p.entry.level === 'error' && p.entry.source !== 'network') issues.push(`${p.entry.source}: ${p.entry.text.slice(0, 240)}`);
         break;
       case 'Network.requestWillBeSent': {
@@ -120,6 +124,10 @@ async function scan(pathname, expectStatus, width) {
       'JSON.stringify({ sw: document.documentElement.scrollWidth, w: window.innerWidth })', returnByValue: true }, sessionId);
     const { sw, w } = JSON.parse(result.value);
     if (sw > w + 1) issues.push(`horizontal overflow: scrollWidth ${sw} > viewport ${w}`);
+    if (width < 860) {
+      const t = (await send('Runtime.evaluate', { expression: "(() => { const b = document.querySelector('.menu-toggle'); if (!b) return null; const r = b.getBoundingClientRect(); return [Math.round(r.width), Math.round(r.height)]; })()", returnByValue: true }, sessionId)).result.value;
+      if (t && (t[0] < 44 || t[1] < 44)) issues.push(`menu toggle is ${t[0]}×${t[1]}px, needs ≥44×44 (WCAG 2.5.5 / A-07)`);
+    }
 
     fontsBeforeInteraction = [...fontBytes.values()].reduce((x, y) => x + y, 0); fontFilesBefore = fontBytes.size;
     // command palette: "/" opens it with focus in the search field; Esc closes it and focus returns to the opener
@@ -189,6 +197,13 @@ async function scenarios() {
     if (expanded !== 'false') issues.push('palette: aria-expanded should be false with no results');
     await key('Enter', 'Enter', 13, '\r'); await sleep(300);
     if ((await js('location.pathname')) !== landed) issues.push('palette: Enter with no results navigated away');
+    // palette: Enter on the close button closes it instead of opening the highlighted tool
+    await key('/', 'Slash', 191, '/'); await sleep(120); await typeText('json'); await sleep(80);
+    await key('Tab', 'Tab', 9); await sleep(50);
+    const before = await js('location.pathname');
+    await key('Enter', 'Enter', 13, '\r'); await sleep(300);
+    if ((await js('location.pathname')) !== before) issues.push('palette: Enter on ✕ opened a tool');
+    else if (await js("!!document.querySelector('dialog.palette[open]')")) issues.push('palette: Enter on ✕ did not close it');
     // palette: a text selection that starts in the input and ends on the backdrop must not close it
     await key('Escape', 'Escape', 27); await sleep(100);
     await key('/', 'Slash', 191, '/'); await sleep(120);
