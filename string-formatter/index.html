@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-Cnj2Kx6iELLQF3vRWDV0dxe5hHG+jqdh7fBNzJSeKLY='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self';" />
   <title>C# String Formatter — Numeric Formats, Padding, Composite</title>
-  <meta name="description" content="Preview C#/.NET numeric format strings (N2, C, P, E2, X8, D8, custom #,##0.00), padding and alignment, composite formatting and common string methods. Runs in your browser." />
+  <meta name="description" content="Try C#/.NET numeric format strings (N2, C, P, X, E, 0.00), padding and composite formatting with live results that match .NET. Runs in your browser." />
   <meta name="keywords" content="c# string format, .net number format, tostring n2, composite formatting, string padding, format specifiers, c# string methods" />
   <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large" />
   <link rel="canonical" href="https://tool.mehmetoya.com/string-formatter" />
@@ -48,7 +48,10 @@
       "name": "DevTools",
       "url": "https://tool.mehmetoya.com/"
     },
-    "image": "https://tool.mehmetoya.com/assets/og/string-formatter.png"
+    "image": "https://tool.mehmetoya.com/assets/og/string-formatter.png",
+    "inLanguage": "en",
+    "browserRequirements": "Requires JavaScript",
+    "dateModified": "2026-11-21"
   }
   </script>
   <script type="application/ld+json">
@@ -65,6 +68,8 @@
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:image" content="https://tool.mehmetoya.com/assets/og/string-formatter.png" />
   <meta name="twitter:image:alt" content="String Formatter — Numeric formats, padding, composite formatting." />
+  <meta name="twitter:site" content="@mehmetoya" />
+  <meta name="twitter:creator" content="@mehmetoya" />
   <meta name="author" content="Mehmet Oya" />
   <meta name="theme-color" content="#0e1318" />
   <meta name="color-scheme" content="dark" />
@@ -97,8 +102,8 @@
 </head>
 <body>
 <div class="shell">
-  <header id="site-header"></header>
-  <aside id="sidebar"></aside>
+  <header id="site-header"><a class="logo" href="/">DevTools</a> <span class="header-tool">by <a href="https://mehmetoya.com" rel="author">Mehmet Oya</a></span></header>
+  <aside id="sidebar"><nav class="side-nav" aria-label="Tools"><a class="side-home" href="/">All tools</a><div class="side-group"><div class="side-group-title">Text Operations</div><a class="side-link" href="/case-converter">Case Converter</a><a class="side-link" href="/reverse">String Reverse</a><a class="side-link" href="/trim-pad">Trim / Pad</a><a class="side-link" href="/line-counter">Line Counter</a><a class="side-link" href="/line-operations">Line Operations</a><a class="side-link" href="/compare">String Compare</a></div><div class="side-group"><div class="side-group-title">Encode / Decode</div><a class="side-link" href="/base64">Base64</a><a class="side-link" href="/url-encode">URL Encode</a><a class="side-link" href="/hash-generator">Hash Generator</a><a class="side-link" href="/jwt-tool">JWT Tool</a></div><div class="side-group"><div class="side-group-title">JSON Tools</div><a class="side-link" href="/json-formatter">JSON Formatter</a><a class="side-link" href="/json-compare">JSON Compare</a><a class="side-link" href="/json-to-csharp">JSON to C#</a><a class="side-link" href="/json-to-java">JSON to Java</a><a class="side-link" href="/json-to-typescript">JSON to TypeScript</a></div><div class="side-group"><div class="side-group-title">Regex Tools</div><a class="side-link" href="/regex-search">Regex Search</a><a class="side-link" href="/regex-replace">Regex Replace</a><a class="side-link" href="/extract">String Extract</a></div><div class="side-group"><div class="side-group-title">Developer Tools</div><a class="side-link" href="/datetime-formatter">DateTime Formatter</a><a class="side-link" href="/string-formatter">String Formatter</a><a class="side-link" href="/guid-generator">GUID Generator</a><a class="side-link" href="/password-generator">Password Generator</a><a class="side-link" href="/number-converter">Number Converter</a><a class="side-link" href="/barcode-generator">Barcode Generator</a><a class="side-link" href="/http-client">HTTP Client</a></div><div class="side-group"><div class="side-group-title">Viewers</div><a class="side-link" href="/markdown-viewer">Markdown Viewer</a><a class="side-link" href="/html-viewer">HTML Viewer</a><a class="side-link" href="/diagram-viewer">Diagram Viewer</a></div></nav></aside>
   <div class="nav-backdrop"></div>
 
   <main class="page">
@@ -217,6 +222,33 @@
       <h2>Privacy</h2>
       <p>Everything is computed in your browser. Nothing is sent, stored or logged.</p>
     </section>
+    <!-- faq: generated from scripts/content/faq.json -->
+    <section class="about faq" aria-labelledby="faq-title">
+      <h2 id="faq-title">Questions</h2>
+      <h3>How do I format a number with thousands separators in C#?</h3>
+      <p>Use the <code>N</code> format with the number of decimals, for example <code>1234567.891.ToString(&quot;N2&quot;)</code>, which gives <code>1,234,567.89</code> in en-US and <code>1.234.567,89</code> in de-DE. A custom format such as <code>#,##0.00</code> gives the same result. Pick a culture in this tool to see how separators change.</p>
+      <h3>How does string.Format alignment work?</h3>
+      <p>In a format item <code>{index,alignment:format}</code>, a positive alignment right-aligns the value in a field of that width and a negative one left-aligns it. For example, <code>string.Format(&quot;{0,-6}|{1,5:F1}&quot;, &quot;ab&quot;, 3.14159)</code> gives <code>ab    |  3.1</code>. Write <code>{{</code> and <code>}}</code> to output literal braces.</p>
+      <h3>Why does 0.125.ToString(&quot;F2&quot;) return 0.12 in .NET?</h3>
+      <p>Since .NET Core 3.0, standard formats round the exact binary value of a double and send exact halves to the even digit, so <code>0.125</code> becomes <code>0.12</code>. Custom formats work differently: they first reduce a double to 15 significant digits and round halves away from zero, so <code>1.005.ToString(&quot;0.00&quot;)</code> gives <code>1.01</code>.</p>
+      <h3>Why do D and X throw a FormatException?</h3>
+      <p><code>D</code> (zero-padded decimal) and <code>X</code> (hexadecimal) only work with integer types, exactly as in .NET. <code>42.ToString(&quot;D5&quot;)</code> gives <code>00042</code> and <code>255.ToString(&quot;X4&quot;)</code> gives <code>00FF</code>, but a number with a decimal point is treated as a <code>double</code> and throws. Whole numbers are treated as <code>int</code>, or <code>long</code> when they do not fit.</p>
+    </section>
+    <!-- /faq -->
+    <!-- related: generated by scripts/gen-site.mjs -->
+    <nav class="related" aria-labelledby="related-title">
+      <h2 id="related-title">Related tools</h2>
+      <ul>
+        <li><a href="/datetime-formatter">DateTime Formatter</a> — .NET-style date/time format strings.</li>
+        <li><a href="/guid-generator">GUID Generator</a> — Generate and parse GUIDs / UUIDs.</li>
+        <li><a href="/password-generator">Password Generator</a> — Secure passwords with custom rules.</li>
+        <li><a href="/number-converter">Number Converter</a> — Binary, decimal, hexadecimal, octal.</li>
+        <li><a href="/barcode-generator">Barcode Generator</a> — QR codes, EAN-13 and EAN-8 barcodes.</li>
+        <li><a href="/">All 28 tools</a></li>
+      </ul>
+      <p class="related-by">Made by <a href="https://mehmetoya.com" rel="author">Mehmet Oya</a> · <a href="https://github.com/mehmetoya/devtools">source on GitHub</a></p>
+    </nav>
+    <!-- /related -->
   </main>
 </div>
 

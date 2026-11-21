@@ -4,13 +4,13 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-ujfZ7THkTLQUFjwVeKjfaIBPDP7A54CjAmgUDNx+emg='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self';" />
-  <title>Base64 Encode/Decode — Free, Private, Client-Side</title>
+  <title>Base64 Decode &amp; Encode Online — Free, Private (UTF-8)</title>
   <meta name="description" content="Encode text to Base64 or decode Base64 to text with UTF-8, ASCII, UTF-16 or UTF-32. Runs entirely in your browser — nothing is sent to a server." />
   <meta name="keywords" content="base64 encode, base64 decode, base64 converter, base64 online, utf-8 base64" />
   <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large" />
   <link rel="canonical" href="https://tool.mehmetoya.com/base64" />
   <meta property="og:type" content="website" />
-  <meta property="og:title" content="Base64 Encode/Decode — Free, Private, Client-Side" />
+  <meta property="og:title" content="Base64 Decode &amp; Encode Online — Free, Private (UTF-8)" />
   <meta property="og:description" content="Encode and decode Base64 in your browser. Nothing leaves your machine." />
   <meta property="og:url" content="https://tool.mehmetoya.com/base64" />
   <meta property="og:site_name" content="DevTools" />
@@ -46,7 +46,10 @@
       "name": "DevTools",
       "url": "https://tool.mehmetoya.com/"
     },
-    "image": "https://tool.mehmetoya.com/assets/og/base64.png"
+    "image": "https://tool.mehmetoya.com/assets/og/base64.png",
+    "inLanguage": "en",
+    "browserRequirements": "Requires JavaScript",
+    "dateModified": "2026-11-21"
   }
   </script>
   <script type="application/ld+json">
@@ -63,6 +66,8 @@
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:image" content="https://tool.mehmetoya.com/assets/og/base64.png" />
   <meta name="twitter:image:alt" content="Base64 — Encode and decode Base64 (UTF-8, ASCII, UTF-16, UTF-32)." />
+  <meta name="twitter:site" content="@mehmetoya" />
+  <meta name="twitter:creator" content="@mehmetoya" />
   <meta name="author" content="Mehmet Oya" />
   <meta name="theme-color" content="#0e1318" />
   <meta name="color-scheme" content="dark" />
@@ -76,8 +81,8 @@
 </head>
 <body>
 <div class="shell">
-  <header id="site-header"></header>
-  <aside id="sidebar"></aside>
+  <header id="site-header"><a class="logo" href="/">DevTools</a> <span class="header-tool">by <a href="https://mehmetoya.com" rel="author">Mehmet Oya</a></span></header>
+  <aside id="sidebar"><nav class="side-nav" aria-label="Tools"><a class="side-home" href="/">All tools</a><div class="side-group"><div class="side-group-title">Text Operations</div><a class="side-link" href="/case-converter">Case Converter</a><a class="side-link" href="/reverse">String Reverse</a><a class="side-link" href="/trim-pad">Trim / Pad</a><a class="side-link" href="/line-counter">Line Counter</a><a class="side-link" href="/line-operations">Line Operations</a><a class="side-link" href="/compare">String Compare</a></div><div class="side-group"><div class="side-group-title">Encode / Decode</div><a class="side-link" href="/base64">Base64</a><a class="side-link" href="/url-encode">URL Encode</a><a class="side-link" href="/hash-generator">Hash Generator</a><a class="side-link" href="/jwt-tool">JWT Tool</a></div><div class="side-group"><div class="side-group-title">JSON Tools</div><a class="side-link" href="/json-formatter">JSON Formatter</a><a class="side-link" href="/json-compare">JSON Compare</a><a class="side-link" href="/json-to-csharp">JSON to C#</a><a class="side-link" href="/json-to-java">JSON to Java</a><a class="side-link" href="/json-to-typescript">JSON to TypeScript</a></div><div class="side-group"><div class="side-group-title">Regex Tools</div><a class="side-link" href="/regex-search">Regex Search</a><a class="side-link" href="/regex-replace">Regex Replace</a><a class="side-link" href="/extract">String Extract</a></div><div class="side-group"><div class="side-group-title">Developer Tools</div><a class="side-link" href="/datetime-formatter">DateTime Formatter</a><a class="side-link" href="/string-formatter">String Formatter</a><a class="side-link" href="/guid-generator">GUID Generator</a><a class="side-link" href="/password-generator">Password Generator</a><a class="side-link" href="/number-converter">Number Converter</a><a class="side-link" href="/barcode-generator">Barcode Generator</a><a class="side-link" href="/http-client">HTTP Client</a></div><div class="side-group"><div class="side-group-title">Viewers</div><a class="side-link" href="/markdown-viewer">Markdown Viewer</a><a class="side-link" href="/html-viewer">HTML Viewer</a><a class="side-link" href="/diagram-viewer">Diagram Viewer</a></div></nav></aside>
   <div class="nav-backdrop"></div>
 
   <main class="page">
@@ -138,6 +143,31 @@
       <h2>Privacy</h2>
       <p>All processing happens in your browser. Nothing you type is sent, stored or logged.</p>
     </section>
+    <!-- faq: generated from scripts/content/faq.json -->
+    <section class="about faq" aria-labelledby="faq-title">
+      <h2 id="faq-title">Questions</h2>
+      <h3>How do I decode Base64 online?</h3>
+      <p>Set Operation to Decode, paste the Base64 string and choose the encoding the original text used, usually UTF-8. For example, <code>aGVsbG8=</code> decodes to <code>hello</code>. Whitespace is ignored and missing <code>=</code> padding is added automatically.</p>
+      <h3>Why does decoded Base64 look like garbled text or fail?</h3>
+      <p>The bytes were probably written in a different text encoding, or they are binary data such as an image. With UTF-8 selected, the tool reports bytes that are not valid UTF-8 instead of showing junk. Try UTF-16 LE or UTF-32 LE if the data came from a Windows or .NET source.</p>
+      <h3>Is Base64 encryption?</h3>
+      <p>No. Base64 is an encoding that represents bytes with 64 printable ASCII characters, and anyone can decode it without a key. Use it to carry binary data through text-only channels, not to protect secrets.</p>
+      <h3>What is URL-safe Base64?</h3>
+      <p>URL-safe Base64 (Base64URL) replaces <code>+</code> with <code>-</code> and <code>/</code> with <code>_</code> and drops the <code>=</code> padding, so the result can sit in URLs and filenames. Turn on URL-safe when encoding: <code>hi?&gt;</code> becomes <code>aGk_Pg</code> instead of <code>aGk/Pg==</code>. Decoding accepts both forms.</p>
+    </section>
+    <!-- /faq -->
+    <!-- related: generated by scripts/gen-site.mjs -->
+    <nav class="related" aria-labelledby="related-title">
+      <h2 id="related-title">Related tools</h2>
+      <ul>
+        <li><a href="/url-encode">URL Encode</a> — Percent-encode or decode URL strings.</li>
+        <li><a href="/hash-generator">Hash Generator</a> — MD5, SHA-1, SHA-256, SHA-384, SHA-512 + verify.</li>
+        <li><a href="/jwt-tool">JWT Tool</a> — Generate, decode and validate JSON Web Tokens.</li>
+        <li><a href="/">All 28 tools</a></li>
+      </ul>
+      <p class="related-by">Made by <a href="https://mehmetoya.com" rel="author">Mehmet Oya</a> · <a href="https://github.com/mehmetoya/devtools">source on GitHub</a></p>
+    </nav>
+    <!-- /related -->
   </main>
 </div>
 

@@ -56,4 +56,5 @@
 ## Optional
 
 - [Privacy and security model](https://github.com/mehmetoya/devtools#privacy--security-model): how the site guarantees input stays local
+- [Full text of every tool page](https://tool.mehmetoya.com/llms-full.txt): descriptions and common questions in Markdown
 - [About the author](https://mehmetoya.com/about/)

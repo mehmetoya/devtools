@@ -80,6 +80,21 @@ for (const f of ['index.html', '404.html', ...routes.map(r => `${r}/index.html`)
 
 // ── SEO, social cards, icons, AI discovery ──
 {
+  const decode = (s) => s.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'");
+  for (const f of ['index.html', ...routes.map(r => `${r}/index.html`)]) {
+    const h = read(f);
+    const title = decode(((h.match(/<title>([\s\S]*?)<\/title>/) || [])[1] || '').trim());
+    const desc = decode((h.match(/<meta name="description" content="([^"]*)"/) || [])[1] || '');
+    if (title.length > 60) fail(f, `title is ${title.length} characters (max 60)`);
+    if (desc.length < 70 || desc.length > 160) fail(f, `meta description is ${desc.length} characters (70–160)`);
+    const body = h.slice(h.indexOf('<body'));
+    if (!/<aside id="sidebar"><nav[^>]*>[\s\S]*<a class="side-link" href="\//.test(body)) fail(f, 'static sidebar links missing (crawlers without JS)');
+    if (f !== 'index.html' && !body.includes('<!-- related: generated')) fail(f, 'Related tools block missing');
+    if (f !== 'index.html' && (body.match(/<section class="about faq"[\s\S]*?<\/section>/) || [''])[0].split('<h3>').length - 1 < 3) fail(f, 'needs at least 3 FAQ entries (scripts/content/faq.json)');
+    if (!body.includes(`href="https://mehmetoya.com" rel="author"`)) fail(f, 'static author link missing');
+  }
+}
+{
   const pngSize = (rel) => {
     const p = path.join(ROOT, rel);
     if (!fs.existsSync(p)) return null;
@@ -131,7 +146,7 @@ try {
   execFileSync(process.execPath, [path.join(tmp, 'scripts/json-codegen/build-gen-pages.js')], { stdio: 'ignore' });
   execFileSync(process.execPath, [path.join(tmp, 'scripts/gen-site.mjs'), tmp], { stdio: 'ignore' });
   const generated = ['index.html', '404.html', '_headers', 'netlify.toml', 'robots.txt', 'sitemap.xml',
-    'manifest.webmanifest', 'llms.txt', '.well-known/security.txt',
+    'manifest.webmanifest', 'llms.txt', 'llms-full.txt', '.well-known/security.txt',
     ...routes.map(r => `${r}/index.html`)];
   for (const f of generated) {
     const a = read(f), b = fs.readFileSync(path.join(tmp, f), 'utf8');

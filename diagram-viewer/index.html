@@ -4,13 +4,13 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-Yis5xw95hw2g3787koimrxXCQ+wvyrlEwbEfmwMsAHs='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self';" />
-  <title>Diagram Viewer — Mermaid Editor with SVG &amp; PNG Export</title>
-  <meta name="description" content="Write Mermaid diagram code and see flowcharts, sequence, class, state, ER, Gantt, pie, git and mind-map diagrams render live. Export SVG or PNG. Runs entirely in your browser." />
+  <title>Mermaid Live Editor — Diagram Viewer with SVG &amp; PNG Export</title>
+  <meta name="description" content="Edit Mermaid diagrams (flowcharts, sequence, class, ER, Gantt) with a live preview and export them as SVG or PNG. Rendered locally in your browser." />
   <meta name="keywords" content="mermaid editor, mermaid live, diagram viewer, flowchart online, sequence diagram, mermaid to png, mermaid to svg" />
   <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large" />
   <link rel="canonical" href="https://tool.mehmetoya.com/diagram-viewer" />
   <meta property="og:type" content="website" />
-  <meta property="og:title" content="Diagram Viewer — Mermaid Editor with SVG &amp; PNG Export" />
+  <meta property="og:title" content="Mermaid Live Editor — Diagram Viewer with SVG &amp; PNG Export" />
   <meta property="og:description" content="Live Mermaid diagram editor with themes, templates and SVG/PNG export." />
   <meta property="og:url" content="https://tool.mehmetoya.com/diagram-viewer" />
   <meta property="og:site_name" content="DevTools" />
@@ -47,7 +47,10 @@
       "name": "DevTools",
       "url": "https://tool.mehmetoya.com/"
     },
-    "image": "https://tool.mehmetoya.com/assets/og/diagram-viewer.png"
+    "image": "https://tool.mehmetoya.com/assets/og/diagram-viewer.png",
+    "inLanguage": "en",
+    "browserRequirements": "Requires JavaScript",
+    "dateModified": "2026-11-21"
   }
   </script>
   <script type="application/ld+json">
@@ -64,6 +67,8 @@
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:image" content="https://tool.mehmetoya.com/assets/og/diagram-viewer.png" />
   <meta name="twitter:image:alt" content="Diagram Viewer — Mermaid diagrams to SVG / PNG." />
+  <meta name="twitter:site" content="@mehmetoya" />
+  <meta name="twitter:creator" content="@mehmetoya" />
   <meta name="author" content="Mehmet Oya" />
   <meta name="theme-color" content="#0e1318" />
   <meta name="color-scheme" content="dark" />
@@ -98,13 +103,13 @@
 </head>
 <body>
 <div class="shell">
-  <header id="site-header"></header>
-  <aside id="sidebar"></aside>
+  <header id="site-header"><a class="logo" href="/">DevTools</a> <span class="header-tool">by <a href="https://mehmetoya.com" rel="author">Mehmet Oya</a></span></header>
+  <aside id="sidebar"><nav class="side-nav" aria-label="Tools"><a class="side-home" href="/">All tools</a><div class="side-group"><div class="side-group-title">Text Operations</div><a class="side-link" href="/case-converter">Case Converter</a><a class="side-link" href="/reverse">String Reverse</a><a class="side-link" href="/trim-pad">Trim / Pad</a><a class="side-link" href="/line-counter">Line Counter</a><a class="side-link" href="/line-operations">Line Operations</a><a class="side-link" href="/compare">String Compare</a></div><div class="side-group"><div class="side-group-title">Encode / Decode</div><a class="side-link" href="/base64">Base64</a><a class="side-link" href="/url-encode">URL Encode</a><a class="side-link" href="/hash-generator">Hash Generator</a><a class="side-link" href="/jwt-tool">JWT Tool</a></div><div class="side-group"><div class="side-group-title">JSON Tools</div><a class="side-link" href="/json-formatter">JSON Formatter</a><a class="side-link" href="/json-compare">JSON Compare</a><a class="side-link" href="/json-to-csharp">JSON to C#</a><a class="side-link" href="/json-to-java">JSON to Java</a><a class="side-link" href="/json-to-typescript">JSON to TypeScript</a></div><div class="side-group"><div class="side-group-title">Regex Tools</div><a class="side-link" href="/regex-search">Regex Search</a><a class="side-link" href="/regex-replace">Regex Replace</a><a class="side-link" href="/extract">String Extract</a></div><div class="side-group"><div class="side-group-title">Developer Tools</div><a class="side-link" href="/datetime-formatter">DateTime Formatter</a><a class="side-link" href="/string-formatter">String Formatter</a><a class="side-link" href="/guid-generator">GUID Generator</a><a class="side-link" href="/password-generator">Password Generator</a><a class="side-link" href="/number-converter">Number Converter</a><a class="side-link" href="/barcode-generator">Barcode Generator</a><a class="side-link" href="/http-client">HTTP Client</a></div><div class="side-group"><div class="side-group-title">Viewers</div><a class="side-link" href="/markdown-viewer">Markdown Viewer</a><a class="side-link" href="/html-viewer">HTML Viewer</a><a class="side-link" href="/diagram-viewer">Diagram Viewer</a></div></nav></aside>
   <div class="nav-backdrop"></div>
 
   <main class="page">
     <section class="tool-head">
-      <h1>Diagram Viewer</h1>
+      <h1>Mermaid Diagram Viewer</h1>
       <p>Describe a diagram in Mermaid syntax and get a live, exportable drawing.</p>
     </section>
 
@@ -184,6 +189,30 @@
       <h2>Privacy</h2>
       <p>The diagram engine runs locally in your browser. Your code is never uploaded; a draft is kept in this browser between visits.</p>
     </section>
+    <!-- faq: generated from scripts/content/faq.json -->
+    <section class="about faq" aria-labelledby="faq-title">
+      <h2 id="faq-title">Questions</h2>
+      <h3>How do I render a Mermaid diagram online?</h3>
+      <p>Write Mermaid code in the editor and the diagram renders live beside it. Start with the diagram type, then add nodes and connections, for example <code>flowchart LR</code> followed by <code>A --&gt; B</code>. The diagram engine runs locally in your browser, and your code is not uploaded.</p>
+      <h3>Which Mermaid diagram types are supported?</h3>
+      <p>Templates cover flowcharts, sequence diagrams, class diagrams, state diagrams (<code>stateDiagram-v2</code>), entity relationship diagrams, Gantt charts, pie charts, Git graphs and mind maps. Pick a template to load a working example of each type, and choose the default, dark, forest or neutral theme.</p>
+      <h3>How do I export a Mermaid diagram as PNG or SVG?</h3>
+      <p>Use Download SVG for a fully scalable, editable vector file, or Download PNG for an image drawn at twice the diagram's size for sharp results. Copy SVG puts the markup on the clipboard, and you can download the source as an <code>.mmd</code> file.</p>
+      <h3>Why does my Mermaid diagram show an error?</h3>
+      <p>The code has a syntax error, and the message shows the parser's details. The last valid diagram stays visible, dimmed, until you fix the code. Diagrams render in strict security mode, so HTML in labels is escaped and click handlers are disabled; those features will not work here.</p>
+    </section>
+    <!-- /faq -->
+    <!-- related: generated by scripts/gen-site.mjs -->
+    <nav class="related" aria-labelledby="related-title">
+      <h2 id="related-title">Related tools</h2>
+      <ul>
+        <li><a href="/markdown-viewer">Markdown Viewer</a> — Live Markdown preview and export.</li>
+        <li><a href="/html-viewer">HTML Viewer</a> — Sandboxed live HTML preview.</li>
+        <li><a href="/">All 28 tools</a></li>
+      </ul>
+      <p class="related-by">Made by <a href="https://mehmetoya.com" rel="author">Mehmet Oya</a> · <a href="https://github.com/mehmetoya/devtools">source on GitHub</a></p>
+    </nav>
+    <!-- /related -->
   </main>
 </div>
 

@@ -4,13 +4,13 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-MpOkJcbC8DSshRT0F46dshxTCDkS1Vmiiy1otjYLIpY='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self';" />
-  <title>URL Encode/Decode — Percent-Encoding Online, Client-Side</title>
-  <meta name="description" content="Percent-encode or decode URLs and query values with encodeURIComponent or encodeURI rules, optional + for spaces, and a URL parser with a query-parameter table." />
+  <title>URL Encode &amp; Decode Online — Percent-Encoding</title>
+  <meta name="description" content="Percent-encode or decode URLs and query strings in your browser, with component and full-URL modes and a query-string parser. Nothing is uploaded." />
   <meta name="keywords" content="url encode, url decode, percent encoding, encodeURIComponent, urlencode online, query string parser" />
   <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large" />
   <link rel="canonical" href="https://tool.mehmetoya.com/url-encode" />
   <meta property="og:type" content="website" />
-  <meta property="og:title" content="URL Encode/Decode — Percent-Encoding Online, Client-Side" />
+  <meta property="og:title" content="URL Encode &amp; Decode Online — Percent-Encoding" />
   <meta property="og:description" content="Encode and decode URL strings and inspect query parameters in your browser. Nothing leaves your machine." />
   <meta property="og:url" content="https://tool.mehmetoya.com/url-encode" />
   <meta property="og:site_name" content="DevTools" />
@@ -49,7 +49,10 @@
       "name": "DevTools",
       "url": "https://tool.mehmetoya.com/"
     },
-    "image": "https://tool.mehmetoya.com/assets/og/url-encode.png"
+    "image": "https://tool.mehmetoya.com/assets/og/url-encode.png",
+    "inLanguage": "en",
+    "browserRequirements": "Requires JavaScript",
+    "dateModified": "2026-11-21"
   }
   </script>
   <script type="application/ld+json">
@@ -66,6 +69,8 @@
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:image" content="https://tool.mehmetoya.com/assets/og/url-encode.png" />
   <meta name="twitter:image:alt" content="URL Encode — Percent-encode or decode URL strings." />
+  <meta name="twitter:site" content="@mehmetoya" />
+  <meta name="twitter:creator" content="@mehmetoya" />
   <meta name="author" content="Mehmet Oya" />
   <meta name="theme-color" content="#0e1318" />
   <meta name="color-scheme" content="dark" />
@@ -85,8 +90,8 @@
 </head>
 <body>
 <div class="shell">
-  <header id="site-header"></header>
-  <aside id="sidebar"></aside>
+  <header id="site-header"><a class="logo" href="/">DevTools</a> <span class="header-tool">by <a href="https://mehmetoya.com" rel="author">Mehmet Oya</a></span></header>
+  <aside id="sidebar"><nav class="side-nav" aria-label="Tools"><a class="side-home" href="/">All tools</a><div class="side-group"><div class="side-group-title">Text Operations</div><a class="side-link" href="/case-converter">Case Converter</a><a class="side-link" href="/reverse">String Reverse</a><a class="side-link" href="/trim-pad">Trim / Pad</a><a class="side-link" href="/line-counter">Line Counter</a><a class="side-link" href="/line-operations">Line Operations</a><a class="side-link" href="/compare">String Compare</a></div><div class="side-group"><div class="side-group-title">Encode / Decode</div><a class="side-link" href="/base64">Base64</a><a class="side-link" href="/url-encode">URL Encode</a><a class="side-link" href="/hash-generator">Hash Generator</a><a class="side-link" href="/jwt-tool">JWT Tool</a></div><div class="side-group"><div class="side-group-title">JSON Tools</div><a class="side-link" href="/json-formatter">JSON Formatter</a><a class="side-link" href="/json-compare">JSON Compare</a><a class="side-link" href="/json-to-csharp">JSON to C#</a><a class="side-link" href="/json-to-java">JSON to Java</a><a class="side-link" href="/json-to-typescript">JSON to TypeScript</a></div><div class="side-group"><div class="side-group-title">Regex Tools</div><a class="side-link" href="/regex-search">Regex Search</a><a class="side-link" href="/regex-replace">Regex Replace</a><a class="side-link" href="/extract">String Extract</a></div><div class="side-group"><div class="side-group-title">Developer Tools</div><a class="side-link" href="/datetime-formatter">DateTime Formatter</a><a class="side-link" href="/string-formatter">String Formatter</a><a class="side-link" href="/guid-generator">GUID Generator</a><a class="side-link" href="/password-generator">Password Generator</a><a class="side-link" href="/number-converter">Number Converter</a><a class="side-link" href="/barcode-generator">Barcode Generator</a><a class="side-link" href="/http-client">HTTP Client</a></div><div class="side-group"><div class="side-group-title">Viewers</div><a class="side-link" href="/markdown-viewer">Markdown Viewer</a><a class="side-link" href="/html-viewer">HTML Viewer</a><a class="side-link" href="/diagram-viewer">Diagram Viewer</a></div></nav></aside>
   <div class="nav-backdrop"></div>
 
   <main class="page">
@@ -159,6 +164,31 @@
       <h2>Privacy</h2>
       <p>All processing happens in your browser. Nothing you type is sent, stored or logged — the URL is only parsed, never requested.</p>
     </section>
+    <!-- faq: generated from scripts/content/faq.json -->
+    <section class="about faq" aria-labelledby="faq-title">
+      <h2 id="faq-title">Questions</h2>
+      <h3>How do I URL-encode a query parameter value?</h3>
+      <p>Choose Encode and the Component mode, which escapes every reserved character like encodeURIComponent. For example, <code>a b&amp;c=1</code> becomes <code>a%20b%26c%3D1</code>, so it can be placed safely after <code>?q=</code>. Non-ASCII text is converted to UTF-8 bytes first: <code>café</code> becomes <code>caf%C3%A9</code>.</p>
+      <h3>What is the difference between Component and Full URL encoding?</h3>
+      <p>Component encodes everything reserved, including <code>/ ? # &amp; =</code>, and suits a single value or path segment. Full URL keeps the characters that give a URL its structure and encodes only the rest, like encodeURI. When decoding in Full URL mode, escapes such as <code>%2F</code> are left in place.</p>
+      <h3>Should spaces be encoded as %20 or +?</h3>
+      <p>Use <code>%20</code> in paths and general URLs. <code>+</code> for spaces is only correct in HTML form encoding (application/x-www-form-urlencoded); turn on + for spaces for that. A literal plus sign is always written as <code>%2B</code> so it is not read as a space.</p>
+      <h3>How do I see the query parameters of a long URL?</h3>
+      <p>Paste the URL and check the URL breakdown panel. It parses the first line as an absolute URL and lists its components and decoded query parameters. The URL is only parsed locally, never requested.</p>
+    </section>
+    <!-- /faq -->
+    <!-- related: generated by scripts/gen-site.mjs -->
+    <nav class="related" aria-labelledby="related-title">
+      <h2 id="related-title">Related tools</h2>
+      <ul>
+        <li><a href="/base64">Base64</a> — Encode and decode Base64 (UTF-8, ASCII, UTF-16, UTF-32).</li>
+        <li><a href="/hash-generator">Hash Generator</a> — MD5, SHA-1, SHA-256, SHA-384, SHA-512 + verify.</li>
+        <li><a href="/jwt-tool">JWT Tool</a> — Generate, decode and validate JSON Web Tokens.</li>
+        <li><a href="/">All 28 tools</a></li>
+      </ul>
+      <p class="related-by">Made by <a href="https://mehmetoya.com" rel="author">Mehmet Oya</a> · <a href="https://github.com/mehmetoya/devtools">source on GitHub</a></p>
+    </nav>
+    <!-- /related -->
   </main>
 </div>
 

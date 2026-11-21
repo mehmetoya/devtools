@@ -1,0 +1,903 @@
+# DevTools (DT-28) by Mehmet Oya — full text
+
+> 28 free developer tools at https://tool.mehmetoya.com/ that run entirely in the browser (no backend, no tracking). This file holds each tool's description and common questions in plain Markdown.
+
+## Text Operations
+
+### Case Converter
+
+URL: https://tool.mehmetoya.com/case-converter
+camelCase, snake_case, PascalCase, kebab-case and more.
+
+#### About this tool
+
+The converter first breaks your text into words. Spaces, hyphens, underscores, dots and other punctuation count as separators, and so do lower-to-upper transitions inside identifiers. Runs of capitals are treated as acronyms, so `parseHTTPResponse` becomes the words parse, HTTP and Response.
+
+- UPPER / lower / tOGGLE change letters in place and keep everything else untouched.
+- Title capitalises the first letter of every word; Sentence capitalises only the start of each sentence.
+- camelCase, PascalCase, snake_case, kebab-case, CONSTANT_CASE rebuild the text from its words, dropping punctuation.
+
+With Convert each line separately turned on, every line is converted on its own — handy for a list of field names.
+Letter rules picks the language used for upper/lower case. Choose Turkish or Azerbaijani for dotted and dotless i: `ÇAĞRI ÖZTÜRK` becomes `çağrıÖztürk` in camelCase, not `çağriÖztürk`. The default follows your browser's language. Open All conversions to see every style at once.
+
+#### Privacy
+
+All processing happens in your browser. Nothing you type is sent, stored or logged.
+
+**How do I convert text to camelCase or snake_case?**
+Paste the text, then pick a style under Convert to, such as camelCase, snake_case or kebab-case. The tool splits the input into words and rebuilds it in that style, so `user id` becomes `userId`, `user_id` or `user-id`. Open All conversions to see every style at once.
+
+**What is the difference between camelCase and PascalCase?**
+Both join words without separators and capitalise each word, but camelCase keeps the first letter lowercase while PascalCase capitalises it too. For example, `order total` becomes `orderTotal` in camelCase and `OrderTotal` in PascalCase. PascalCase is common for class names; camelCase for variables and fields.
+
+**How do I convert a list of field names in one go?**
+Paste one name per line and turn on Convert each line separately. Each line is then converted on its own instead of being merged into one identifier, so a column list like `first name` and `last name` becomes `first_name` and `last_name` in snake_case.
+
+**Why does uppercase or lowercase handle the letter i wrongly?**
+Case rules for i depend on language. In Turkish and Azerbaijani, I lowercases to ı and i uppercases to İ, unlike in English. Set Letter rules to the right language; the default follows your browser's language, which may not match the text.
+
+### String Reverse
+
+URL: https://tool.mehmetoya.com/reverse
+Reverse strings, lines, words or each word.
+
+#### About this tool
+
+- Whole text — mirrors the entire input, so the last character comes first.
+- Line order — keeps every line as-is but lists them bottom to top.
+- Word order — reverses the sequence of words on each line while leaving the spacing in place.
+- Each line — mirrors the characters of every line but keeps the lines in their original order.
+- Each word — mirrors the letters inside every word without moving the words.
+
+Reversal works on user-perceived characters (grapheme clusters), so flags, skin-tone emoji and letters with combining accents are not torn apart. Windows line endings are normalised to `\n`.
+
+#### Privacy
+
+All processing happens in your browser. Nothing you type is sent, stored or logged.
+
+**How do I reverse a string online?**
+Paste the text and keep Reverse set to Whole text, which mirrors the input so the last character comes first: `hello` becomes `olleh`. The result appears as you type and can be copied, downloaded or reused as input.
+
+**How do I reverse the order of lines without flipping the text?**
+Choose Line order. Every line stays exactly as written, but the lines are listed bottom to top. To mirror the characters inside each line while keeping the lines in place, choose Each line instead.
+
+**Will reversing text break emoji or accented letters?**
+No. Reversal works on user-perceived characters (grapheme clusters), so flags, skin-tone emoji and letters built from combining accents stay intact rather than being split into broken pieces.
+
+**How do I reverse the word order in a sentence?**
+Choose Word order. It reverses the sequence of words on each line and keeps the original spacing, so `one two three` becomes `three two one`. Each word instead mirrors the letters inside every word without moving the words.
+
+### Trim / Pad
+
+URL: https://tool.mehmetoya.com/trim-pad
+Trim whitespace or pad text to a width.
+
+#### About this tool
+
+Trim removes characters from the beginning and/or end of the text. Leave Characters empty to strip any whitespace (spaces, tabs, line breaks, non-breaking spaces), or list the exact characters to strip — for example `*-#` removes any mix of asterisks, dashes and hashes from the edges.
+Pad extends text to the chosen width. Pad left right-aligns it, Pad right left-aligns it and Center splits the padding (any odd character goes on the right). A multi-character fill such as `.-` is repeated as needed. Text that is already as wide as the target is left alone. Widths are counted in Unicode code points.
+
+#### Privacy
+
+All processing happens in your browser. Nothing you type is sent, stored or logged.
+
+**How do I remove leading and trailing whitespace from text?**
+Choose Trim and leave Characters empty. Spaces, tabs, line breaks and non-breaking spaces are stripped from both ends. Use Trim start or Trim end to clean only one side, and turn on Apply to each line to trim every line of a list.
+
+**How do I pad a number with leading zeros?**
+Choose Pad left, set Width to the target length and Pad with to `0`. For example, `42` with width 5 becomes `00042`. Text that is already at least as wide as the target is left unchanged.
+
+**Can I strip specific characters instead of whitespace?**
+Yes. Type the characters to remove in Characters, and any mix of them is stripped from the edges only. For example, `*-#` turns `**-Title-#` into `Title`. Characters in the middle of the text are kept.
+
+**How does centering text work when the padding is uneven?**
+Center splits the padding between both sides, and any odd extra character goes on the right. Padding `ab` to width 5 with `*` gives `*ab**`. Multi-character fills are repeated as needed, and widths count Unicode code points.
+
+### Line Counter
+
+URL: https://tool.mehmetoya.com/line-counter
+Lines, words, characters, bytes and more.
+
+#### How things are counted
+
+- Lines — every line break (`\n`, `\r\n` or `\r`) starts a new line. A trailing line break therefore adds an empty last line, just as most editors show it.
+- Non-empty lines — lines that contain at least one non-whitespace character.
+- Words — runs of characters separated by whitespace.
+- Characters — Unicode code points, so an emoji such as 😀 counts once. No spaces leaves out all whitespace including line breaks.
+- Bytes — the size of the text when saved as UTF-8.
+- Paragraphs — blocks of text separated by one or more blank lines.
+- Sentences — detected with the browser's built-in sentence segmentation.
+- Avg word length — letters and digits per word, ignoring punctuation.
+
+#### Privacy
+
+All processing happens in your browser. Nothing you type is sent, stored or logged.
+
+**How do I count lines, words and characters in a text?**
+Paste or type the text and the statistics update live: lines, non-empty lines, words, characters, bytes, paragraphs, sentences and average word length. Use Copy stats or Download stats to export them. The text is counted in your browser and never sent anywhere.
+
+**Why is the line count one higher than I expected?**
+A trailing line break starts a new, empty last line, the same way most editors display it. So `a`, line break, `b`, line break counts as 3 lines. Check Non-empty lines if you only want lines that contain visible text.
+
+**What is the difference between characters and bytes?**
+Characters are Unicode code points, so an emoji counts as one. Bytes are the size of the text saved as UTF-8, where non-ASCII characters take more space: `é` is 2 bytes and `😀` is 4. Byte counts matter for size limits in databases and APIs.
+
+**How are words and paragraphs counted?**
+Words are runs of characters separated by whitespace. Paragraphs are blocks of text separated by one or more blank lines. Sentences are detected with the browser's built-in sentence segmentation, so results can differ slightly between languages.
+
+### Line Operations
+
+URL: https://tool.mehmetoya.com/line-operations
+Sort, dedupe, filter, number, join lines.
+
+#### About this tool
+
+Pick an operation and the output updates as you type. Use Use as input to chain several steps — for example trim, remove blank lines, sort and then remove duplicates.
+
+#### Privacy
+
+All processing happens in your browser. Nothing you type is sent, stored or logged.
+
+**How do I remove duplicate lines from a list?**
+Choose Remove duplicate lines. The first occurrence of each line is kept and later repeats are dropped. Turn off Case sensitive to treat `Apple` and `apple` as the same line.
+
+**How do I sort lines so file2 comes before file10?**
+Choose Sort A → Z and turn on Natural sort. Digit runs are then compared as numbers, so `file2` sorts before `file10` instead of after it. Sort by length orders lines from shortest to longest.
+
+**How do I turn a list of lines into a comma-separated string?**
+Choose Join lines and pick a delimiter such as Comma or Comma + space, or enter a Custom one. Split into lines does the reverse. Custom delimiters accept the escapes `\n`, `\t`, `\r` and `\\`.
+
+**Can I filter lines with a regular expression?**
+Yes. Keep lines matching regex uses JavaScript regex syntax with the Unicode flag; turning off Case sensitive adds the `i` flag. The filter runs in a background worker and stops any pattern that takes longer than 1.5 seconds. Keep or Remove lines containing filter by plain text.
+
+### String Compare
+
+URL: https://tool.mehmetoya.com/compare
+Compare two strings line by line.
+
+#### About this tool
+
+The comparison anchors on lines that occur exactly once in both texts, then aligns the stretches between them with the Myers algorithm — so it finds the lines the two texts share and reports everything else as removed (−, only in A) or added (+, only in B). Because it aligns on common lines, inserting one line near the top does not flag the rest of the document. When a removed line is directly replaced by an added one, the exact characters that differ are highlighted.
+
+- Ignore case treats upper- and lower-case letters as equal.
+- Ignore whitespace disregards all spaces and tabs inside lines.
+- Trim lines only ignores whitespace at the start and end of each line.
+
+Copy and Download export the result as plain text with `-` / `+` markers. Windows and Unix line endings compare as equal.
+
+#### Privacy
+
+All processing happens in your browser. Nothing you type is sent, stored or logged.
+
+**How do I compare two texts and see the differences?**
+Paste the original into Text A and the changed version into Text B. Lines only in A are marked with − (removed), lines only in B with + (added), and where one line directly replaces another, the exact differing characters are highlighted. Both texts stay in your browser.
+
+**How do I ignore whitespace or case differences?**
+Turn on Ignore case to treat upper- and lower-case letters as equal, or Ignore whitespace to disregard all spaces and tabs inside lines. Trim lines is narrower and ignores only whitespace at the start and end of each line.
+
+**Why doesn't one inserted line mark the rest of the text as changed?**
+The comparison anchors on lines that occur exactly once in both texts and aligns the sections between them with the Myers diff algorithm. Because it matches shared lines, an insertion near the top only shows up as one added line.
+
+**Can I export the diff result?**
+Yes. Copy and Download export the differences as plain text with `-` and `+` markers, similar to a unified diff. Turn on Show only differences to hide unchanged lines first.
+
+## Encode / Decode
+
+### Base64
+
+URL: https://tool.mehmetoya.com/base64
+Encode and decode Base64 (UTF-8, ASCII, UTF-16, UTF-32).
+
+#### About this tool
+
+Base64 represents binary data with 64 printable ASCII characters. The text is first converted to bytes with the selected encoding, then those bytes are Base64-encoded. Decoding reverses the process.
+
+#### Privacy
+
+All processing happens in your browser. Nothing you type is sent, stored or logged.
+
+**How do I decode Base64 online?**
+Set Operation to Decode, paste the Base64 string and choose the encoding the original text used, usually UTF-8. For example, `aGVsbG8=` decodes to `hello`. Whitespace is ignored and missing `=` padding is added automatically.
+
+**Why does decoded Base64 look like garbled text or fail?**
+The bytes were probably written in a different text encoding, or they are binary data such as an image. With UTF-8 selected, the tool reports bytes that are not valid UTF-8 instead of showing junk. Try UTF-16 LE or UTF-32 LE if the data came from a Windows or .NET source.
+
+**Is Base64 encryption?**
+No. Base64 is an encoding that represents bytes with 64 printable ASCII characters, and anyone can decode it without a key. Use it to carry binary data through text-only channels, not to protect secrets.
+
+**What is URL-safe Base64?**
+URL-safe Base64 (Base64URL) replaces `+` with `-` and `/` with `_` and drops the `=` padding, so the result can sit in URLs and filenames. Turn on URL-safe when encoding: `hi?>` becomes `aGk_Pg` instead of `aGk/Pg==`. Decoding accepts both forms.
+
+### URL Encode
+
+URL: https://tool.mehmetoya.com/url-encode
+Percent-encode or decode URL strings.
+
+#### About this tool
+
+URLs may only contain a limited set of ASCII characters. Everything else is converted to UTF-8 bytes and written as `%XX` hex pairs.
+
+- Component encodes every reserved character, including `/ ? # & =`. Use it for a single query value or path segment (like `encodeURIComponent`).
+- Full URL keeps the characters that give a URL its structure and only encodes the rest (like `encodeURI`). When decoding, escapes of reserved characters such as `%2F` are left in place.
+- + for spaces follows HTML form encoding (`application/x-www-form-urlencoded`): spaces become `+` and `! ' ( ) ~` are escaped too. A literal `+` is written as `%2B` in both modes, so it is not mistaken for a space. When decoding, `+` is read as a space and `%2B` as a plus sign.
+
+The breakdown panel parses the first line of the input (or the decoded output) as an absolute URL and lists its components and decoded query parameters.
+
+#### Privacy
+
+All processing happens in your browser. Nothing you type is sent, stored or logged — the URL is only parsed, never requested.
+
+**How do I URL-encode a query parameter value?**
+Choose Encode and the Component mode, which escapes every reserved character like encodeURIComponent. For example, `a b&c=1` becomes `a%20b%26c%3D1`, so it can be placed safely after `?q=`. Non-ASCII text is converted to UTF-8 bytes first: `café` becomes `caf%C3%A9`.
+
+**What is the difference between Component and Full URL encoding?**
+Component encodes everything reserved, including `/ ? # & =`, and suits a single value or path segment. Full URL keeps the characters that give a URL its structure and encodes only the rest, like encodeURI. When decoding in Full URL mode, escapes such as `%2F` are left in place.
+
+**Should spaces be encoded as %20 or +?**
+Use `%20` in paths and general URLs. `+` for spaces is only correct in HTML form encoding (application/x-www-form-urlencoded); turn on + for spaces for that. A literal plus sign is always written as `%2B` so it is not read as a space.
+
+**How do I see the query parameters of a long URL?**
+Paste the URL and check the URL breakdown panel. It parses the first line as an absolute URL and lists its components and decoded query parameters. The URL is only parsed locally, never requested.
+
+### Hash Generator
+
+URL: https://tool.mehmetoya.com/hash-generator
+MD5, SHA-1, SHA-256, SHA-384, SHA-512 + verify.
+
+#### About this tool
+
+A cryptographic hash function maps any input to a fixed-size fingerprint. Text is encoded as UTF-8 before hashing, so the same string always produces the same digest as most command-line tools (for example `printf %s "text" | sha256sum`).
+
+- MD5 (128 bits) and SHA-1 (160 bits) are broken for collision resistance. Use them only for checksums and legacy compatibility.
+- SHA-256, SHA-384 and SHA-512 belong to the SHA-2 family and are suitable for integrity checks and signatures.
+- HMAC mixes a secret key into the hash so only key holders can produce or check the value. HMAC-MD5 is computed in JavaScript; the SHA variants use the browser's Web Crypto API.
+- Plain hashes are not a safe way to store passwords. Use a slow, salted algorithm such as Argon2, scrypt or bcrypt.
+
+#### Verify
+
+Paste any digest into the verify box. It is compared (case-insensitively for hex) against every algorithm for the current input and the matching algorithm is highlighted.
+
+#### Privacy
+
+Text, files and keys stay in your browser. Nothing is uploaded, stored or logged.
+
+**How do I generate a SHA-256 hash of a string?**
+Type or paste the text and the SHA-256 digest appears in the table alongside MD5, SHA-1, SHA-384 and SHA-512. Text is hashed as UTF-8, so results match `printf %s "hello" | sha256sum`; for `hello` the digest starts with `2cf24dba`. Output can be hex or Base64, lowercase or uppercase.
+
+**How do I check a file's checksum?**
+Switch Source to File and drop or choose the file; it is read locally and never uploaded. Then paste the published checksum into Verify a hash. The matching algorithm is highlighted, and hex is compared case-insensitively.
+
+**How can I tell which algorithm produced a hash?**
+Paste the hash into the verify box with the original input loaded; it is compared against every algorithm and the match is highlighted. Without a match, the tool reports whether the length fits an algorithm, since MD5 is 128 bits, SHA-1 160 bits and SHA-256 256 bits.
+
+**Is MD5 or SHA-256 safe for storing passwords?**
+No. Plain hashes are fast, which makes them easy to brute-force. Store passwords with a slow, salted algorithm such as Argon2, scrypt or bcrypt. MD5 and SHA-1 are also broken for collision resistance and fit only checksums and legacy use.
+
+### JWT Tool
+
+URL: https://tool.mehmetoya.com/jwt-tool
+Generate, decode and validate JSON Web Tokens.
+
+#### About JSON Web Tokens
+
+A JWT is three Base64URL segments joined by dots: a header naming the algorithm, a payload holding the claims, and a signature computed over the first two parts. Anyone can read the header and payload; only the signature proves who created the token.
+
+- `iat` (issued at), `exp` (expiration) and `nbf` (not before) are Unix timestamps in seconds.
+- This tool signs and verifies with HMAC (HS256, HS384, HS512) through the browser's Web Crypto API. Signature comparison is done by `crypto.subtle.verify`.
+- Tokens using `alg: none` are always reported as invalid. RSA/ECDSA tokens can be decoded but not verified here.
+- RFC 7518 asks for an HMAC secret at least as long as the hash output (32 bytes for HS256, 48 for HS384, 64 for HS512).
+
+#### Privacy
+
+Tokens and secrets are processed only in your browser. Nothing is sent, stored or logged. Even so, avoid pasting production secrets into any web page you do not control.
+
+**How do I decode a JWT token?**
+Switch to Decode and paste the token. The header and payload are shown as JSON, and time claims such as `exp` and `iat` are listed alongside. Decoding does not check the signature; use Validate for that.
+
+**How do I verify a JWT signature?**
+Switch to Validate, paste the token and enter the secret, ticking Secret is Base64 encoded if needed. The tool verifies HS256, HS384 and HS512 signatures and can also check expiry, not-before, issuer and audience with a configurable clock skew. RSA and ECDSA tokens can be decoded but not verified here.
+
+**Is the data in a JWT encrypted?**
+No. A standard JWT is three Base64URL segments, so anyone holding the token can read the header and payload. Only the signature proves who created it. Never put secrets in the claims.
+
+**How long should an HS256 secret be?**
+RFC 7518 asks for an HMAC key at least as long as the hash output: 32 bytes for HS256, 48 for HS384 and 64 for HS512. The tool warns when a secret is shorter, and the Random button generates one. Avoid pasting production secrets into web pages you do not control.
+
+## JSON Tools
+
+### JSON Formatter
+
+URL: https://tool.mehmetoya.com/json-formatter
+Validate, beautify, minify, sort keys.
+
+#### About this tool
+
+A free JSON formatter, beautifier, validator and minifier. Paste JSON (or drop a .json file on the input) and it is re-formatted as you type, with color-coded keys, strings, numbers, booleans and null values. Switch the action to minify, sort keys at every nesting level, or convert an array of objects into CSV.
+
+#### Features
+
+- Beautify with 2 spaces, 4 spaces or tabs.
+- Validate with the exact line and column of the first syntax error, plus a hint on how to fix it.
+- Lossless: numbers are written exactly as in the input (`12345678901234567890` and `1e400` stay intact), and duplicate keys are kept and reported.
+- Minify to strip whitespace for transport.
+- Sort keys alphabetically, recursively.
+- JSON to CSV for arrays of objects (nested values are written as JSON).
+- Escape non-ASCII characters as `\uXXXX` for ASCII-only transports.
+- Size stats: original vs. result bytes (UTF-8) and the difference.
+- Fullscreen output, copy and download as .json or .csv.
+
+#### Keyboard shortcuts
+
+Ctrl+Enter (⌘+Enter on Mac) runs the selected action · Esc closes fullscreen.
+
+#### Privacy & security
+
+All JSON is processed in your browser by a strict, lossless parser that runs on the page. Nothing is sent to a server, stored, or logged, and there is no share or history feature. The highlighted output is built with DOM text nodes only — never `innerHTML` — so a malicious payload cannot inject markup or scripts.
+
+**How do I find where my JSON is invalid?**
+Paste the JSON and choose Validate. The tool reports the exact line and column of the first syntax error with a hint on how to fix it, such as a trailing comma or single quotes instead of the double quotes JSON requires.
+
+**How do I minify JSON?**
+Choose Minify to strip all whitespace for transport. The size stats show the original and result in UTF-8 bytes and the difference. Beautify reverses it with 2 spaces, 4 spaces or tabs.
+
+**Does formatting change large numbers in my JSON?**
+No. The parser is lossless, so numbers are written exactly as in the input; `12345678901234567890` and `1e400` stay intact rather than being rounded. Duplicate keys are kept and reported instead of silently dropped.
+
+**How do I convert JSON to CSV?**
+Choose To CSV with an array of objects (or a single object) as input. Every key found across the objects becomes a column, missing values are left empty, and nested objects or arrays are written as JSON inside the cell. Download saves the result as .csv.
+
+### JSON Compare
+
+URL: https://tool.mehmetoya.com/json-compare
+Structural diff of two JSON documents.
+
+#### About this tool
+
+JSON Compare parses both documents and walks them side by side. Instead of a line-based text diff, it reports semantic differences, so whitespace, indentation and key order inside objects never count as changes.
+
+#### Difference types
+
+- added — the path exists only in B.
+- removed — the path exists only in A.
+- changed — same type, different value.
+- type mismatch — e.g. a number in A and a string in B (only reported in strict mode for primitives).
+- array length — the arrays at this path have different lengths.
+
+#### Options
+
+Ignore array order matches array items by value, so `[1,2,3]` and `[3,1,2]` are equal; it stays fast on arrays with thousands of items. Strict types off treats primitives with the same text or numeric value as equal (`1` vs `"1"`, `true` vs `"true"`).
+
+#### Numbers and duplicate keys
+
+Numbers are compared exactly as written, not as rounded floating-point values: `12345678901234567890` and `12345678901234567891` are different, while `1` and `1.0` are the same number. If a document repeats a key in one object, the later value is compared (as most parsers do) and a warning names the key and line.
+
+#### Privacy
+
+All processing happens in your browser. Nothing you paste is sent, stored or logged.
+
+**How do I compare two JSON files and ignore key order?**
+Paste one document into Original (A) and the other into Modified (B). The comparison is structural, so key order, whitespace and indentation never count as changes. Each difference is listed with its path. Nothing is sent to a server.
+
+**How do I compare JSON arrays regardless of item order?**
+Turn on Ignore array order. Array items are then matched by value, so `[1,2,3]` and `[3,1,2]` are equal. It stays fast on arrays with thousands of items.
+
+**Why is 1 not equal to "1" in the comparison?**
+Strict types is on, so a number and a string are reported as a type mismatch. Turn it off to treat primitives with the same text or numeric value as equal, such as `1` and `"1"` or `true` and `"true"`.
+
+**Are 1 and 1.0 treated as different numbers?**
+No. Numbers are compared by exact value as written, not as rounded floating-point values, so `1` and `1.0` are equal while `12345678901234567890` and `12345678901234567891` are different.
+
+### JSON to C#
+
+URL: https://tool.mehmetoya.com/json-to-csharp
+Generate C# classes or records from JSON.
+
+#### About this tool
+
+Paste a representative JSON document and get C# types that `System.Text.Json` can deserialize it into. Every nested object becomes its own class (or record), arrays become `List<T>`, and when the root is an array of objects the item type is generated.
+
+#### Type mapping
+
+- Whole numbers → `int`, `long` outside the 32-bit range, `ulong` for positive values beyond `long`, and `decimal` beyond 64 bits. A number written with a decimal point or exponent (`2.0`, `1e3`) → `double`.
+- `true/false` → `bool`; text → `string`; valid ISO-8601 dates such as `2024-05-17` or `2024-05-17T09:30:00Z` → `DateTime` (optional; impossible dates like `2024-02-30` stay `string`).
+- `null`-only values, empty arrays and mixed-type arrays → `object`.
+- A value type that is `null` in any sample always becomes nullable (`int?`, `DateTime?`), since deserializing `null` into `int` fails. With Nullable types on, properties missing from some items and reference types are marked nullable too.
+
+#### Options
+
+Use records emits positional records (attributes use the `property:` target). PascalCase properties renames `first_name` to `FirstName`; keep [JsonPropertyName] on so the original JSON names still map.
+
+#### Privacy
+
+Code is generated entirely in your browser. The JSON you paste is never uploaded, stored or logged.
+
+**How do I generate C# classes from JSON?**
+Paste a representative JSON sample and set the root Class name. Each nested object becomes its own class, arrays become `List<T>`, and the result is ready for System.Text.Json. Copy the code or download it as a .cs file.
+
+**How do I keep snake_case JSON names with PascalCase C# properties?**
+Turn on PascalCase properties and [JsonPropertyName]. A key like `first_name` becomes the property `FirstName` with `[JsonPropertyName("first_name")]`, so System.Text.Json still maps the original name.
+
+**Can I generate C# records instead of classes?**
+Yes. Turn on Use records to emit positional records instead of classes. Attributes are then written with the `property:` target so they apply to the generated properties.
+
+**Why are some properties typed as object or made nullable?**
+Values that are only null, empty arrays and mixed-type arrays become `object` because their type cannot be inferred. A value type that is null in any sample becomes nullable, such as `int?`, since null cannot be deserialized into `int`. Provide a fuller sample for better types.
+
+### JSON to Java
+
+URL: https://tool.mehmetoya.com/json-to-java
+Generate Java POJOs / records from JSON.
+
+#### About this tool
+
+Paste a JSON sample and get a single compilable `.java` file: the root class plus every nested object as a `public static` inner class (or nested record). When the root is an array of objects, the item type is generated.
+
+#### Type mapping
+
+- Whole numbers → `Integer`, `Long` outside the 32-bit range, `BigInteger` beyond 64 bits; numbers with a decimal point or exponent → `Double`.
+- `true/false` → `Boolean`; text → `String`; arrays → `List<T>`.
+- `null`-only values, empty arrays and mixed arrays → `Object`.
+- Field names are camelCased; Java keywords and names of `Object` methods (`hashCode`, `toString`, `getClass`, `wait`…) get a trailing underscore. Keep Jackson on so the original JSON names still map.
+
+#### Options
+
+Records (Java 16+) produce immutable records, so Lombok and accessors are disabled. Lombok @Data generates accessors at compile time instead of writing them out.
+
+#### Privacy
+
+Code is generated entirely in your browser. The JSON you paste is never uploaded, stored or logged.
+
+**How do I convert JSON to a Java POJO?**
+Paste a JSON sample and set the Class name and optional Package. You get one compilable .java file with the root class and every nested object as a public static inner class. Arrays become `List<T>`.
+
+**Can I generate Java records or Lombok classes from JSON?**
+Yes. Records (Java 16+) produce immutable records, which disables Lombok and accessors. Lombok @Data adds the annotation so accessors are generated at compile time; otherwise Getters / setters writes them out.
+
+**How are JSON field names mapped to Java?**
+Field names are camelCased, and Java keywords or Object method names such as `class` or `hashCode` get a trailing underscore. Keep Jackson @JsonProperty on so the original JSON names still map during deserialization.
+
+**Which Java types are used for JSON numbers?**
+Whole numbers become `Integer`, `Long` outside the 32-bit range and `BigInteger` beyond 64 bits. Numbers with a decimal point or exponent become `Double`. Booleans map to `Boolean`, text to `String`, and null-only or mixed values to `Object`.
+
+### JSON to TypeScript
+
+URL: https://tool.mehmetoya.com/json-to-typescript
+Generate TypeScript interfaces / types.
+
+#### About this tool
+
+Paste a JSON sample and get TypeScript declarations for it. Every nested object becomes its own interface (or type alias) named after its key, and arrays become `T[]`.
+
+#### Type mapping
+
+- Numbers → `number`, text → `string`, `true/false` → `boolean`, `null` → `null`.
+- Empty arrays → `unknown[]`; arrays with mixed values → unions such as `(string | number)[]`.
+- Objects inside arrays are merged: a key missing from some items is marked optional (`?`), a key that is sometimes `null` gets `| null`.
+- Keys that are not valid identifiers (e.g. `first-name`, or the empty key `""`) are quoted.
+
+#### Options
+
+All properties optional adds `?` everywhere, useful for partial payloads. camelCase renames keys — only use it when your code maps names, since the types will no longer match the raw JSON.
+
+#### Privacy
+
+Code is generated entirely in your browser. The JSON you paste is never uploaded, stored or logged.
+
+**How do I convert JSON to a TypeScript interface?**
+Paste a JSON object or an array of objects and the TypeScript declarations appear instantly. Every nested object becomes its own interface named after its key, and arrays become `T[]`. You can switch to type aliases, rename the root type, drop the `export` keyword, then copy the result or download it as a `.ts` file.
+
+**How are optional and nullable properties detected?**
+Objects inside an array are merged into one type. A key missing from some items is marked optional with `?`, and a key that is sometimes `null` gets `| null`. For example, `[{"id":1},{"id":2,"tag":null}]` produces `id: number;` and `tag?: null;`. The "All properties optional" option adds `?` to every property, which suits partial payloads.
+
+**Should I use an interface or a type alias?**
+For plain object shapes both work the same, so pick whichever your codebase uses. Interfaces can be extended and merged by redeclaring them; type aliases can also name unions and arrays. When the JSON root is an array, the tool always emits a type alias such as `type Root = RootItem[];` plus an interface or alias for the item.
+
+**What happens to keys like first-name or mixed-type arrays?**
+Keys that are not valid identifiers, such as `first-name`, are quoted: `"first-name": string;`. Arrays with mixed values become unions, for example `(string | number)[]`, and empty arrays become `unknown[]`. All JSON numbers map to `number`, so integers larger than 2^53 lose precision unless you parse them with a bigint-aware parser.
+
+## Regex Tools
+
+### Regex Search
+
+URL: https://tool.mehmetoya.com/regex-search
+Find matches and capture groups.
+
+#### About this tool
+
+Regex Search uses your browser's JavaScript regular-expression engine and always searches globally, so every match is listed with its start index, length, matched value and capture groups — both numbered (`$1`, `$2`…) and named (`(?<name>…)`).
+
+#### Flags
+
+- i — case-insensitive matching.
+- m — `^` and `$` match at every line break.
+- s — `.` also matches newlines (single-line / dotall mode).
+- u — full Unicode: code-point escapes like `\u{1F600}` and property classes like `\p{L}`.
+
+#### Limits
+
+The table shows the first 500 matches; counting stops at 100,000 matches or after about one second. Empty matches (such as `a*` between characters) are shown as thin markers and the search moves on by one character (one code point with the u flag), so it never loops forever. Matching runs in a background worker: a pathological pattern such as `(a+)+$` is stopped after 1.5 seconds and the page stays responsive.
+
+#### Privacy
+
+All processing happens in your browser. Nothing you type is sent, stored or logged.
+
+**How do I test a regular expression online?**
+Type a pattern, paste your test text, and every match is highlighted and listed with its index, length, value and capture groups. Both numbered groups (`$1`, `$2`) and named groups (`(?<name>…)`) are shown. The tool uses your browser's JavaScript regex engine, so results match what `String.prototype.matchAll` returns in JavaScript. Matching runs locally; nothing is uploaded.
+
+**What do the g, i, m, s and u regex flags do?**
+`g` finds all matches instead of the first; this tool always searches globally. `i` ignores case, and `m` makes `^` and `$` match at every line break. `s` lets `.` match newlines, and `u` enables full Unicode, including `\u{1F600}` escapes and property classes such as `\p{L}`. The `u` flag is on by default.
+
+**Why does my regex hang or time out?**
+Nested quantifiers such as `(a+)+$` can cause catastrophic backtracking, where the engine tries an exponential number of paths. This page runs matching in a background worker and stops it after 1.5 seconds, so the page stays responsive. Make quantifiers more specific or remove the nesting to fix the pattern.
+
+**How many matches can it show?**
+The results table shows the first 500 matches, and counting stops at 100,000 matches or after about one second. Empty matches, such as `a*` between characters, appear as thin markers and the search advances one character, so it never loops forever. Use "Show matches only" to copy or download all matched values, one per line.
+
+### Regex Replace
+
+URL: https://tool.mehmetoya.com/regex-replace
+Find and replace with group references.
+
+#### About this tool
+
+Regex Replace runs a global search with your browser's JavaScript regex engine and substitutes every match (or only the first N when Max replacements is above 0). Unicode (u) is on by default: it enables `\p{L}`-style property classes and `\u{…}` escapes and treats emoji and other astral characters as single characters. Matching runs in a background worker; a pattern that takes longer than 1.5 seconds (catastrophic backtracking) is stopped and the page stays responsive.
+
+#### Replacement references
+
+- `$1` … `$99` — numbered capture group.
+- `$<name>` — named group, from `(?<name>…)`.
+- `$&` — the whole match; `$`` / `$'` — the text before / after it.
+- `$$` — a literal dollar sign.
+- With Escapes in replacement on, `\n`, `\t`, `\r` and `\\` are turned into a newline, tab, carriage return and backslash.
+
+#### Privacy
+
+All processing happens in your browser. Nothing you type is sent, stored or logged.
+
+**How do I find and replace text with a regular expression?**
+Enter a pattern, a replacement string and your input text; the output updates as you type. Every match is replaced unless you set "Max replacements" above 0 to replace only the first N. It uses the JavaScript regex engine, and all processing stays in your browser.
+
+**How do I use capture groups in the replacement?**
+Use `$1` to `$99` for numbered groups and `$<name>` for named groups. For example, pattern `(\d{4})-(\d{2})-(\d{2})` with replacement `$3/$2/$1` turns `2024-03-15` into `15/03/2024`. `$&` inserts the whole match, `` $` `` and `$'` the text before and after it, and `$$` a literal dollar sign.
+
+**How do I insert a newline or tab in a regex replacement?**
+Turn on "Escapes in replacement". Then `\n`, `\t`, `\r` and `\\` in the replacement become a newline, tab, carriage return and backslash. Without that option, the replacement text is inserted literally apart from `$` references.
+
+**Why is my replacement pattern stopped with a timeout?**
+Patterns that backtrack catastrophically, such as `(a+)+$`, can take exponential time on some inputs. Matching runs in a background worker, and a pattern that runs longer than 1.5 seconds is stopped so the page stays responsive. Simplify nested quantifiers or anchor the pattern more tightly.
+
+### String Extract
+
+URL: https://tool.mehmetoya.com/extract
+Extract by position, delimiters, regex or line range.
+
+#### About this tool
+
+String Extract pulls a piece of text out using one of four strategies. Multiple results are placed on separate lines.
+
+#### Modes
+
+- Substring — characters from a 0-based Start position, for Length characters (empty = to the end). A negative start counts from the end, so `-4` takes the last four characters.
+- Between — text between a start and an end delimiter, optionally including the delimiters, first occurrence or all of them. An empty start delimiter means "from the beginning", an empty end delimiter "to the end".
+- Regex — every match of a JavaScript regular expression; choose which capture group to output (0 = the whole match). Unicode (u) is on by default (enables `\p{L}` and treats emoji as single characters). Matching runs in a background worker and a pattern that takes longer than 1.5 seconds is stopped.
+- Lines — line numbers and ranges such as `1-5, 10, 15-20`. Line numbers start at 1; `12-` means line 12 to the end. Lines are output in the order the ranges are listed.
+
+#### Privacy
+
+All processing happens in your browser. Nothing you type is sent, stored or logged.
+
+**How do I extract text between two delimiters?**
+Choose Between mode and enter a start and an end delimiter, for example `[` and `]`. You can include the delimiters in the output and take the first occurrence or all of them, one per line. An empty start delimiter means from the beginning of the text, and an empty end delimiter means to the end.
+
+**How do I extract a substring by position?**
+Use Substring mode with a 0-based Start and an optional Length; leave Length empty to take everything to the end. A negative start counts from the end, so Start `-4` returns the last four characters. Positions count Unicode code points, so an emoji counts as one character.
+
+**How do I extract only a capture group from regex matches?**
+Choose Regex mode, enter a JavaScript pattern and set Group to the capture group you want, where 0 is the whole match. For example, pattern `order=(\d+)` with Group 1 lists just the order numbers, one per line. Matching runs in a background worker and stops after 1.5 seconds.
+
+**How do I get specific lines from a text?**
+Use Lines mode and enter line numbers or ranges such as `1-5, 10, 15-20`. Line numbers start at 1, and an open range like `12-` takes line 12 to the end. Lines are output in the order the ranges are listed.
+
+## Developer Tools
+
+### DateTime Formatter
+
+URL: https://tool.mehmetoya.com/datetime-formatter
+.NET-style date/time format strings.
+
+#### About this tool
+
+The formatter is a JavaScript re-implementation of .NET's DateTime format rules. Click any format in the tables to load it into the custom box.
+
+- A single character is a standard format (for example `d` or `o`). Use `%d` to get the custom day specifier on its own.
+- Text in single or double quotes is copied literally, and `\` escapes one character. `/` and `:` become the culture's date and time separators.
+- Month and day names and AM/PM designators come from your browser's locale data (ICU). Culture patterns (`d`, `D`, `t`…) were checked against .NET 10 on ICU, which is what .NET uses on Linux, macOS and Windows 10+. Results depend on the ICU version of both your browser and the .NET runtime, so separators (for example U+202F before AM/PM in en-US) and abbreviations can differ slightly; Windows with the legacy NLS mode differs more.
+- Kind mirrors `DateTimeKind`: it changes `K`, `z` and the `U` format. Like real .NET, `R` and `u` do not convert a `DateTime` to UTC; call `ToUniversalTime()` first.
+- Browser date inputs carry milliseconds only, so the 4th to 7th fraction digits (`ffff`…) are always zero.
+
+#### Privacy
+
+Everything is computed in your browser. Nothing is sent, stored or logged.
+
+**How do I format a DateTime in C#?**
+Call `ToString` with a format string, for example `date.ToString("yyyy-MM-dd HH:mm:ss")`, which gives `2024-03-05 14:07:09`. A single letter such as `d` or `o` is a standard format; longer strings are custom formats. This tool shows the result for any date, format and culture, and generates the matching C# line.
+
+**What is the difference between MM and mm in .NET date formats?**
+`MM` is the month (01–12) and `mm` is the minute (00–59). Likewise `HH` is the 24-hour hour and `hh` the 12-hour hour, usually paired with `tt` for AM/PM. So `hh:mm tt` gives `02:07 PM` and `HH:mm` gives `14:07` for 14:07.
+
+**Why does the short date format look different in each culture?**
+Standard formats such as `d` expand to a culture-specific pattern. The same date is `3/5/2024` in en-US, `05/03/2024` in en-GB and `05.03.2024` in de-DE. In custom formats, `/` and `:` are replaced by the culture's date and time separators. Use `CultureInfo.InvariantCulture` for fixed, machine-readable output.
+
+**How do I output an ISO 8601 date in .NET?**
+Use the round-trip format `o`, which gives `2024-03-05T14:07:09.1200000Z` for a UTC value; the ending depends on `DateTimeKind`. Format `s` gives the sortable form without fraction or offset. Like .NET itself, `u` and `R` do not convert to UTC, so call `ToUniversalTime()` first.
+
+### String Formatter
+
+URL: https://tool.mehmetoya.com/string-formatter
+Numeric formats, padding, composite formatting.
+
+#### About this tool
+
+This page re-implements .NET's formatting rules in JavaScript so you can try format strings without compiling anything. Whole numbers are treated as `int` (or `long` when they do not fit), anything with a decimal point or exponent as `double`. `D` and `X` only work with integer types, exactly like in .NET.
+
+- Standard formats (`F`, `N`, `C`, `P`, `E`, `G` with a precision) round the exact binary value of a double and send exact halves to the even digit, like .NET Core 3.0 and later: `0.125.ToString("F2")` is `0.12`.
+- Custom formats first reduce a double to 15 significant digits and then round halves away from zero, so `1.005.ToString("0.00")` is `1.01`. `int` and `long` values are always exact.
+- A negative double that rounds to zero keeps its sign (`-0.001.ToString("0.00")` is `-0.00`), as in .NET Core 3.0 and later.
+- Separators, currency symbols and percent placement come from your browser's locale data (ICU), which is also what .NET uses on Linux and macOS. Windows (NLS) data can differ slightly, for example in negative currency patterns.
+- Custom formats support `0`, `#`, `.`, `,` (grouping and ÷1000 scaling), `%`, `‰`, `E+0`/`e-0`, `\` escapes, quoted literals and up to three `;` sections.
+
+#### Privacy
+
+Everything is computed in your browser. Nothing is sent, stored or logged.
+
+**How do I format a number with thousands separators in C#?**
+Use the `N` format with the number of decimals, for example `1234567.891.ToString("N2")`, which gives `1,234,567.89` in en-US and `1.234.567,89` in de-DE. A custom format such as `#,##0.00` gives the same result. Pick a culture in this tool to see how separators change.
+
+**How does string.Format alignment work?**
+In a format item `{index,alignment:format}`, a positive alignment right-aligns the value in a field of that width and a negative one left-aligns it. For example, `string.Format("{0,-6}|{1,5:F1}", "ab", 3.14159)` gives `ab    |  3.1`. Write `{{` and `}}` to output literal braces.
+
+**Why does 0.125.ToString("F2") return 0.12 in .NET?**
+Since .NET Core 3.0, standard formats round the exact binary value of a double and send exact halves to the even digit, so `0.125` becomes `0.12`. Custom formats work differently: they first reduce a double to 15 significant digits and round halves away from zero, so `1.005.ToString("0.00")` gives `1.01`.
+
+**Why do D and X throw a FormatException?**
+`D` (zero-padded decimal) and `X` (hexadecimal) only work with integer types, exactly as in .NET. `42.ToString("D5")` gives `00042` and `255.ToString("X4")` gives `00FF`, but a number with a decimal point is treated as a `double` and throws. Whole numbers are treated as `int`, or `long` when they do not fit.
+
+### GUID Generator
+
+URL: https://tool.mehmetoya.com/guid-generator
+Generate and parse GUIDs / UUIDs.
+
+#### About GUIDs and UUIDs
+
+A GUID (Microsoft's name) or UUID is a 128-bit identifier written as 32 hexadecimal digits. Four bits encode the version (the first digit of the third group) and two or three bits the variant (the first digit of the fourth group: 8, 9, a or b for standard UUIDs).
+
+- Version 4 is 122 bits of randomness. This page uses `crypto.randomUUID()`, the browser's cryptographically secure generator. In .NET: `Guid.NewGuid()`.
+- Version 7 (RFC 9562) starts with a 48-bit Unix timestamp in milliseconds followed by random bits, so values sort by creation time and index well in databases. In .NET 9+: `Guid.CreateVersion7()`. Values generated in the same millisecond here are kept in increasing order.
+- .NET format letters: `D` hyphens (default), `N` digits only, `B` braces, `P` parentheses, `X` hex structure as used in C/C# initialisers.
+- `Guid.ToByteArray()` stores the first three groups little-endian, which is why the bytes look shuffled compared to the string.
+- The nil GUID (`Guid.Empty`) is all zeros; the max UUID is all `f`.
+
+#### Privacy
+
+GUIDs are generated in your browser. Nothing is sent, stored or logged.
+
+**What is the difference between UUID v4 and v7?**
+Version 4 is 122 random bits, so values have no order. Version 7 (RFC 9562) starts with a 48-bit Unix timestamp in milliseconds followed by random bits, so values sort by creation time and index well in databases. In .NET, use `Guid.NewGuid()` for v4 and `Guid.CreateVersion7()` (.NET 9 and later) for v7.
+
+**Is a GUID the same as a UUID?**
+Yes. GUID is Microsoft's name for the same 128-bit identifier, written as 32 hexadecimal digits such as `00000000-0000-0000-0000-000000000000`. The first digit of the third group is the version, and the first digit of the fourth group shows the variant (8, 9, a or b for standard UUIDs).
+
+**Are the generated GUIDs secure and random?**
+Version 4 GUIDs come from `crypto.randomUUID()`, the browser's cryptographically secure generator, and v7 random bits come from `crypto.getRandomValues`. You can create up to 1,000 at a time, in your browser, without sending them anywhere. A v7 GUID reveals its creation time, so do not use it where that matters.
+
+**What do the .NET GUID formats D, N, B, P and X mean?**
+`D` is the default hyphenated form, `N` is 32 digits without hyphens, `B` wraps it in braces, `P` in parentheses, and `X` is the hex structure used in C and C# initialisers. Paste any of these, or a `urn:uuid:` value, into the parser to see all forms, the version, the variant and any embedded timestamp.
+
+### Password Generator
+
+URL: https://tool.mehmetoya.com/password-generator
+Secure passwords with custom rules.
+
+#### How it works
+
+- Every character is chosen with `crypto.getRandomValues`. Random numbers are drawn with rejection sampling, so no character is more likely than another (no modulo bias). `Math.random` is never used.
+- Required characters (minimum counts and "include every type") are placed first, the rest is filled from the whole pool, and the result is shuffled with a secure Fisher–Yates shuffle.
+- Strength is estimated as `length × log₂(pool size)` bits: under 28 very weak, under 36 weak, under 60 fair, under 100 strong, otherwise very strong. Rules that remove choices lower the real entropy slightly.
+- "No sequences" rejects three letters or digits in a row that go up or down by one, such as `abc`, `CBA` or `789`.
+
+#### Privacy
+
+Passwords are generated in your browser and are not sent, stored or logged. Copy them into a password manager rather than a plain text file.
+
+**How long should a strong password be?**
+Aim for at least 16 random characters from a large character set. This tool estimates strength as `length × log2(pool size)` bits: 16 characters from lowercase, uppercase, digits and the default 27 symbols give about 104 bits, rated very strong. Below 60 bits is rated fair or weaker.
+
+**Is this password generator truly random?**
+Yes. Every character is chosen with `crypto.getRandomValues` and rejection sampling, so no character is more likely than another, and `Math.random` is never used. Required characters are placed first and the result is shuffled with a secure Fisher–Yates shuffle. Passwords are generated in your browser and never sent or stored.
+
+**Can I exclude confusing characters like l, 1, O and 0?**
+Yes. "Exclude ambiguous" removes `l 1 I O 0 o`, and "Exclude similar" removes `i l 1 L o 0 O`. You can also edit the symbol list, forbid duplicate characters, block sequences such as `abc` or `789`, or require the password to begin with a letter. Rules that remove choices lower the real entropy slightly.
+
+**How do I meet a password policy that requires each character type?**
+Keep "Include every selected type" on, or set a minimum count for lowercase, uppercase, numbers and symbols. Lengths from 4 to 128 characters are supported, and you can generate up to 50 passwords at once.
+
+### Number Converter
+
+URL: https://tool.mehmetoya.com/number-converter
+Binary, decimal, hexadecimal, octal.
+
+#### About number bases
+
+- Decimal (base 10) uses digits 0–9. Binary (base 2) uses 0 and 1; each digit is one bit. Octal (base 8) uses 0–7; one digit is three bits, as in Unix permissions like `755`. Hexadecimal (base 16) uses 0–9 and A–F; one digit is four bits (a nibble), two digits are a byte.
+- Prefixes `0x`, `0b` and `0o` are accepted, as are spaces and underscores used as digit separators (`1111_0000`).
+- Negative numbers are shown with a minus sign in every base. The two's complement table shows how a fixed-width signed integer stores the value; a pattern such as `FF` reads as 255 unsigned or −1 as a signed byte.
+- All arithmetic uses JavaScript `BigInt`, so there is no precision loss for large values.
+
+#### Privacy
+
+Everything is computed in your browser. Nothing is sent, stored or logged.
+
+**How do I convert decimal to hexadecimal or binary?**
+Type a number in any of the four fields (decimal, hexadecimal, binary or octal) and the other three update instantly. For example, `255` is `FF` in hex, `11111111` in binary and `377` in octal. Prefixes `0x`, `0b` and `0o` are accepted, and spaces or underscores can separate digits.
+
+**How are negative numbers shown in binary or hex?**
+Each base field shows a minus sign, such as `-FF`. The two's complement table shows how 8-, 16-, 32- and 64-bit signed integers store the value. For example, -1 is stored as `FF` in 8 bits, and that pattern reads as 255 unsigned.
+
+**Can it convert very large numbers without losing precision?**
+Yes. All arithmetic uses JavaScript `BigInt`, so integers of any size are exact, up to 50,000 digits of input. The converter handles integers only, not fractions. It also shows the bit length, the bytes needed and the value with thousands separators.
+
+**Why is one hex digit equal to four bits?**
+Base 16 has 16 = 2^4 digit values, so each hex digit maps to exactly four bits (a nibble) and two hex digits make a byte. Octal digits map to three bits, which is why Unix permissions such as `755` are written in octal. Turn on "Group binary in nibbles" to see this grouping.
+
+### Barcode Generator
+
+URL: https://tool.mehmetoya.com/barcode-generator
+QR codes, EAN-13 and EAN-8 barcodes.
+
+#### About this tool
+
+QR codes store text, links or structured payloads (Wi-Fi credentials, contact cards, mail and SMS links) in a square matrix. The version (grid size) is picked automatically from the amount of data. A higher error-correction level lets a damaged or partly covered code still scan, at the cost of a denser grid. Text is encoded as UTF-8.
+EAN-13 and EAN-8 are the retail barcodes printed on most products. Enter 12 (or 7) digits and the final check digit is calculated for you; enter all 13 (or 8) and the check digit is verified. Each digit is drawn with one of three bar patterns — L (odd parity), G (even parity) or R — and for EAN-13 the mix of L and G patterns on the left half encodes the leading digit.
+
+#### Privacy
+
+Codes are drawn in your browser. Nothing you enter is uploaded, stored or logged.
+
+**How do I create a QR code for a Wi-Fi network?**
+Choose QR Code and click the Wi-Fi template, then edit the network name and password in `WIFI:T:WPA;S:MyNetwork;P:my-wifi-password;;`. Templates also cover websites, contact cards (vCard), email, SMS and phone numbers. Download the result as PNG or SVG. The code is drawn in your browser, so your password is not uploaded.
+
+**Which QR code error correction level should I use?**
+Level L recovers about 7% damage, M about 15%, Q about 25% and H about 30%. Higher levels let a damaged or partly covered code still scan, but make the grid denser. M is the default and suits most uses; choose H if you will place a logo over the code or print it on rough surfaces.
+
+**How is the EAN-13 check digit calculated?**
+Starting from the rightmost data digit, multiply the digits alternately by 3 and 1, add them up, and the check digit brings the total to the next multiple of 10. For `400638133393` the check digit is `1`. Enter 12 digits (7 for EAN-8) to have it calculated, or all 13 (or 8) to verify it.
+
+**Should I download the barcode as PNG or SVG?**
+SVG is a vector format, so it stays sharp at any print size and is best for packaging and print work. PNG is a raster image at the width you set (100 to 1,000 pixels), which suits documents, slides and web pages. You can also change the bar and background colours, but keep strong contrast so scanners can read it.
+
+### HTTP Client
+
+URL: https://tool.mehmetoya.com/http-client
+Build and send HTTP requests.
+
+#### About this tool
+
+This client runs inside your browser using the `fetch` API, so it follows the same rules as any web page. Pick a method, enter a URL, add query parameters, headers and an optional body, then press Enter in the URL field or click Send. Long requests can be cancelled, and they are aborted automatically after the timeout.
+
+#### Why does my request fail with a network error?
+
+- CORS: a page can only read a cross-origin response if the server allows it with `Access-Control-Allow-Origin`. Many public APIs do; many private ones don't. The browser hides the details, so a blocked request looks like a generic network error. Server-to-server tools like cURL are not subject to CORS.
+- Preflight: non-simple requests (e.g. JSON bodies, PUT/DELETE, custom headers) first send an `OPTIONS` request that the server must answer correctly.
+- Mixed content: this page is served over HTTPS, so plain `http://` URLs are usually blocked.
+- Forbidden headers: headers such as Host, Cookie or Origin are controlled by the browser and cannot be set.
+
+#### Privacy
+
+Requests go directly from your browser to the URL you enter — this site never sees or proxies them. Nothing is stored.
+
+**How do I send an HTTP request from the browser?**
+Pick a method (GET, POST, PUT, PATCH, DELETE, HEAD or OPTIONS), enter the URL, add query parameters, headers and an optional JSON, text or form body, then click Send. The response shows status, time, size, headers and the body, with JSON pretty-printed. Requests go directly from your browser to the target URL; this site does not proxy or store them.
+
+**Why does my request fail with a CORS or network error?**
+The client uses the browser's `fetch` API, so it can only read a cross-origin response if the server allows it with `Access-Control-Allow-Origin`. Non-simple requests, such as JSON bodies or custom headers, also need a correct `OPTIONS` preflight response. Plain `http://` URLs are usually blocked as mixed content. Server-side tools like cURL are not limited by CORS.
+
+**Why can't I set the Cookie, Host or Origin header?**
+Browsers control these headers and silently drop them, along with others such as Referer and Content-Length, and may ignore User-Agent. Cookies are not sent either, because requests use `credentials: 'omit'`. To authenticate, send a token in a header such as `Authorization`, or use cURL for full header control.
+
+**Can I export the request as a cURL command?**
+Yes. "Copy as cURL" copies the current method, URL, headers and body as a `curl` command you can run in a terminal. This is useful when CORS blocks the request in the browser, because cURL sends it from your machine without browser restrictions.
+
+## Viewers
+
+### Markdown Viewer
+
+URL: https://tool.mehmetoya.com/markdown-viewer
+Live Markdown preview and export.
+
+#### About this tool
+
+The editor understands GitHub-flavoured Markdown: headings, emphasis, links, lists, task lists, tables, fenced code blocks, block quotes and strikethrough. The rendered HTML is passed through a sanitizer before it is shown, so scripts and event handlers in pasted content never run. Your draft is kept in this browser between visits.
+Note: for privacy and security, images can only be shown when they are embedded as `data:` URLs; remote images are blocked on this site.
+
+#### Cheat sheet
+
+# Title / ## SectionHeadings, levels 1–6
+**bold**  *italic*  ~~struck~~Inline emphasis
+`inline code`Monospace span
+[label](https://example.org)Link
+![alt text](data:image/png;base64,…)Image
+- item / 1. itemBulleted or numbered list (indent to nest)
+- [ ] open / - [x] doneTask list
+> quoted textBlock quote
+```js … ```Fenced code block with language
+| a | b ||---|--:|Table (colons set alignment)
+---Horizontal rule
+
+#### Privacy
+
+Everything is rendered in your browser. Nothing you write is uploaded or logged.
+
+**How do I preview Markdown online?**
+Type or paste Markdown in the editor and the rendered result appears beside it as you type. Split, editor-only and preview-only views are available, along with line numbers and sync scroll. Export the source as `.md` or the rendered output as HTML. Your draft is kept in this browser between visits and is not uploaded.
+
+**Does it support GitHub-flavoured Markdown?**
+Yes. It renders headings, emphasis, links, bulleted and numbered lists, task lists (`- [x] done`), tables with column alignment, fenced code blocks, block quotes and strikethrough (`~~text~~`). Turn on "Line breaks as <br>" to turn single line breaks into `<br>` tags.
+
+**Why are images not showing in the preview?**
+Remote images are blocked on this site for privacy and security, so an image loads only when it is embedded as a `data:` URL, such as `![logo](data:image/png;base64,…)`. Links to images on other hosts will not display.
+
+**Is it safe to paste untrusted Markdown?**
+Yes. The rendered HTML passes through a sanitizer before it is shown, so scripts and event handlers in pasted content never run.
+
+### HTML Viewer
+
+URL: https://tool.mehmetoya.com/html-viewer
+Sandboxed live HTML preview.
+
+#### About this tool
+
+The preview is an `<iframe>` sandbox with a unique, opaque origin. Scripts inside it may run (unless you turn on Sanitize HTML), but they cannot read this site's storage or cookies, open pop-ups, submit forms, show alert dialogs or navigate this page.
+The preview inherits this site's security policy: inline `<style>` and `<script>` work, while external scripts, stylesheets, fonts and remote images are blocked. Embed images as `data:` URLs if you need them.
+Sanitize HTML removes `<script>` elements, inline event handlers such as `onclick` and `javascript:` links — handy for previewing HTML from an untrusted source, such as an email body.
+
+#### Privacy
+
+Your HTML is rendered locally and never uploaded. A draft is kept in this browser between visits.
+
+**How do I preview HTML code online?**
+Paste or write HTML in the editor and the preview updates automatically, or press Run (Ctrl/⌘ + Enter). Inline `<style>` and `<script>` work. Templates for a basic page, form, table, card, grid and navigation bar give you a starting point. Your HTML is rendered locally and a draft is kept in this browser.
+
+**Is it safe to run untrusted HTML here?**
+The preview runs in a sandboxed `<iframe>` with a unique, opaque origin. Scripts can run, but they cannot read this site's storage or cookies, open pop-ups, submit forms, show alert dialogs or navigate the page. Turn on "Sanitize HTML" to remove `<script>` elements, inline event handlers and `javascript:` links before rendering.
+
+**Why don't external CSS, scripts or images load in the preview?**
+The preview inherits this site's strict security policy, which blocks external scripts, stylesheets, fonts and remote images. Put CSS in a `<style>` block and JavaScript in a `<script>` block, and embed images as `data:` URLs.
+
+**How can I safely view an HTML email body?**
+Paste the HTML and turn on "Sanitize HTML". This strips scripts, `onclick`-style handlers and `javascript:` URLs, and the sandbox and security policy block remote images and other external resources, so tracking pixels cannot load.
+
+### Diagram Viewer
+
+URL: https://tool.mehmetoya.com/diagram-viewer
+Mermaid diagrams to SVG / PNG.
+
+#### About this tool
+
+Mermaid turns short text descriptions into diagrams. Start a document with the diagram type — `flowchart`, `sequenceDiagram`, `classDiagram`, `stateDiagram-v2`, `erDiagram`, `gantt`, `pie`, `gitGraph` or `mindmap` — then add nodes and connections. Pick a template to see a working example of each.
+Diagrams render in strict security mode: HTML inside labels is escaped and click handlers are disabled. PNG export is drawn at twice the diagram's size for sharp results; SVG keeps the diagram fully scalable and editable.
+
+#### Privacy
+
+The diagram engine runs locally in your browser. Your code is never uploaded; a draft is kept in this browser between visits.
+
+**How do I render a Mermaid diagram online?**
+Write Mermaid code in the editor and the diagram renders live beside it. Start with the diagram type, then add nodes and connections, for example `flowchart LR` followed by `A --> B`. The diagram engine runs locally in your browser, and your code is not uploaded.
+
+**Which Mermaid diagram types are supported?**
+Templates cover flowcharts, sequence diagrams, class diagrams, state diagrams (`stateDiagram-v2`), entity relationship diagrams, Gantt charts, pie charts, Git graphs and mind maps. Pick a template to load a working example of each type, and choose the default, dark, forest or neutral theme.
+
+**How do I export a Mermaid diagram as PNG or SVG?**
+Use Download SVG for a fully scalable, editable vector file, or Download PNG for an image drawn at twice the diagram's size for sharp results. Copy SVG puts the markup on the clipboard, and you can download the source as an `.mmd` file.
+
+**Why does my Mermaid diagram show an error?**
+The code has a syntax error, and the message shows the parser's details. The last valid diagram stays visible, dimmed, until you fix the code. Diagrams render in strict security mode, so HTML in labels is escaped and click handlers are disabled; those features will not work here.

@@ -4,13 +4,13 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self';" />
-  <title>HTML Viewer — Sandboxed Live HTML Preview</title>
-  <meta name="description" content="Paste or write HTML and see it rendered live in an isolated sandbox. Optional sanitizing, templates, split view, fullscreen and download as .html — all in your browser." />
+  <title>HTML Viewer — Live Sandboxed HTML/CSS/JS Preview</title>
+  <meta name="description" content="Paste HTML, CSS and JavaScript and see it render live in a sandboxed iframe, with starter templates and HTML export. Nothing is uploaded." />
   <meta name="keywords" content="html viewer, html preview online, live html editor, html renderer, test html snippet, html sandbox" />
   <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large" />
   <link rel="canonical" href="https://tool.mehmetoya.com/html-viewer" />
   <meta property="og:type" content="website" />
-  <meta property="og:title" content="HTML Viewer — Sandboxed Live HTML Preview" />
+  <meta property="og:title" content="HTML Viewer — Live Sandboxed HTML/CSS/JS Preview" />
   <meta property="og:description" content="Render HTML snippets live in a locked-down sandbox, with templates and export." />
   <meta property="og:url" content="https://tool.mehmetoya.com/html-viewer" />
   <meta property="og:site_name" content="DevTools" />
@@ -48,7 +48,10 @@
       "name": "DevTools",
       "url": "https://tool.mehmetoya.com/"
     },
-    "image": "https://tool.mehmetoya.com/assets/og/html-viewer.png"
+    "image": "https://tool.mehmetoya.com/assets/og/html-viewer.png",
+    "inLanguage": "en",
+    "browserRequirements": "Requires JavaScript",
+    "dateModified": "2026-11-21"
   }
   </script>
   <script type="application/ld+json">
@@ -65,6 +68,8 @@
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:image" content="https://tool.mehmetoya.com/assets/og/html-viewer.png" />
   <meta name="twitter:image:alt" content="HTML Viewer — Sandboxed live HTML preview." />
+  <meta name="twitter:site" content="@mehmetoya" />
+  <meta name="twitter:creator" content="@mehmetoya" />
   <meta name="author" content="Mehmet Oya" />
   <meta name="theme-color" content="#0e1318" />
   <meta name="color-scheme" content="dark" />
@@ -94,8 +99,8 @@
 </head>
 <body>
 <div class="shell">
-  <header id="site-header"></header>
-  <aside id="sidebar"></aside>
+  <header id="site-header"><a class="logo" href="/">DevTools</a> <span class="header-tool">by <a href="https://mehmetoya.com" rel="author">Mehmet Oya</a></span></header>
+  <aside id="sidebar"><nav class="side-nav" aria-label="Tools"><a class="side-home" href="/">All tools</a><div class="side-group"><div class="side-group-title">Text Operations</div><a class="side-link" href="/case-converter">Case Converter</a><a class="side-link" href="/reverse">String Reverse</a><a class="side-link" href="/trim-pad">Trim / Pad</a><a class="side-link" href="/line-counter">Line Counter</a><a class="side-link" href="/line-operations">Line Operations</a><a class="side-link" href="/compare">String Compare</a></div><div class="side-group"><div class="side-group-title">Encode / Decode</div><a class="side-link" href="/base64">Base64</a><a class="side-link" href="/url-encode">URL Encode</a><a class="side-link" href="/hash-generator">Hash Generator</a><a class="side-link" href="/jwt-tool">JWT Tool</a></div><div class="side-group"><div class="side-group-title">JSON Tools</div><a class="side-link" href="/json-formatter">JSON Formatter</a><a class="side-link" href="/json-compare">JSON Compare</a><a class="side-link" href="/json-to-csharp">JSON to C#</a><a class="side-link" href="/json-to-java">JSON to Java</a><a class="side-link" href="/json-to-typescript">JSON to TypeScript</a></div><div class="side-group"><div class="side-group-title">Regex Tools</div><a class="side-link" href="/regex-search">Regex Search</a><a class="side-link" href="/regex-replace">Regex Replace</a><a class="side-link" href="/extract">String Extract</a></div><div class="side-group"><div class="side-group-title">Developer Tools</div><a class="side-link" href="/datetime-formatter">DateTime Formatter</a><a class="side-link" href="/string-formatter">String Formatter</a><a class="side-link" href="/guid-generator">GUID Generator</a><a class="side-link" href="/password-generator">Password Generator</a><a class="side-link" href="/number-converter">Number Converter</a><a class="side-link" href="/barcode-generator">Barcode Generator</a><a class="side-link" href="/http-client">HTTP Client</a></div><div class="side-group"><div class="side-group-title">Viewers</div><a class="side-link" href="/markdown-viewer">Markdown Viewer</a><a class="side-link" href="/html-viewer">HTML Viewer</a><a class="side-link" href="/diagram-viewer">Diagram Viewer</a></div></nav></aside>
   <div class="nav-backdrop"></div>
 
   <main class="page">
@@ -169,6 +174,30 @@
       <h2>Privacy</h2>
       <p>Your HTML is rendered locally and never uploaded. A draft is kept in this browser between visits.</p>
     </section>
+    <!-- faq: generated from scripts/content/faq.json -->
+    <section class="about faq" aria-labelledby="faq-title">
+      <h2 id="faq-title">Questions</h2>
+      <h3>How do I preview HTML code online?</h3>
+      <p>Paste or write HTML in the editor and the preview updates automatically, or press Run (Ctrl/⌘ + Enter). Inline <code>&lt;style&gt;</code> and <code>&lt;script&gt;</code> work. Templates for a basic page, form, table, card, grid and navigation bar give you a starting point. Your HTML is rendered locally and a draft is kept in this browser.</p>
+      <h3>Is it safe to run untrusted HTML here?</h3>
+      <p>The preview runs in a sandboxed <code>&lt;iframe&gt;</code> with a unique, opaque origin. Scripts can run, but they cannot read this site's storage or cookies, open pop-ups, submit forms, show alert dialogs or navigate the page. Turn on &quot;Sanitize HTML&quot; to remove <code>&lt;script&gt;</code> elements, inline event handlers and <code>javascript:</code> links before rendering.</p>
+      <h3>Why don't external CSS, scripts or images load in the preview?</h3>
+      <p>The preview inherits this site's strict security policy, which blocks external scripts, stylesheets, fonts and remote images. Put CSS in a <code>&lt;style&gt;</code> block and JavaScript in a <code>&lt;script&gt;</code> block, and embed images as <code>data:</code> URLs.</p>
+      <h3>How can I safely view an HTML email body?</h3>
+      <p>Paste the HTML and turn on &quot;Sanitize HTML&quot;. This strips scripts, <code>onclick</code>-style handlers and <code>javascript:</code> URLs, and the sandbox and security policy block remote images and other external resources, so tracking pixels cannot load.</p>
+    </section>
+    <!-- /faq -->
+    <!-- related: generated by scripts/gen-site.mjs -->
+    <nav class="related" aria-labelledby="related-title">
+      <h2 id="related-title">Related tools</h2>
+      <ul>
+        <li><a href="/markdown-viewer">Markdown Viewer</a> — Live Markdown preview and export.</li>
+        <li><a href="/diagram-viewer">Diagram Viewer</a> — Mermaid diagrams to SVG / PNG.</li>
+        <li><a href="/">All 28 tools</a></li>
+      </ul>
+      <p class="related-by">Made by <a href="https://mehmetoya.com" rel="author">Mehmet Oya</a> · <a href="https://github.com/mehmetoya/devtools">source on GitHub</a></p>
+    </nav>
+    <!-- /related -->
   </main>
 </div>
 

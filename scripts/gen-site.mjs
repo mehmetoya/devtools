@@ -43,10 +43,12 @@ ${canonical ? `  <meta name="robots" content="index, follow, max-snippet:-1, max
   <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
 ${extra}  <link rel="stylesheet" href="/assets/app.css" />`;
 
+const staticHeader = `<header id="site-header"><a class="logo" href="/">DevTools</a> <span class="header-tool">by <a href="${AUTHOR.url}" rel="author">${AUTHOR.name}</a></span></header>`;
+const staticSidebar = `<aside id="sidebar"><nav class="side-nav" aria-label="Tools"><a class="side-home" href="/">All tools</a>${CATS.map(c => `<div class="side-group"><div class="side-group-title">${esc(c.name)}</div>${c.tools.map(t => `<a class="side-link" href="/${t.route}">${esc(t.name)}</a>`).join('')}</div>`).join('')}</nav></aside>`;
 const shellOpen = `<body>
 <div class="shell">
-  <header id="site-header"></header>
-  <aside id="sidebar"></aside>
+  ${staticHeader}
+  ${staticSidebar}
   <div class="nav-backdrop"></div>
 `;
 const shellClose = `</div>
@@ -54,6 +56,8 @@ const shellClose = `</div>
 
 const ld = JSON.stringify({
   '@context': 'https://schema.org', '@type': 'WebSite', name: 'DevTools', url: SITE_URL + '/',
+  inLanguage: 'en', image: SITE_URL + '/assets/og/home.png', dateModified: latestRev.replace(/\./g, '-'),
+  publisher: { '@type': 'Person', name: AUTHOR.name, url: AUTHOR.url },
   description: 'Free, private, client-side developer tools.',
   author: { '@type': 'Person', name: 'Mehmet Oya', url: 'https://mehmetoya.com' },
   isPartOf: { '@type': 'WebSite', name: 'Mehmet Oya', url: 'https://mehmetoya.com' },
@@ -70,7 +74,7 @@ ${c.tools.map(t => `          <li><a class="sheet" href="/${t.route}"><span clas
       </section>`).join('\n');
 
 const home = `${head('DevTools — Free, Private, Client-Side Developer Tools',
-  `${tools.length} free developer tools: JSON formatter, Base64, hashes, JWT, regex, case converter, GUID, password generator, Mermaid diagrams and more. Everything runs in your browser.`,
+  `${tools.length} free, private developer tools: JSON formatter, Base64, hashes, JWT, regex tester, GUIDs, Mermaid diagrams and more. Everything runs in your browser.`,
   '/', `  <script type="application/ld+json">\n${ld}\n  </script>\n`)}
 </head>
 ${shellOpen}
@@ -151,6 +155,9 @@ const cspFor = (route, hashes) => {
 
 // ── SEO / social / icon tags: one generated block per page head (idempotent) ──
 const toolByRoute = new Map(tools.map(t => [t.route, t]));
+// Questions people ask about each tool — source: scripts/content/faq.json (plain text; `code` in backticks)
+const FAQ = JSON.parse(fs.readFileSync(new URL('./content/faq.json', import.meta.url), 'utf8'));
+const inline = (s) => esc(s).replace(/`([^`]+)`/g, '<code>$1</code>');
 function seoHead(html, route) {
   const end = html.indexOf('</head>');
   let head = html.slice(0, end);
@@ -171,6 +178,8 @@ function seoHead(html, route) {
       '<meta name="twitter:card" content="summary_large_image" />',
       `<meta name="twitter:image" content="${SITE_URL}/assets/og/${img}.png" />`,
       `<meta name="twitter:image:alt" content="${esc(alt)}" />`,
+      '<meta name="twitter:site" content="@mehmetoya" />',
+      '<meta name="twitter:creator" content="@mehmetoya" />',
     ] : []),
     `<meta name="author" content="${AUTHOR.name}" />`,
     '<meta name="theme-color" content="#0e1318" />',
@@ -190,9 +199,49 @@ function seoHead(html, route) {
     data.author = { '@type': 'Person', name: AUTHOR.name, url: AUTHOR.url };
     data.isPartOf = { '@type': 'WebSite', name: 'DevTools', url: SITE_URL + '/' };
     data.image = `${SITE_URL}/assets/og/${route}.png`;
+    data.inLanguage = 'en';
+    data.browserRequirements = 'Requires JavaScript';
+    data.dateModified = toolByRoute.get(route).rev.replace(/\./g, '-');
     return a + '\n  ' + JSON.stringify(data, null, 2).split('\n').join('\n  ') + '\n  ' + c;
   });
   return head + html.slice(end);
+}
+
+// FAQ: visible questions and answers under "About this tool" (answer engines quote visible text)
+function faqBlock(html, route) {
+  html = html.replace(/[ \t]*<!-- faq: generated[\s\S]*?<!-- \/faq -->\r?\n/, '');
+  const items = FAQ[route];
+  if (!items) return html;
+  const block = `    <!-- faq: generated from scripts/content/faq.json -->
+    <section class="about faq" aria-labelledby="faq-title">
+      <h2 id="faq-title">Questions</h2>
+${items.map(({ q, a }) => `      <h3>${inline(q)}</h3>
+      <p>${inline(a)}</p>`).join('\n')}
+    </section>
+    <!-- /faq -->
+`;
+  return html.replace(/(\n)([ \t]*<\/main>)/, `$1${block}$2`);
+}
+
+// "Related tools": same-category siblings + the author, as plain links in the page body (crawlable without JS)
+function relatedBlock(html, route) {
+  html = html.replace(/[ \t]*<!-- related: generated[\s\S]*?<!-- \/related -->\r?\n/, '');
+  const t = toolByRoute.get(route);
+  if (!t) return html;
+  const cat = CATS.find(c => c.tools.some(x => x.route === route));
+  const sibs = cat.tools.filter(x => x.route !== route).slice(0, 5);
+  const block = `    <!-- related: generated by scripts/gen-site.mjs -->
+    <nav class="related" aria-labelledby="related-title">
+      <h2 id="related-title">Related tools</h2>
+      <ul>
+${sibs.map(x => `        <li><a href="/${x.route}">${esc(x.name)}</a> — ${esc(x.desc)}</li>`).join('\n')}
+        <li><a href="/">All ${tools.length} tools</a></li>
+      </ul>
+      <p class="related-by">Made by <a href="${AUTHOR.url}" rel="author">${AUTHOR.name}</a> · <a href="https://github.com/mehmetoya/devtools">source on GitHub</a></p>
+    </nav>
+    <!-- /related -->
+`;
+  return html.replace(/(\n)([ \t]*<\/main>)/, `$1${block}$2`);
 }
 
 function syncPage(file, route) {
@@ -211,6 +260,10 @@ function syncPage(file, route) {
              .replace(/("(?:url|item)":\s*")\/([^"]*)"/g, `$1${SITE_URL}/$2"`)
 ;
   html = seoHead(html, route);
+  html = html.replace(/<header id="site-header">[\s\S]*?<\/header>/, staticHeader)
+             .replace(/<aside id="sidebar">[\s\S]*?<\/aside>/, staticSidebar);
+  html = faqBlock(html, route);
+  html = relatedBlock(html, route);
   // only touch the document <head> — page scripts may legitimately contain CSP metas in template strings
   {
     const end = html.indexOf('</head>');
@@ -256,6 +309,7 @@ ${block('/assets/vendor/*', ['Cache-Control: public, max-age=86400'])}
 ${block('/assets/fonts/*', ['Cache-Control: public, max-age=31536000, immutable'])}
 ${block('/manifest.webmanifest', ['Content-Type: application/manifest+json; charset=utf-8'])}
 ${block('/llms.txt', ['Content-Type: text/plain; charset=utf-8'])}
+${block('/llms-full.txt', ['Content-Type: text/plain; charset=utf-8'])}
 ${block('/.well-known/security.txt', ['Content-Type: text/plain; charset=utf-8'])}
 `;
 for (const [path, policy] of policies) headers += block(path, ['Content-Security-Policy: ' + policy]) + '\n';
@@ -282,6 +336,19 @@ if (!ONLY) fs.writeFileSync(root + '/netlify.toml', `# ── netlify.toml ─�
 ${PREVIOUS_ORIGINS.map(o => `[[redirects]]
   from   = "${o}/*"
   to     = "${SITE_URL}/:splat"
+  status = 301
+  force  = true
+`).join('\n')}
+# One URL per page: /<route>/ and /<route>/index.html move permanently to /<route>.
+${tools.map(t => `[[redirects]]
+  from   = "/${t.route}/"
+  to     = "/${t.route}"
+  status = 301
+  force  = true
+
+[[redirects]]
+  from   = "/${t.route}/index.html"
+  to     = "/${t.route}"
   status = 301
   force  = true
 `).join('\n')}
@@ -333,8 +400,35 @@ ${c.tools.map(t => `- [${t.name}](${SITE_URL}/${t.route}): ${t.desc}`).join('\n'
 ## Optional
 
 - [Privacy and security model](https://github.com/mehmetoya/devtools#privacy--security-model): how the site guarantees input stays local
+- [Full text of every tool page](${SITE_URL}/llms-full.txt): descriptions and common questions in Markdown
 - [About the author](${AUTHOR.url}/about/)
 `);
+// llms-full.txt: the full text answer engines can read without running JavaScript
+if (!ONLY) {
+  const aboutText = (route) => {
+    const h = fs.readFileSync(`${root}/${route}/index.html`, 'utf8');
+    const m = h.match(/<section class="about">([\s\S]*?)<\/section>/);
+    if (!m) return '';
+    return m[1].replace(/<h2[^>]*>([\s\S]*?)<\/h2>/g, '\n#### $1\n').replace(/<li[^>]*>/g, '- ').replace(/<code>([\s\S]*?)<\/code>/g, '`$1`')
+      .replace(/<[^>]+>/g, '').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'")
+      .split('\n').map(l => l.trim()).filter((l, i, a) => l || (a[i - 1] && a[i - 1].trim())).join('\n').trim();
+  };
+  fs.writeFileSync(root + '/llms-full.txt', `# DevTools (DT-28) by ${AUTHOR.name} — full text
+
+> ${tools.length} free developer tools at ${SITE_URL}/ that run entirely in the browser (no backend, no tracking). This file holds each tool's description and common questions in plain Markdown.
+
+${CATS.map(c => `## ${c.name}
+
+${c.tools.map(t => `### ${t.name}
+
+URL: ${SITE_URL}/${t.route}
+${t.desc}
+
+${aboutText(t.route)}
+
+${(FAQ[t.route] || []).map(({ q, a }) => `**${q}**\n${a}`).join('\n\n')}`).join('\n\n')}`).join('\n\n')}
+`);
+}
 if (!ONLY) {
   fs.mkdirSync(root + '/.well-known', { recursive: true });
   fs.writeFileSync(root + '/.well-known/security.txt', `Contact: ${AUTHOR.contact}

@@ -4,13 +4,13 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-5K+JkZ3kvsPD5fhoBRUcNMf1Pi86xujOeqWVx04p1D4='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self';" />
-  <title>Regex Search — Test Regular Expressions Online, Client-Side</title>
+  <title>Regex Tester Online — Test Regular Expressions, Free</title>
   <meta name="description" content="Test JavaScript regular expressions against your text: highlighted matches, positions, numbered and named capture groups. Runs entirely in your browser." />
   <meta name="keywords" content="regex tester, regex search, regular expression tester, regex online, capture groups, named groups, javascript regex" />
   <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large" />
   <link rel="canonical" href="https://tool.mehmetoya.com/regex-search" />
   <meta property="og:type" content="website" />
-  <meta property="og:title" content="Regex Search — Test Regular Expressions, Client-Side" />
+  <meta property="og:title" content="Regex Tester Online — Test Regular Expressions, Free" />
   <meta property="og:description" content="Find regex matches and capture groups in your browser. Nothing leaves your machine." />
   <meta property="og:url" content="https://tool.mehmetoya.com/regex-search" />
   <meta property="og:site_name" content="DevTools" />
@@ -46,7 +46,10 @@
       "name": "DevTools",
       "url": "https://tool.mehmetoya.com/"
     },
-    "image": "https://tool.mehmetoya.com/assets/og/regex-search.png"
+    "image": "https://tool.mehmetoya.com/assets/og/regex-search.png",
+    "inLanguage": "en",
+    "browserRequirements": "Requires JavaScript",
+    "dateModified": "2026-11-21"
   }
   </script>
   <script type="application/ld+json">
@@ -63,6 +66,8 @@
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:image" content="https://tool.mehmetoya.com/assets/og/regex-search.png" />
   <meta name="twitter:image:alt" content="Regex Search — Find matches and capture groups." />
+  <meta name="twitter:site" content="@mehmetoya" />
+  <meta name="twitter:creator" content="@mehmetoya" />
   <meta name="author" content="Mehmet Oya" />
   <meta name="theme-color" content="#0e1318" />
   <meta name="color-scheme" content="dark" />
@@ -93,13 +98,13 @@
 </head>
 <body>
 <div class="shell">
-  <header id="site-header"></header>
-  <aside id="sidebar"></aside>
+  <header id="site-header"><a class="logo" href="/">DevTools</a> <span class="header-tool">by <a href="https://mehmetoya.com" rel="author">Mehmet Oya</a></span></header>
+  <aside id="sidebar"><nav class="side-nav" aria-label="Tools"><a class="side-home" href="/">All tools</a><div class="side-group"><div class="side-group-title">Text Operations</div><a class="side-link" href="/case-converter">Case Converter</a><a class="side-link" href="/reverse">String Reverse</a><a class="side-link" href="/trim-pad">Trim / Pad</a><a class="side-link" href="/line-counter">Line Counter</a><a class="side-link" href="/line-operations">Line Operations</a><a class="side-link" href="/compare">String Compare</a></div><div class="side-group"><div class="side-group-title">Encode / Decode</div><a class="side-link" href="/base64">Base64</a><a class="side-link" href="/url-encode">URL Encode</a><a class="side-link" href="/hash-generator">Hash Generator</a><a class="side-link" href="/jwt-tool">JWT Tool</a></div><div class="side-group"><div class="side-group-title">JSON Tools</div><a class="side-link" href="/json-formatter">JSON Formatter</a><a class="side-link" href="/json-compare">JSON Compare</a><a class="side-link" href="/json-to-csharp">JSON to C#</a><a class="side-link" href="/json-to-java">JSON to Java</a><a class="side-link" href="/json-to-typescript">JSON to TypeScript</a></div><div class="side-group"><div class="side-group-title">Regex Tools</div><a class="side-link" href="/regex-search">Regex Search</a><a class="side-link" href="/regex-replace">Regex Replace</a><a class="side-link" href="/extract">String Extract</a></div><div class="side-group"><div class="side-group-title">Developer Tools</div><a class="side-link" href="/datetime-formatter">DateTime Formatter</a><a class="side-link" href="/string-formatter">String Formatter</a><a class="side-link" href="/guid-generator">GUID Generator</a><a class="side-link" href="/password-generator">Password Generator</a><a class="side-link" href="/number-converter">Number Converter</a><a class="side-link" href="/barcode-generator">Barcode Generator</a><a class="side-link" href="/http-client">HTTP Client</a></div><div class="side-group"><div class="side-group-title">Viewers</div><a class="side-link" href="/markdown-viewer">Markdown Viewer</a><a class="side-link" href="/html-viewer">HTML Viewer</a><a class="side-link" href="/diagram-viewer">Diagram Viewer</a></div></nav></aside>
   <div class="nav-backdrop"></div>
 
   <main class="page">
     <section class="tool-head">
-      <h1>Regex Search</h1>
+      <h1>Regex Tester</h1>
       <p>Test a regular expression against your text and inspect every match and capture group.</p>
     </section>
 
@@ -168,6 +173,31 @@
       <h2>Privacy</h2>
       <p>All processing happens in your browser. Nothing you type is sent, stored or logged.</p>
     </section>
+    <!-- faq: generated from scripts/content/faq.json -->
+    <section class="about faq" aria-labelledby="faq-title">
+      <h2 id="faq-title">Questions</h2>
+      <h3>How do I test a regular expression online?</h3>
+      <p>Type a pattern, paste your test text, and every match is highlighted and listed with its index, length, value and capture groups. Both numbered groups (<code>
+</code>, <code>  </main></code>) and named groups (<code>(?&lt;name&gt;…)</code>) are shown. The tool uses your browser's JavaScript regex engine, so results match what <code>String.prototype.matchAll</code> returns in JavaScript. Matching runs locally; nothing is uploaded.</p>
+      <h3>What do the g, i, m, s and u regex flags do?</h3>
+      <p><code>g</code> finds all matches instead of the first; this tool always searches globally. <code>i</code> ignores case, and <code>m</code> makes <code>^</code> and <code>$</code> match at every line break. <code>s</code> lets <code>.</code> match newlines, and <code>u</code> enables full Unicode, including <code>\u{1F600}</code> escapes and property classes such as <code>\p{L}</code>. The <code>u</code> flag is on by default.</p>
+      <h3>Why does my regex hang or time out?</h3>
+      <p>Nested quantifiers such as <code>(a+)+$</code> can cause catastrophic backtracking, where the engine tries an exponential number of paths. This page runs matching in a background worker and stops it after 1.5 seconds, so the page stays responsive. Make quantifiers more specific or remove the nesting to fix the pattern.</p>
+      <h3>How many matches can it show?</h3>
+      <p>The results table shows the first 500 matches, and counting stops at 100,000 matches or after about one second. Empty matches, such as <code>a*</code> between characters, appear as thin markers and the search advances one character, so it never loops forever. Use &quot;Show matches only&quot; to copy or download all matched values, one per line.</p>
+    </section>
+    <!-- /faq -->
+    <!-- related: generated by scripts/gen-site.mjs -->
+    <nav class="related" aria-labelledby="related-title">
+      <h2 id="related-title">Related tools</h2>
+      <ul>
+        <li><a href="/regex-replace">Regex Replace</a> — Find and replace with group references.</li>
+        <li><a href="/extract">String Extract</a> — Extract by position, delimiters, regex or line range.</li>
+        <li><a href="/">All 28 tools</a></li>
+      </ul>
+      <p class="related-by">Made by <a href="https://mehmetoya.com" rel="author">Mehmet Oya</a> · <a href="https://github.com/mehmetoya/devtools">source on GitHub</a></p>
+    </nav>
+    <!-- /related -->
   </main>
 </div>
 

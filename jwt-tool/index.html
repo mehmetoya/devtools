@@ -4,13 +4,13 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-nNwGeBL2CIi6+Xl6mxgmf+Yovzm+DqS8LFYcv1SKdHQ='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self';" />
-  <title>JWT Tool — Generate, Decode &amp; Validate JSON Web Tokens</title>
-  <meta name="description" content="Create HS256/HS384/HS512 JSON Web Tokens, decode any JWT into readable header and claims, and verify signatures, expiry and issuer. Runs entirely in your browser." />
+  <title>JWT Decoder &amp; Encoder Online — Decode, Verify, Generate</title>
+  <meta name="description" content="Decode, verify and generate JSON Web Tokens (HS256/384/512) in your browser. Inspect header, payload and claims; tokens and secrets never leave the page." />
   <meta name="keywords" content="jwt decoder, jwt generator, jwt validator, json web token, hs256, verify jwt signature, jwt debugger" />
   <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large" />
   <link rel="canonical" href="https://tool.mehmetoya.com/jwt-tool" />
   <meta property="og:type" content="website" />
-  <meta property="og:title" content="JWT Tool — Generate, Decode &amp; Validate JSON Web Tokens" />
+  <meta property="og:title" content="JWT Decoder &amp; Encoder Online — Decode, Verify, Generate" />
   <meta property="og:description" content="Generate, decode and verify JWTs in your browser. Tokens and secrets never leave your machine." />
   <meta property="og:url" content="https://tool.mehmetoya.com/jwt-tool" />
   <meta property="og:site_name" content="DevTools" />
@@ -47,7 +47,10 @@
       "name": "DevTools",
       "url": "https://tool.mehmetoya.com/"
     },
-    "image": "https://tool.mehmetoya.com/assets/og/jwt-tool.png"
+    "image": "https://tool.mehmetoya.com/assets/og/jwt-tool.png",
+    "inLanguage": "en",
+    "browserRequirements": "Requires JavaScript",
+    "dateModified": "2026-11-21"
   }
   </script>
   <script type="application/ld+json">
@@ -64,6 +67,8 @@
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:image" content="https://tool.mehmetoya.com/assets/og/jwt-tool.png" />
   <meta name="twitter:image:alt" content="JWT Tool — Generate, decode and validate JSON Web Tokens." />
+  <meta name="twitter:site" content="@mehmetoya" />
+  <meta name="twitter:creator" content="@mehmetoya" />
   <meta name="author" content="Mehmet Oya" />
   <meta name="theme-color" content="#0e1318" />
   <meta name="color-scheme" content="dark" />
@@ -109,13 +114,13 @@
 </head>
 <body>
 <div class="shell">
-  <header id="site-header"></header>
-  <aside id="sidebar"></aside>
+  <header id="site-header"><a class="logo" href="/">DevTools</a> <span class="header-tool">by <a href="https://mehmetoya.com" rel="author">Mehmet Oya</a></span></header>
+  <aside id="sidebar"><nav class="side-nav" aria-label="Tools"><a class="side-home" href="/">All tools</a><div class="side-group"><div class="side-group-title">Text Operations</div><a class="side-link" href="/case-converter">Case Converter</a><a class="side-link" href="/reverse">String Reverse</a><a class="side-link" href="/trim-pad">Trim / Pad</a><a class="side-link" href="/line-counter">Line Counter</a><a class="side-link" href="/line-operations">Line Operations</a><a class="side-link" href="/compare">String Compare</a></div><div class="side-group"><div class="side-group-title">Encode / Decode</div><a class="side-link" href="/base64">Base64</a><a class="side-link" href="/url-encode">URL Encode</a><a class="side-link" href="/hash-generator">Hash Generator</a><a class="side-link" href="/jwt-tool">JWT Tool</a></div><div class="side-group"><div class="side-group-title">JSON Tools</div><a class="side-link" href="/json-formatter">JSON Formatter</a><a class="side-link" href="/json-compare">JSON Compare</a><a class="side-link" href="/json-to-csharp">JSON to C#</a><a class="side-link" href="/json-to-java">JSON to Java</a><a class="side-link" href="/json-to-typescript">JSON to TypeScript</a></div><div class="side-group"><div class="side-group-title">Regex Tools</div><a class="side-link" href="/regex-search">Regex Search</a><a class="side-link" href="/regex-replace">Regex Replace</a><a class="side-link" href="/extract">String Extract</a></div><div class="side-group"><div class="side-group-title">Developer Tools</div><a class="side-link" href="/datetime-formatter">DateTime Formatter</a><a class="side-link" href="/string-formatter">String Formatter</a><a class="side-link" href="/guid-generator">GUID Generator</a><a class="side-link" href="/password-generator">Password Generator</a><a class="side-link" href="/number-converter">Number Converter</a><a class="side-link" href="/barcode-generator">Barcode Generator</a><a class="side-link" href="/http-client">HTTP Client</a></div><div class="side-group"><div class="side-group-title">Viewers</div><a class="side-link" href="/markdown-viewer">Markdown Viewer</a><a class="side-link" href="/html-viewer">HTML Viewer</a><a class="side-link" href="/diagram-viewer">Diagram Viewer</a></div></nav></aside>
   <div class="nav-backdrop"></div>
 
   <main class="page">
     <section class="tool-head">
-      <h1>JWT Tool</h1>
+      <h1>JWT Decoder &amp; Encoder</h1>
       <p>Generate signed JSON Web Tokens, decode their contents and verify signature and claims.</p>
     </section>
 
@@ -271,6 +276,31 @@
       <h2>Privacy</h2>
       <p>Tokens and secrets are processed only in your browser. Nothing is sent, stored or logged. Even so, avoid pasting production secrets into any web page you do not control.</p>
     </section>
+    <!-- faq: generated from scripts/content/faq.json -->
+    <section class="about faq" aria-labelledby="faq-title">
+      <h2 id="faq-title">Questions</h2>
+      <h3>How do I decode a JWT token?</h3>
+      <p>Switch to Decode and paste the token. The header and payload are shown as JSON, and time claims such as <code>exp</code> and <code>iat</code> are listed alongside. Decoding does not check the signature; use Validate for that.</p>
+      <h3>How do I verify a JWT signature?</h3>
+      <p>Switch to Validate, paste the token and enter the secret, ticking Secret is Base64 encoded if needed. The tool verifies HS256, HS384 and HS512 signatures and can also check expiry, not-before, issuer and audience with a configurable clock skew. RSA and ECDSA tokens can be decoded but not verified here.</p>
+      <h3>Is the data in a JWT encrypted?</h3>
+      <p>No. A standard JWT is three Base64URL segments, so anyone holding the token can read the header and payload. Only the signature proves who created it. Never put secrets in the claims.</p>
+      <h3>How long should an HS256 secret be?</h3>
+      <p>RFC 7518 asks for an HMAC key at least as long as the hash output: 32 bytes for HS256, 48 for HS384 and 64 for HS512. The tool warns when a secret is shorter, and the Random button generates one. Avoid pasting production secrets into web pages you do not control.</p>
+    </section>
+    <!-- /faq -->
+    <!-- related: generated by scripts/gen-site.mjs -->
+    <nav class="related" aria-labelledby="related-title">
+      <h2 id="related-title">Related tools</h2>
+      <ul>
+        <li><a href="/base64">Base64</a> — Encode and decode Base64 (UTF-8, ASCII, UTF-16, UTF-32).</li>
+        <li><a href="/url-encode">URL Encode</a> — Percent-encode or decode URL strings.</li>
+        <li><a href="/hash-generator">Hash Generator</a> — MD5, SHA-1, SHA-256, SHA-384, SHA-512 + verify.</li>
+        <li><a href="/">All 28 tools</a></li>
+      </ul>
+      <p class="related-by">Made by <a href="https://mehmetoya.com" rel="author">Mehmet Oya</a> · <a href="https://github.com/mehmetoya/devtools">source on GitHub</a></p>
+    </nav>
+    <!-- /related -->
   </main>
 </div>
 

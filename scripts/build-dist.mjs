@@ -13,7 +13,7 @@ const ctx = { window: {}, document: { readyState: 'loading', addEventListener() 
 vm.runInNewContext(fs.readFileSync(path.join(ROOT, 'assets/tools.js'), 'utf8'), ctx);
 const routes = ctx.window.DevTools.CATEGORIES.flatMap(c => c.tools.map(t => t.route));
 
-const PUBLIC = ['index.html', '404.html', '_headers', 'sitemap.xml', 'robots.txt', 'manifest.webmanifest', 'llms.txt',
+const PUBLIC = ['index.html', '404.html', '_headers', 'sitemap.xml', 'robots.txt', 'manifest.webmanifest', 'llms.txt', 'llms-full.txt',
   'favicon.ico', 'apple-touch-icon.png', '.well-known', 'assets', ...routes];
 
 fs.rmSync(DIST, { recursive: true, force: true });

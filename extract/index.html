@@ -4,13 +4,13 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-socjQLl1gJMvBIodZRC0arAb1DQ25DWf2Omi3dBqMp8='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self';" />
-  <title>String Extract — Substring, Between Delimiters, Regex &amp; Line Ranges</title>
+  <title>String Extract — Substring, Delimiters, Regex &amp; Lines</title>
   <meta name="description" content="Extract parts of text by position, between two delimiters, with a regex capture group, or by line ranges like 1-5, 10, 15-20. Runs entirely in your browser." />
   <meta name="keywords" content="extract text, substring online, text between delimiters, extract regex group, extract lines, line range" />
   <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large" />
   <link rel="canonical" href="https://tool.mehmetoya.com/extract" />
   <meta property="og:type" content="website" />
-  <meta property="og:title" content="String Extract — Substring, Delimiters, Regex, Lines" />
+  <meta property="og:title" content="String Extract — Substring, Delimiters, Regex &amp; Lines" />
   <meta property="og:description" content="Pull out exactly the text you need, in your browser. Nothing leaves your machine." />
   <meta property="og:url" content="https://tool.mehmetoya.com/extract" />
   <meta property="og:site_name" content="DevTools" />
@@ -46,7 +46,10 @@
       "name": "DevTools",
       "url": "https://tool.mehmetoya.com/"
     },
-    "image": "https://tool.mehmetoya.com/assets/og/extract.png"
+    "image": "https://tool.mehmetoya.com/assets/og/extract.png",
+    "inLanguage": "en",
+    "browserRequirements": "Requires JavaScript",
+    "dateModified": "2026-11-21"
   }
   </script>
   <script type="application/ld+json">
@@ -63,6 +66,8 @@
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:image" content="https://tool.mehmetoya.com/assets/og/extract.png" />
   <meta name="twitter:image:alt" content="String Extract — Extract by position, delimiters, regex or line range." />
+  <meta name="twitter:site" content="@mehmetoya" />
+  <meta name="twitter:creator" content="@mehmetoya" />
   <meta name="author" content="Mehmet Oya" />
   <meta name="theme-color" content="#0e1318" />
   <meta name="color-scheme" content="dark" />
@@ -81,8 +86,8 @@
 </head>
 <body>
 <div class="shell">
-  <header id="site-header"></header>
-  <aside id="sidebar"></aside>
+  <header id="site-header"><a class="logo" href="/">DevTools</a> <span class="header-tool">by <a href="https://mehmetoya.com" rel="author">Mehmet Oya</a></span></header>
+  <aside id="sidebar"><nav class="side-nav" aria-label="Tools"><a class="side-home" href="/">All tools</a><div class="side-group"><div class="side-group-title">Text Operations</div><a class="side-link" href="/case-converter">Case Converter</a><a class="side-link" href="/reverse">String Reverse</a><a class="side-link" href="/trim-pad">Trim / Pad</a><a class="side-link" href="/line-counter">Line Counter</a><a class="side-link" href="/line-operations">Line Operations</a><a class="side-link" href="/compare">String Compare</a></div><div class="side-group"><div class="side-group-title">Encode / Decode</div><a class="side-link" href="/base64">Base64</a><a class="side-link" href="/url-encode">URL Encode</a><a class="side-link" href="/hash-generator">Hash Generator</a><a class="side-link" href="/jwt-tool">JWT Tool</a></div><div class="side-group"><div class="side-group-title">JSON Tools</div><a class="side-link" href="/json-formatter">JSON Formatter</a><a class="side-link" href="/json-compare">JSON Compare</a><a class="side-link" href="/json-to-csharp">JSON to C#</a><a class="side-link" href="/json-to-java">JSON to Java</a><a class="side-link" href="/json-to-typescript">JSON to TypeScript</a></div><div class="side-group"><div class="side-group-title">Regex Tools</div><a class="side-link" href="/regex-search">Regex Search</a><a class="side-link" href="/regex-replace">Regex Replace</a><a class="side-link" href="/extract">String Extract</a></div><div class="side-group"><div class="side-group-title">Developer Tools</div><a class="side-link" href="/datetime-formatter">DateTime Formatter</a><a class="side-link" href="/string-formatter">String Formatter</a><a class="side-link" href="/guid-generator">GUID Generator</a><a class="side-link" href="/password-generator">Password Generator</a><a class="side-link" href="/number-converter">Number Converter</a><a class="side-link" href="/barcode-generator">Barcode Generator</a><a class="side-link" href="/http-client">HTTP Client</a></div><div class="side-group"><div class="side-group-title">Viewers</div><a class="side-link" href="/markdown-viewer">Markdown Viewer</a><a class="side-link" href="/html-viewer">HTML Viewer</a><a class="side-link" href="/diagram-viewer">Diagram Viewer</a></div></nav></aside>
   <div class="nav-backdrop"></div>
 
   <main class="page">
@@ -172,6 +177,30 @@
       <h2>Privacy</h2>
       <p>All processing happens in your browser. Nothing you type is sent, stored or logged.</p>
     </section>
+    <!-- faq: generated from scripts/content/faq.json -->
+    <section class="about faq" aria-labelledby="faq-title">
+      <h2 id="faq-title">Questions</h2>
+      <h3>How do I extract text between two delimiters?</h3>
+      <p>Choose Between mode and enter a start and an end delimiter, for example <code>[</code> and <code>]</code>. You can include the delimiters in the output and take the first occurrence or all of them, one per line. An empty start delimiter means from the beginning of the text, and an empty end delimiter means to the end.</p>
+      <h3>How do I extract a substring by position?</h3>
+      <p>Use Substring mode with a 0-based Start and an optional Length; leave Length empty to take everything to the end. A negative start counts from the end, so Start <code>-4</code> returns the last four characters. Positions count Unicode code points, so an emoji counts as one character.</p>
+      <h3>How do I extract only a capture group from regex matches?</h3>
+      <p>Choose Regex mode, enter a JavaScript pattern and set Group to the capture group you want, where 0 is the whole match. For example, pattern <code>order=(\d+)</code> with Group 1 lists just the order numbers, one per line. Matching runs in a background worker and stops after 1.5 seconds.</p>
+      <h3>How do I get specific lines from a text?</h3>
+      <p>Use Lines mode and enter line numbers or ranges such as <code>1-5, 10, 15-20</code>. Line numbers start at 1, and an open range like <code>12-</code> takes line 12 to the end. Lines are output in the order the ranges are listed.</p>
+    </section>
+    <!-- /faq -->
+    <!-- related: generated by scripts/gen-site.mjs -->
+    <nav class="related" aria-labelledby="related-title">
+      <h2 id="related-title">Related tools</h2>
+      <ul>
+        <li><a href="/regex-search">Regex Search</a> — Find matches and capture groups.</li>
+        <li><a href="/regex-replace">Regex Replace</a> — Find and replace with group references.</li>
+        <li><a href="/">All 28 tools</a></li>
+      </ul>
+      <p class="related-by">Made by <a href="https://mehmetoya.com" rel="author">Mehmet Oya</a> · <a href="https://github.com/mehmetoya/devtools">source on GitHub</a></p>
+    </nav>
+    <!-- /related -->
   </main>
 </div>
 

@@ -41,7 +41,8 @@ async function page(p, route, expectStatus = 200) {
 await page('/', '');
 for (const r of routes) {
   await page('/' + r, r);
-  await page('/' + r + '/', r);
+  const slash = await get('/' + r + '/');
+  if (slash.status !== 301 || (slash.headers.get('location') || '').replace(BASE, '') !== '/' + r) fail('/' + r + '/', `expected 301 → /${r}, got ${slash.status} ${slash.headers.get('location') || ''}`);
 }
 await page('/this-page-does-not-exist', null, 404);
 
@@ -53,7 +54,7 @@ for (const p of ['/README.md', '/LICENSE', '/netlify.toml', '/_headers', '/scrip
 for (const p of ['/assets/tools.js', '/assets/app.css', '/assets/regex-worker.js', '/assets/favicon.svg',
   '/assets/fonts/ibm-plex-sans-condensed-latin-600-normal.woff2', '/assets/fonts/ibm-plex-sans-latin-400-normal.woff2', '/assets/fonts/ibm-plex-mono-latin-400-normal.woff2',
   '/assets/vendor/mermaid.min.js', '/assets/vendor/purify.min.js', '/sitemap.xml', '/robots.txt',
-  '/favicon.ico', '/apple-touch-icon.png', '/manifest.webmanifest', '/llms.txt', '/.well-known/security.txt',
+  '/favicon.ico', '/apple-touch-icon.png', '/manifest.webmanifest', '/llms.txt', '/llms-full.txt', '/.well-known/security.txt',
   '/assets/og/home.png', '/assets/og/base64.png', '/assets/icons/icon-512.png']) {
   const res = await get(p);
   if (res.status !== 200) fail(p, `status ${res.status}`);
@@ -64,4 +65,4 @@ if (errors.length) {
   console.error(`\n${errors.length} problem(s) on ${BASE}`);
   process.exit(1);
 }
-console.log(`✓ ${BASE}: ${routes.length * 2 + 1} pages, 404 page, repo files hidden, assets — all smoke checks passed.`);
+console.log(`✓ ${BASE}: ${routes.length + 1} pages + ${routes.length} trailing-slash 301s, 404 page, repo files hidden, assets — all smoke checks passed.`);

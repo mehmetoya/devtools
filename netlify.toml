@@ -20,6 +20,343 @@
   status = 301
   force  = true
 
+# One URL per page: /<route>/ and /<route>/index.html move permanently to /<route>.
+[[redirects]]
+  from   = "/case-converter/"
+  to     = "/case-converter"
+  status = 301
+  force  = true
+
+[[redirects]]
+  from   = "/case-converter/index.html"
+  to     = "/case-converter"
+  status = 301
+  force  = true
+
+[[redirects]]
+  from   = "/reverse/"
+  to     = "/reverse"
+  status = 301
+  force  = true
+
+[[redirects]]
+  from   = "/reverse/index.html"
+  to     = "/reverse"
+  status = 301
+  force  = true
+
+[[redirects]]
+  from   = "/trim-pad/"
+  to     = "/trim-pad"
+  status = 301
+  force  = true
+
+[[redirects]]
+  from   = "/trim-pad/index.html"
+  to     = "/trim-pad"
+  status = 301
+  force  = true
+
+[[redirects]]
+  from   = "/line-counter/"
+  to     = "/line-counter"
+  status = 301
+  force  = true
+
+[[redirects]]
+  from   = "/line-counter/index.html"
+  to     = "/line-counter"
+  status = 301
+  force  = true
+
+[[redirects]]
+  from   = "/line-operations/"
+  to     = "/line-operations"
+  status = 301
+  force  = true
+
+[[redirects]]
+  from   = "/line-operations/index.html"
+  to     = "/line-operations"
+  status = 301
+  force  = true
+
+[[redirects]]
+  from   = "/compare/"
+  to     = "/compare"
+  status = 301
+  force  = true
+
+[[redirects]]
+  from   = "/compare/index.html"
+  to     = "/compare"
+  status = 301
+  force  = true
+
+[[redirects]]
+  from   = "/base64/"
+  to     = "/base64"
+  status = 301
+  force  = true
+
+[[redirects]]
+  from   = "/base64/index.html"
+  to     = "/base64"
+  status = 301
+  force  = true
+
+[[redirects]]
+  from   = "/url-encode/"
+  to     = "/url-encode"
+  status = 301
+  force  = true
+
+[[redirects]]
+  from   = "/url-encode/index.html"
+  to     = "/url-encode"
+  status = 301
+  force  = true
+
+[[redirects]]
+  from   = "/hash-generator/"
+  to     = "/hash-generator"
+  status = 301
+  force  = true
+
+[[redirects]]
+  from   = "/hash-generator/index.html"
+  to     = "/hash-generator"
+  status = 301
+  force  = true
+
+[[redirects]]
+  from   = "/jwt-tool/"
+  to     = "/jwt-tool"
+  status = 301
+  force  = true
+
+[[redirects]]
+  from   = "/jwt-tool/index.html"
+  to     = "/jwt-tool"
+  status = 301
+  force  = true
+
+[[redirects]]
+  from   = "/json-formatter/"
+  to     = "/json-formatter"
+  status = 301
+  force  = true
+
+[[redirects]]
+  from   = "/json-formatter/index.html"
+  to     = "/json-formatter"
+  status = 301
+  force  = true
+
+[[redirects]]
+  from   = "/json-compare/"
+  to     = "/json-compare"
+  status = 301
+  force  = true
+
+[[redirects]]
+  from   = "/json-compare/index.html"
+  to     = "/json-compare"
+  status = 301
+  force  = true
+
+[[redirects]]
+  from   = "/json-to-csharp/"
+  to     = "/json-to-csharp"
+  status = 301
+  force  = true
+
+[[redirects]]
+  from   = "/json-to-csharp/index.html"
+  to     = "/json-to-csharp"
+  status = 301
+  force  = true
+
+[[redirects]]
+  from   = "/json-to-java/"
+  to     = "/json-to-java"
+  status = 301
+  force  = true
+
+[[redirects]]
+  from   = "/json-to-java/index.html"
+  to     = "/json-to-java"
+  status = 301
+  force  = true
+
+[[redirects]]
+  from   = "/json-to-typescript/"
+  to     = "/json-to-typescript"
+  status = 301
+  force  = true
+
+[[redirects]]
+  from   = "/json-to-typescript/index.html"
+  to     = "/json-to-typescript"
+  status = 301
+  force  = true
+
+[[redirects]]
+  from   = "/regex-search/"
+  to     = "/regex-search"
+  status = 301
+  force  = true
+
+[[redirects]]
+  from   = "/regex-search/index.html"
+  to     = "/regex-search"
+  status = 301
+  force  = true
+
+[[redirects]]
+  from   = "/regex-replace/"
+  to     = "/regex-replace"
+  status = 301
+  force  = true
+
+[[redirects]]
+  from   = "/regex-replace/index.html"
+  to     = "/regex-replace"
+  status = 301
+  force  = true
+
+[[redirects]]
+  from   = "/extract/"
+  to     = "/extract"
+  status = 301
+  force  = true
+
+[[redirects]]
+  from   = "/extract/index.html"
+  to     = "/extract"
+  status = 301
+  force  = true
+
+[[redirects]]
+  from   = "/datetime-formatter/"
+  to     = "/datetime-formatter"
+  status = 301
+  force  = true
+
+[[redirects]]
+  from   = "/datetime-formatter/index.html"
+  to     = "/datetime-formatter"
+  status = 301
+  force  = true
+
+[[redirects]]
+  from   = "/string-formatter/"
+  to     = "/string-formatter"
+  status = 301
+  force  = true
+
+[[redirects]]
+  from   = "/string-formatter/index.html"
+  to     = "/string-formatter"
+  status = 301
+  force  = true
+
+[[redirects]]
+  from   = "/guid-generator/"
+  to     = "/guid-generator"
+  status = 301
+  force  = true
+
+[[redirects]]
+  from   = "/guid-generator/index.html"
+  to     = "/guid-generator"
+  status = 301
+  force  = true
+
+[[redirects]]
+  from   = "/password-generator/"
+  to     = "/password-generator"
+  status = 301
+  force  = true
+
+[[redirects]]
+  from   = "/password-generator/index.html"
+  to     = "/password-generator"
+  status = 301
+  force  = true
+
+[[redirects]]
+  from   = "/number-converter/"
+  to     = "/number-converter"
+  status = 301
+  force  = true
+
+[[redirects]]
+  from   = "/number-converter/index.html"
+  to     = "/number-converter"
+  status = 301
+  force  = true
+
+[[redirects]]
+  from   = "/barcode-generator/"
+  to     = "/barcode-generator"
+  status = 301
+  force  = true
+
+[[redirects]]
+  from   = "/barcode-generator/index.html"
+  to     = "/barcode-generator"
+  status = 301
+  force  = true
+
+[[redirects]]
+  from   = "/http-client/"
+  to     = "/http-client"
+  status = 301
+  force  = true
+
+[[redirects]]
+  from   = "/http-client/index.html"
+  to     = "/http-client"
+  status = 301
+  force  = true
+
+[[redirects]]
+  from   = "/markdown-viewer/"
+  to     = "/markdown-viewer"
+  status = 301
+  force  = true
+
+[[redirects]]
+  from   = "/markdown-viewer/index.html"
+  to     = "/markdown-viewer"
+  status = 301
+  force  = true
+
+[[redirects]]
+  from   = "/html-viewer/"
+  to     = "/html-viewer"
+  status = 301
+  force  = true
+
+[[redirects]]
+  from   = "/html-viewer/index.html"
+  to     = "/html-viewer"
+  status = 301
+  force  = true
+
+[[redirects]]
+  from   = "/diagram-viewer/"
+  to     = "/diagram-viewer"
+  status = 301
+  force  = true
+
+[[redirects]]
+  from   = "/diagram-viewer/index.html"
+  to     = "/diagram-viewer"
+  status = 301
+  force  = true
+
 # Serve /<route> directly (200) instead of Netlify's 301 to /<route>/, so links, canonicals
 # and the per-path CSP in _headers all use the same URL.
 [[redirects]]
