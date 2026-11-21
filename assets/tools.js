@@ -7,44 +7,44 @@
 
   const CATEGORIES = [
     { id: 'text', name: 'Text Operations', tools: [
-      { route: 'case-converter',  name: 'Case Converter',     desc: 'camelCase, snake_case, PascalCase, kebab-case and more.' },
-      { route: 'reverse',         name: 'String Reverse',     desc: 'Reverse strings, lines, words or each word.' },
-      { route: 'trim-pad',        name: 'Trim / Pad',         desc: 'Trim whitespace or pad text to a width.' },
-      { route: 'line-counter',    name: 'Line Counter',       desc: 'Lines, words, characters, bytes and more.' },
-      { route: 'line-operations', name: 'Line Operations',    desc: 'Sort, dedupe, filter, number, join lines.' },
-      { route: 'compare',         name: 'String Compare',     desc: 'Compare two strings line by line.' },
+      { route: 'case-converter',  name: 'Case Converter',     desc: 'camelCase, snake_case, PascalCase, kebab-case and more.', aliases: ['camel', 'snake', 'kebab', 'pascal', 'upper', 'lower'] },
+      { route: 'reverse',         name: 'String Reverse',     desc: 'Reverse strings, lines, words or each word.', aliases: ['rev', 'backwards'] },
+      { route: 'trim-pad',        name: 'Trim / Pad',         desc: 'Trim whitespace or pad text to a width.', aliases: ['trim', 'pad', 'whitespace'] },
+      { route: 'line-counter',    name: 'Line Counter',       desc: 'Lines, words, characters, bytes and more.', aliases: ['count', 'wc', 'words', 'chars'] },
+      { route: 'line-operations', name: 'Line Operations',    desc: 'Sort, dedupe, filter, number, join lines.', aliases: ['sort', 'dedupe', 'unique', 'lines'] },
+      { route: 'compare',         name: 'String Compare',     desc: 'Compare two strings line by line.', aliases: ['diff', 'text diff'] },
     ]},
     { id: 'encode', name: 'Encode / Decode', tools: [
-      { route: 'base64',          name: 'Base64',             desc: 'Encode and decode Base64 (UTF-8, ASCII, UTF-16, UTF-32).' },
-      { route: 'url-encode',      name: 'URL Encode',         desc: 'Percent-encode or decode URL strings.' },
-      { route: 'hash-generator',  name: 'Hash Generator',     desc: 'MD5, SHA-1, SHA-256, SHA-384, SHA-512 + verify.' },
-      { route: 'jwt-tool',        name: 'JWT Tool',           desc: 'Generate, decode and validate JSON Web Tokens.' },
+      { route: 'base64',          name: 'Base64',             desc: 'Encode and decode Base64 (UTF-8, ASCII, UTF-16, UTF-32).', aliases: ['b64', 'atob', 'btoa'] },
+      { route: 'url-encode',      name: 'URL Encode',         desc: 'Percent-encode or decode URL strings.', aliases: ['url', 'percent', 'uri'] },
+      { route: 'hash-generator',  name: 'Hash Generator',     desc: 'MD5, SHA-1, SHA-256, SHA-384, SHA-512 + verify.', aliases: ['md5', 'sha', 'sha256', 'checksum'] },
+      { route: 'jwt-tool',        name: 'JWT Tool',           desc: 'Generate, decode and validate JSON Web Tokens.', aliases: ['jwt', 'token', 'bearer'] },
     ]},
     { id: 'json', name: 'JSON Tools', tools: [
-      { route: 'json-formatter',     name: 'JSON Formatter',  desc: 'Validate, beautify, minify, sort keys.' },
-      { route: 'json-compare',       name: 'JSON Compare',    desc: 'Structural diff of two JSON documents.' },
-      { route: 'json-to-csharp',     name: 'JSON to C#',      desc: 'Generate C# classes or records from JSON.' },
-      { route: 'json-to-java',       name: 'JSON to Java',    desc: 'Generate Java POJOs / records from JSON.' },
-      { route: 'json-to-typescript', name: 'JSON to TypeScript', desc: 'Generate TypeScript interfaces / types.' },
+      { route: 'json-formatter',     name: 'JSON Formatter',  desc: 'Validate, beautify, minify, sort keys.', aliases: ['json', 'pretty', 'beautify', 'minify'] },
+      { route: 'json-compare',       name: 'JSON Compare',    desc: 'Structural diff of two JSON documents.', aliases: ['jdiff', 'json diff'] },
+      { route: 'json-to-csharp',     name: 'JSON to C#',      desc: 'Generate C# classes or records from JSON.', aliases: ['c#', 'cs', 'csharp', 'dotnet'] },
+      { route: 'json-to-java',       name: 'JSON to Java',    desc: 'Generate Java POJOs / records from JSON.', aliases: ['java', 'pojo'] },
+      { route: 'json-to-typescript', name: 'JSON to TypeScript', desc: 'Generate TypeScript interfaces / types.', aliases: ['ts', 'typescript', 'interface'] },
     ]},
     { id: 'regex', name: 'Regex Tools', tools: [
-      { route: 'regex-search',    name: 'Regex Search',       desc: 'Find matches and capture groups.' },
-      { route: 'regex-replace',   name: 'Regex Replace',      desc: 'Find and replace with group references.' },
-      { route: 'extract',         name: 'String Extract',     desc: 'Extract by position, delimiters, regex or line range.' },
+      { route: 'regex-search',    name: 'Regex Search',       desc: 'Find matches and capture groups.', aliases: ['regex', 'regexp', 'match'] },
+      { route: 'regex-replace',   name: 'Regex Replace',      desc: 'Find and replace with group references.', aliases: ['replace', 'sub'] },
+      { route: 'extract',         name: 'String Extract',     desc: 'Extract by position, delimiters, regex or line range.', aliases: ['substring', 'slice', 'between'] },
     ]},
     { id: 'dev', name: 'Developer Tools', tools: [
-      { route: 'datetime-formatter', name: 'DateTime Formatter', desc: '.NET-style date/time format strings.' },
-      { route: 'string-formatter',   name: 'String Formatter',   desc: 'Numeric formats, padding, composite formatting.' },
-      { route: 'guid-generator',     name: 'GUID Generator',     desc: 'Generate and parse GUIDs / UUIDs.' },
-      { route: 'password-generator', name: 'Password Generator', desc: 'Secure passwords with custom rules.' },
-      { route: 'number-converter',   name: 'Number Converter',   desc: 'Binary, decimal, hexadecimal, octal.' },
-      { route: 'barcode-generator',  name: 'Barcode Generator',  desc: 'QR codes, EAN-13 and EAN-8 barcodes.' },
-      { route: 'http-client',        name: 'HTTP Client',        desc: 'Build and send HTTP requests.' },
+      { route: 'datetime-formatter', name: 'DateTime Formatter', desc: '.NET-style date/time format strings.', aliases: ['date', 'time', 'datetime'] },
+      { route: 'string-formatter',   name: 'String Formatter',   desc: 'Numeric formats, padding, composite formatting.', aliases: ['format', 'printf', 'numeric'] },
+      { route: 'guid-generator',     name: 'GUID Generator',     desc: 'Generate and parse GUIDs / UUIDs.', aliases: ['guid', 'uuid'] },
+      { route: 'password-generator', name: 'Password Generator', desc: 'Secure passwords with custom rules.', aliases: ['password', 'pwd', 'secret'] },
+      { route: 'number-converter',   name: 'Number Converter',   desc: 'Binary, decimal, hexadecimal, octal.', aliases: ['hex', 'binary', 'octal', 'radix'] },
+      { route: 'barcode-generator',  name: 'Barcode Generator',  desc: 'QR codes, EAN-13 and EAN-8 barcodes.', aliases: ['qr', 'ean', 'barcode'] },
+      { route: 'http-client',        name: 'HTTP Client',        desc: 'Build and send HTTP requests.', aliases: ['http', 'curl', 'rest', 'api', 'fetch'] },
     ]},
     { id: 'viewers', name: 'Viewers', tools: [
-      { route: 'markdown-viewer',  name: 'Markdown Viewer',     desc: 'Live Markdown preview and export.' },
-      { route: 'html-viewer',      name: 'HTML Viewer',         desc: 'Sandboxed live HTML preview.' },
-      { route: 'diagram-viewer',   name: 'Diagram Viewer',      desc: 'Mermaid diagrams to SVG / PNG.' },
+      { route: 'markdown-viewer',  name: 'Markdown Viewer',     desc: 'Live Markdown preview and export.', aliases: ['md', 'markdown'] },
+      { route: 'html-viewer',      name: 'HTML Viewer',         desc: 'Sandboxed live HTML preview.', aliases: ['html', 'preview'] },
+      { route: 'diagram-viewer',   name: 'Diagram Viewer',      desc: 'Mermaid diagrams to SVG / PNG.', aliases: ['mermaid', 'diagram', 'chart'] },
     ]},
   ];
 
@@ -144,17 +144,130 @@
     if (!node) return;
     node.className = 'msg' + (kind ? ' msg-' + kind : '');
     node.setAttribute('role', kind === 'error' ? 'alert' : 'status');
-    node.textContent = text || '';
+    // app.css draws the status glyph (.msg-*::before); drop a glyph the caller already put in the text
+    node.textContent = kind ? String(text || '').replace(/^\s*[✓✔✕✗⚠ℹ!]️?\s*/, '') : (text || '');
     node.hidden = !kind || !text;
   }
 
   function allTools() { return CATEGORIES.flatMap(c => c.tools.map(t => Object.assign({ category: c.name }, t))); }
+
+  // ── tool search (pure; scripts/check.mjs runs it in a vm to prove every tool is reachable) ──
+  /** Lower-case, strip accents (dönüştür → donustur) and fold Turkish dotless ı. */
+  function norm(s) {
+    return String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/ı/g, 'i').toLowerCase().trim();
+  }
+  /** Score one query token against a tool; 0 = no match. Name/alias/route prefixes beat substring matches. */
+  function tokenScore(tok, t) {
+    const name = norm(t.name), route = norm(t.route), aliases = (t.aliases || []).map(norm);
+    const words = name.split(/[^a-z0-9#+]+/).filter(Boolean);
+    if (aliases.includes(tok)) return 100;
+    if (name.startsWith(tok)) return 95;
+    if (route.startsWith(tok)) return 90;
+    if (aliases.some(a => a.startsWith(tok))) return 85;
+    if (words.some(w => w.startsWith(tok))) return 80;
+    if (name.includes(tok) || route.includes(tok)) return 60;
+    if (aliases.some(a => a.includes(tok))) return 50;
+    if (norm(t.category).includes(tok)) return 30;
+    if (norm(t.desc).includes(tok)) return 20;
+    return 0;
+  }
+  /**
+   * Rank tools for a palette query. Every whitespace-separated token must match.
+   * Order: strong matches (any token scoring ≥80 on average) before weak ones; within a tier
+   * favorites first, then score, then registry order. Empty query: favorites, then registry order.
+   */
+  function rankTools(query, tools, favs) {
+    const toks = norm(query).split(/\s+/).filter(Boolean);
+    const fav = new Set(favs || []);
+    const scored = [];
+    tools.forEach((t, i) => {
+      let score = 0;
+      for (const tok of toks) { const sc = tokenScore(tok, t); if (!sc) return; score += sc; }
+      const avg = toks.length ? score / toks.length : 0;
+      scored.push({ tool: t, tier: toks.length && avg < 80 ? 1 : 0, fav: fav.has(t.route) ? 0 : 1, score, i });
+    });
+    scored.sort((a, b) => a.tier - b.tier || a.fav - b.fav || b.score - a.score || a.i - b.i);
+    return scored.map(s => s.tool);
+  }
+
+  // ── keyboard shortcuts preference (single-key shortcuts can be switched off: WCAG 2.1.4) ──
+  const SHORTCUTS_KEY = 'devtools:shortcuts';
+  function shortcutsOn() { try { return localStorage.getItem(SHORTCUTS_KEY) !== 'off'; } catch { return true; } }
+  const typingIn = (node) => !!node && (/^(INPUT|TEXTAREA|SELECT)$/.test(node.tagName) || node.isContentEditable);
+
+  // ── command palette: native modal <dialog> + APG combobox/listbox ──
+  let palette = null;
+  function buildPalette() {
+    const input = el('input', {
+      type: 'text', class: 'pal-input', role: 'combobox', 'aria-expanded': 'true', 'aria-autocomplete': 'list',
+      'aria-controls': 'pal-list', 'aria-label': 'Find a tool', placeholder: 'Find a tool…',
+      autocomplete: 'off', spellcheck: 'false',
+    });
+    const list = el('ul', { class: 'pal-list', id: 'pal-list', role: 'listbox', 'aria-label': 'Tools' });
+    const empty = el('p', { class: 'pal-empty', hidden: true }, 'No tool matches. Try a shorter word, e.g. "json" or "hash".');
+    const dlg = el('dialog', { class: 'palette', 'aria-label': 'Find a tool' },
+      input, list, empty,
+      el('div', { class: 'pal-hint', 'aria-hidden': 'true' },
+        el('span', null, el('kbd', null, '↑'), el('kbd', null, '↓'), ' move'),
+        el('span', null, el('kbd', null, '↵'), ' open'),
+        el('span', null, el('kbd', null, 'esc'), ' close')));
+    document.body.appendChild(dlg);
+
+    let items = [], active = 0, opener = null;
+    const tools = allTools();
+    function setActive(i) {
+      active = Math.max(0, Math.min(i, items.length - 1));
+      $$('[role=option]', list).forEach((li, j) => {
+        li.setAttribute('aria-selected', String(j === active));
+        if (j === active) { input.setAttribute('aria-activedescendant', li.id); li.scrollIntoView({ block: 'nearest' }); }
+      });
+      if (!items.length) input.removeAttribute('aria-activedescendant');
+    }
+    function render() {
+      const favs = readFavs();
+      items = rankTools(input.value, tools, favs);
+      list.replaceChildren(...items.map((t, i) => el('li', {
+        id: 'pal-opt-' + t.route, role: 'option', 'aria-selected': 'false', 'data-route': t.route,
+        onclick: () => go(t), onmousemove: () => { if (active !== i) setActive(i); },
+      }, el('span', { class: 'pal-name' }, (favs.includes(t.route) ? '★ ' : '') + t.name),
+         el('span', { class: 'pal-cat' }, t.category))));
+      empty.hidden = items.length > 0;
+      setActive(0);
+      announce(items.length === 1 ? '1 tool' : items.length + ' tools');
+    }
+    function go(t) { if (t) location.assign('/' + t.route); }
+    function open() {
+      if (dlg.open) return;
+      opener = document.activeElement;
+      input.value = '';
+      render();
+      dlg.showModal();
+      input.focus();
+    }
+    function close() { if (dlg.open) dlg.close(); }
+    dlg.addEventListener('close', () => { if (opener && document.contains(opener)) opener.focus(); opener = null; });
+    dlg.addEventListener('click', (e) => { if (e.target === dlg) close(); }); // backdrop click
+    input.addEventListener('input', render);
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowDown') { e.preventDefault(); setActive(active + 1); }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); setActive(active - 1); }
+      else if (e.key === 'Home' && items.length) { e.preventDefault(); setActive(0); }
+      else if (e.key === 'End' && items.length) { e.preventDefault(); setActive(items.length - 1); }
+      else if (e.key === 'Enter') { e.preventDefault(); go(items[active]); }
+    });
+    return { open, close, dialog: dlg };
+  }
+  function openPalette() { (palette || (palette = buildPalette())).open(); }
 
   // ── header + sidebar ──
   function currentRoute() {
     const seg = location.pathname.replace(/^\/+|\/+$/g, '').split('/')[0];
     return seg.replace(/\.html$/, '') === 'index' ? '' : seg;
   }
+
+  const total = CATEGORIES.reduce((n, c) => n + c.tools.length, 0);
+  /** Two-digit sheet number of a tool: its position in the registry (01–28). */
+  function sheetNo(route) { return String(allTools().findIndex(t => t.route === route) + 1).padStart(2, '0'); }
 
   function buildHeader(active) {
     const header = $('#site-header');
@@ -166,9 +279,13 @@
     header.replaceChildren(
       el('a', { class: 'skip-link', href: '#main' }, 'Skip to tool'),
       toggle,
-      el('a', { class: 'logo', href: '/' }, el('span', { class: 'logo-dot' }), 'DevTools'),
+      el('a', { class: 'logo', href: '/', 'aria-label': 'DevTools by Moya — all tools' },
+        el('span', { class: 'logo-dot', 'aria-hidden': 'true' }), 'Moya', el('span', { class: 'logo-sep', 'aria-hidden': 'true' }, '/'), 'DT‑28'),
       el('span', { class: 'header-tool' }, active ? active.name : ''),
+      el('button', { type: 'button', class: 'find-btn', 'aria-keyshortcuts': 'Control+K Meta+K /', onclick: openPalette },
+        el('span', { class: 'find-label' }, el('span', { class: 'find-long' }, 'Find a tool…'), el('span', { class: 'find-short' }, 'Find')), el('kbd', { 'aria-hidden': 'true' }, '/')),
       el('span', { class: 'spacer' }),
+      el('span', { class: 'sheet-count', 'aria-hidden': 'true' }, active ? `Sheet ${sheetNo(active.route)} / ${total}` : `${total} sheets`),
       el('span', { class: 'badge-private', title: 'Everything runs in your browser — nothing is uploaded' }, el('span', { class: 'badge-long' }, 'Client-side only'), el('span', { class: 'badge-short' }, 'Local')),
     );
   }
@@ -181,7 +298,7 @@
     // while the drawer covers the page, keep keyboard focus out of the covered content
     const page = $('main');
     if (page) page.inert = open && window.matchMedia('(max-width: 860px)').matches;
-    if (open) { const s = $('.side-search'); if (s && focusSearch !== false) setTimeout(() => s.focus(), 30); }
+    if (open) { const first = $('#sidebar a, #sidebar button'); if (first && focusSearch !== false) setTimeout(() => first.focus(), 30); }
     else if (toggle && document.activeElement && $('#sidebar') && $('#sidebar').contains(document.activeElement)) toggle.focus();
   }
 
@@ -225,11 +342,9 @@
     if (!side) return;
     const favs = readFavs();
     const tools = allTools();
-
-    const search = el('input', { type: 'search', class: 'side-search', placeholder: 'Search tools…', 'aria-label': 'Search tools' });
     const list = el('nav', { class: 'side-nav', 'aria-label': 'Tools' });
 
-    function link(t) {
+    function link(t, hint) {
       const isFav = favs.includes(t.route);
       const star = el('button', {
         class: 'fav-btn' + (isFav ? ' on' : ''), title: isFav ? 'Remove from favorites' : 'Add to favorites',
@@ -237,26 +352,26 @@
         'aria-pressed': String(isFav), 'data-route': t.route,
         onclick: (e) => { e.preventDefault(); toggleFav(t.route); },
       }, isFav ? '★' : '☆');
-      return el('div', { class: 'side-item' + (t.route === activeRoute ? ' active' : '') },
-        el('a', { href: '/' + t.route, class: 'side-link', title: t.desc }, t.name), star);
+      const here = t.route === activeRoute;
+      return el('div', { class: 'side-item' + (here ? ' active' : '') },
+        el('a', { href: '/' + t.route, class: 'side-link', title: t.desc, 'aria-current': here ? 'page' : null },
+          el('span', { class: 'side-num', 'aria-hidden': 'true' }, sheetNo(t.route)),
+          el('span', { class: 'side-name' }, t.name),
+          hint ? el('kbd', { class: 'side-key', 'aria-hidden': 'true' }, hint) : null),
+        star);
     }
 
     function render() {
-      const q = search.value.trim().toLowerCase();
+      const on = shortcutsOn();
       list.replaceChildren();
-      if (q) {
-        const hits = tools.filter(t => (t.name + ' ' + t.desc + ' ' + t.route).toLowerCase().includes(q));
-        list.appendChild(el('div', { class: 'side-group' }, el('div', { class: 'side-group-title' }, 'Results'),
-          hits.length ? hits.map(link) : el('div', { class: 'side-empty' }, 'No tools found')));
-        return;
-      }
-      list.appendChild(el('a', { href: '/', class: 'side-home' + (activeRoute === '' ? ' active' : '') }, 'Home'));
+      list.appendChild(el('a', { href: '/', class: 'side-home' + (activeRoute === '' ? ' active' : ''), 'aria-current': activeRoute === '' ? 'page' : null }, 'All tools'));
       const favTools = favs.map(r => tools.find(t => t.route === r)).filter(Boolean);
       if (favTools.length) {
-        list.appendChild(el('div', { class: 'side-group' }, el('div', { class: 'side-group-title' }, '★ Favorites'), favTools.map(link)));
+        list.appendChild(el('div', { class: 'side-group side-favs' }, el('div', { class: 'side-group-title' }, '★ Favorites'),
+          favTools.map((t, i) => link(t, on && i < 9 ? 'g' + (i + 1) : null))));
       }
       for (const c of CATEGORIES) {
-        list.appendChild(el('div', { class: 'side-group' }, el('div', { class: 'side-group-title' }, c.name), c.tools.map(link)));
+        list.appendChild(el('div', { class: 'side-group' }, el('div', { class: 'side-group-title' }, c.name), c.tools.map(t => link(t))));
       }
     }
 
@@ -272,19 +387,32 @@
       document.dispatchEvent(new CustomEvent('devtools:favorites', { detail: favs.slice() }));
     }
 
-    search.addEventListener('input', render);
-    search.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') { const a = $('.side-link', list); if (a) location.href = a.getAttribute('href'); }
-      if (e.key === 'Escape') { search.value = ''; render(); }
-    });
-    side.replaceChildren(el('div', { class: 'side-search-wrap' }, search), list);
+    // single-key shortcuts ("/" and g+digit) can be switched off — WCAG 2.1.4
+    const toggle = el('button', { type: 'button', class: 'shortcut-switch', role: 'switch', 'aria-checked': String(shortcutsOn()),
+      onclick: () => {
+        const next = !shortcutsOn();
+        try { localStorage.setItem(SHORTCUTS_KEY, next ? 'on' : 'off'); } catch { /* preference just won't persist */ }
+        toggle.setAttribute('aria-checked', String(next));
+        render();
+        announce(next ? 'Keyboard shortcuts on' : 'Keyboard shortcuts off');
+      } }, el('span', { class: 'switch-track', 'aria-hidden': 'true' }), 'Single-key shortcuts');
+    const help = el('p', { class: 'side-help' }, el('kbd', null, '/'), ' find · ', el('kbd', null, 'g'), el('kbd', null, '1'), ' favorite · ', el('kbd', null, '⌘K'), ' always');
+    side.replaceChildren(list, el('div', { class: 'side-foot' }, toggle, help));
     render();
+  }
 
+  /** g then 1–9 within a second opens that favorite. */
+  function wireFavoriteKeys() {
+    let armed = 0;
     document.addEventListener('keydown', (e) => {
-      if (e.key === '/' && !/^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName) && !document.activeElement.isContentEditable) {
-        e.preventDefault();
-        if (window.matchMedia('(max-width: 860px)').matches) setNav(true); else search.focus();
+      if (e.defaultPrevented || e.metaKey || e.ctrlKey || e.altKey || !shortcutsOn() || typingIn(document.activeElement)) { armed = 0; return; }
+      if (armed && Date.now() - armed < 1000 && /^[1-9]$/.test(e.key)) {
+        armed = 0;
+        const route = readFavs()[Number(e.key) - 1];
+        if (route && allTools().some(t => t.route === route)) { e.preventDefault(); location.assign('/' + route); }
+        return;
       }
+      armed = e.key === 'g' && !e.shiftKey ? Date.now() : 0;
     });
   }
 
@@ -293,6 +421,7 @@
     const active = allTools().find(t => t.route === route);
     buildHeader(active);
     buildSidebar(route);
+    wireFavoriteKeys();
     const main = $('main');
     if (main && !main.id) main.id = 'main';
     if (main && !main.hasAttribute('tabindex')) main.setAttribute('tabindex', '-1');
@@ -305,9 +434,20 @@
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape' && document.body.classList.contains('nav-open')) setNav(false);
     });
+    // palette: ⌘K / Ctrl+K always; "/" only when not typing and single-key shortcuts are on
+    document.addEventListener('keydown', (e) => {
+      if (e.defaultPrevented || e.altKey) return;
+      const cmdK = (e.metaKey || e.ctrlKey) && !e.shiftKey && e.key.toLowerCase() === 'k';
+      const slash = e.key === '/' && !e.metaKey && !e.ctrlKey && shortcutsOn() && !typingIn(document.activeElement);
+      if (cmdK || slash) {
+        e.preventDefault();
+        if (document.body.classList.contains('nav-open')) setNav(false);
+        openPalette();
+      }
+    });
   }
 
-  window.DevTools = { CATEGORIES, allTools, el, $, $$, debounce, copy, download, msg, invalid, announce, readFavs, writeFavs };
+  window.DevTools = { CATEGORIES, allTools, rankTools, openPalette, el, $, $$, debounce, copy, download, msg, invalid, announce, readFavs, writeFavs };
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();

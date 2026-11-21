@@ -114,7 +114,7 @@ ${o.optionsHtml}
             <span class="panel-meta" id="out-meta"></span>
             <button class="btn sm" id="fs" title="Fullscreen (Esc to close)" aria-label="Fullscreen ${o.outTitle}"><span aria-hidden="true">⛶</span> Fullscreen</button>
             <button class="btn sm" id="copy">Copy</button>
-            <button class="btn sm" id="dl">Download ${o.ext}</button>
+            <button class="btn sm" id="dl">Download <span class="no-caps">${o.ext}</span></button>
           </span>
         </div>
         <textarea id="output" spellcheck="false" readonly wrap="off"></textarea>

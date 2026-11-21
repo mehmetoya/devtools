@@ -3,16 +3,16 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-XzNxoQbQ70gVXhKlrMkhst9UzaGMHL9NEGdLgG2bwow='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self';" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-nNwGeBL2CIi6+Xl6mxgmf+Yovzm+DqS8LFYcv1SKdHQ='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self';" />
   <title>JWT Tool — Generate, Decode &amp; Validate JSON Web Tokens</title>
   <meta name="description" content="Create HS256/HS384/HS512 JSON Web Tokens, decode any JWT into readable header and claims, and verify signatures, expiry and issuer. Runs entirely in your browser." />
   <meta name="keywords" content="jwt decoder, jwt generator, jwt validator, json web token, hs256, verify jwt signature, jwt debugger" />
   <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large" />
-  <link rel="canonical" href="https://devtool-moya.netlify.app/jwt-tool" />
+  <link rel="canonical" href="https://tool.mehmetoya.com/jwt-tool" />
   <meta property="og:type" content="website" />
   <meta property="og:title" content="JWT Tool — Generate, Decode &amp; Validate JSON Web Tokens" />
   <meta property="og:description" content="Generate, decode and verify JWTs in your browser. Tokens and secrets never leave your machine." />
-  <meta property="og:url" content="https://devtool-moya.netlify.app/jwt-tool" />
+  <meta property="og:url" content="https://tool.mehmetoya.com/jwt-tool" />
   <meta property="og:site_name" content="DevTools" />
   <meta name="twitter:card" content="summary" />
   <script type="application/ld+json">
@@ -20,7 +20,7 @@
     "@context": "https://schema.org",
     "@type": "WebApplication",
     "name": "JWT Tool",
-    "url": "https://devtool-moya.netlify.app/jwt-tool",
+    "url": "https://tool.mehmetoya.com/jwt-tool",
     "description": "Free online JSON Web Token generator, decoder and validator for HS256, HS384 and HS512. Runs client-side.",
     "applicationCategory": "DeveloperApplication",
     "operatingSystem": "Any",
@@ -31,21 +31,22 @@
   </script>
   <script type="application/ld+json">
   { "@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [
-    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://devtool-moya.netlify.app/" },
-    { "@type": "ListItem", "position": 2, "name": "JWT Tool", "item": "https://devtool-moya.netlify.app/jwt-tool" } ] }
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://tool.mehmetoya.com/" },
+    { "@type": "ListItem", "position": 2, "name": "JWT Tool", "item": "https://tool.mehmetoya.com/jwt-tool" } ] }
   </script>
   <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
   <link rel="stylesheet" href="/assets/app.css" />
   <style>
-    .jwt-h { color: var(--danger); }
-    .jwt-p { color: #c38bff; }
+    .jwt-h { color: var(--syn-key); }
+    .jwt-p { color: var(--syn-num); }
     .jwt-s { color: var(--info); }
     .jwt-dot { color: var(--muted2); }
     .token-out { word-break: break-all; min-height: 90px; }
     .form { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 14px; padding: 14px; }
     .form .full { grid-column: 1 / -1; }
     .field { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
-    .field > span { font-size: 11px; font-weight: 700; letter-spacing: 0.6px; text-transform: uppercase; color: var(--muted); }
+    .field > span { font-family: var(--sans); font-size: 11px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+    .field > span small { font-family: var(--mono); font-size: 11px; letter-spacing: 0; text-transform: none; }
     .field input, .field select { width: 100%; }
     .field textarea { min-height: 110px; }
     .secret-row { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
@@ -54,11 +55,11 @@
     .field label.check input { width: auto; flex: none; margin: 0; }
     .json-out { min-height: 80px; }
     .checks { list-style: none; padding: 14px; display: flex; flex-direction: column; gap: 6px; font-family: var(--mono); font-size: 12px; }
-    .checks li.pass { color: var(--accent); }
+    .checks li.pass { color: var(--ok); }
     .checks li.fail { color: var(--danger); }
     .checks li.skip { color: var(--muted2); }
-    .status-pill { font-family: var(--mono); font-size: 11px; padding: 2px 8px; border-radius: 10px; }
-    .status-pill.ok { background: var(--accent-dim); color: var(--accent); }
+    .status-pill { font-family: var(--mono); font-size: 11px; padding: 2px 8px; border: 1px solid currentColor; border-radius: 0; }
+    .status-pill.ok { background: var(--ok-dim); color: var(--ok); }
     .status-pill.bad { background: var(--danger-dim); color: var(--danger); }
     .status-pill.warn { background: var(--warn-dim); color: var(--warn); }
     .claims-tbl td:first-child { white-space: nowrap; font-family: var(--mono); color: var(--muted2); }
@@ -100,14 +101,14 @@
             <label class="field"><span>Algorithm</span>
               <select id="g-alg"><option>HS256</option><option>HS384</option><option>HS512</option></select>
             </label>
-            <label class="field"><span>Expires in (minutes, 0 = never)</span>
+            <label class="field"><span>Expires in <small>(minutes, 0 = never)</small></span>
               <input type="number" id="g-exp" value="60" min="0" step="1" />
             </label>
-            <label class="field"><span>Issuer (iss)</span><input type="text" id="g-iss" placeholder="https://auth.example.com" spellcheck="false" /></label>
-            <label class="field"><span>Subject (sub)</span><input type="text" id="g-sub" placeholder="user-123" spellcheck="false" /></label>
-            <label class="field full"><span>Audience (aud, comma-separated for several)</span><input type="text" id="g-aud" placeholder="my-api" spellcheck="false" /></label>
+            <label class="field"><span>Issuer <small>(iss)</small></span><input type="text" id="g-iss" placeholder="https://auth.example.com" spellcheck="false" /></label>
+            <label class="field"><span>Subject <small>(sub)</small></span><input type="text" id="g-sub" placeholder="user-123" spellcheck="false" /></label>
+            <label class="field full"><span>Audience <small>(aud, comma-separated for several)</small></span><input type="text" id="g-aud" placeholder="my-api" spellcheck="false" /></label>
             <label class="check full"><input type="checkbox" id="g-iat" checked /> Include issued-at (iat)</label>
-            <label class="field full"><span>Custom claims (JSON object)</span>
+            <label class="field full"><span>Custom claims <small>(JSON object)</small></span>
               <textarea id="g-claims" spellcheck="false">{
   "name": "Ada Lovelace",
   "role": "admin"
@@ -204,7 +205,7 @@
             <label class="field"><span>Expected issuer</span><input type="text" id="v-iss" spellcheck="false" placeholder="https://auth.example.com" /></label>
             <label class="check"><input type="checkbox" id="v-aud-on" /> Validate audience</label>
             <label class="field"><span>Expected audience</span><input type="text" id="v-aud" spellcheck="false" placeholder="my-api" /></label>
-            <label class="field"><span>Clock skew (seconds)</span><input type="number" id="v-skew" value="0" min="0" step="1" /></label>
+            <label class="field"><span>Clock skew <small>(seconds)</small></span><input type="number" id="v-skew" value="0" min="0" step="1" /></label>
           </div>
         </div>
         <div class="stack">
@@ -515,7 +516,7 @@
     const show = (overall) => {
       shown = true;
       if (my !== valSeq) return;
-      list.replaceChildren(...rows.map(r => el('li', { class: r.state }, (r.state === 'pass' ? '✓ ' : r.state === 'fail' ? '✗ ' : '– ') + r.text)));
+      list.replaceChildren(...rows.map(r => el('li', { class: r.state }, (r.state === 'pass' ? '✓ ' : r.state === 'fail' ? '✕ ' : '– ') + r.text)));
       verdict.replaceChildren();
       if (overall === true) { verdict.appendChild(el('span', { class: 'status-pill ok' }, 'VALID')); msg($('#msg'), 'ok', 'Token is valid.'); }
       else if (overall === false) { verdict.appendChild(el('span', { class: 'status-pill bad' }, 'INVALID')); msg($('#msg'), 'error', 'Token is invalid: ' + (rows.find(r => r.state === 'fail') || { text: '' }).text); }

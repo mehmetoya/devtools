@@ -8,11 +8,11 @@
   <meta name="description" content="Compare two texts line by line with added, removed and changed lines highlighted down to the character. Ignore case or whitespace. Runs in your browser." />
   <meta name="keywords" content="compare strings, text diff, diff checker, compare text online, line by line diff, character diff" />
   <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large" />
-  <link rel="canonical" href="https://devtool-moya.netlify.app/compare" />
+  <link rel="canonical" href="https://tool.mehmetoya.com/compare" />
   <meta property="og:type" content="website" />
   <meta property="og:title" content="String Compare — Line-by-Line Text Diff Online" />
   <meta property="og:description" content="Diff two texts in your browser with line and character highlighting. Nothing leaves your machine." />
-  <meta property="og:url" content="https://devtool-moya.netlify.app/compare" />
+  <meta property="og:url" content="https://tool.mehmetoya.com/compare" />
   <meta property="og:site_name" content="DevTools" />
   <meta name="twitter:card" content="summary" />
   <script type="application/ld+json">
@@ -20,7 +20,7 @@
     "@context": "https://schema.org",
     "@type": "WebApplication",
     "name": "String Compare",
-    "url": "https://devtool-moya.netlify.app/compare",
+    "url": "https://tool.mehmetoya.com/compare",
     "description": "Free online text compare tool with a line-by-line diff, character-level highlighting, ignore case, ignore whitespace and trim options. Runs client-side.",
     "applicationCategory": "DeveloperApplication",
     "operatingSystem": "Any",
@@ -31,8 +31,8 @@
   </script>
   <script type="application/ld+json">
   { "@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [
-    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://devtool-moya.netlify.app/" },
-    { "@type": "ListItem", "position": 2, "name": "String Compare", "item": "https://devtool-moya.netlify.app/compare" } ] }
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://tool.mehmetoya.com/" },
+    { "@type": "ListItem", "position": 2, "name": "String Compare", "item": "https://tool.mehmetoya.com/compare" } ] }
   </script>
   <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
   <link rel="stylesheet" href="/assets/app.css" />
@@ -40,19 +40,19 @@
     .diff-wrap { margin-top: 16px; }
     .diff-scroll { overflow: auto; max-height: 70vh; }
     table.diff { width: 100%; border-collapse: collapse; font-family: var(--mono); font-size: 12.5px; }
-    table.diff td { padding: 1px 8px; vertical-align: top; border-bottom: 1px solid rgba(255,255,255,0.03); }
+    table.diff td { padding: 1px 8px; vertical-align: top; border-bottom: 1px solid var(--border); }
     table.diff td.ln { width: 1%; color: var(--muted); text-align: right; user-select: none; white-space: nowrap; }
-    table.diff td.mk { width: 1%; text-align: center; user-select: none; font-weight: 700; }
+    table.diff td.mk { width: 1%; text-align: center; user-select: none; font-weight: 500; }
     table.diff td.tx { white-space: pre-wrap; word-break: break-word; }
-    table.diff tr.del td { background: rgba(255,91,107,0.08); }
-    table.diff tr.add td { background: rgba(79,255,176,0.07); }
+    table.diff tr.del td { background: var(--danger-dim); }
+    table.diff tr.add td { background: var(--ok-dim); }
     table.diff tr.del td.mk { color: var(--danger); }
-    table.diff tr.add td.mk { color: var(--accent); }
+    table.diff tr.add td.mk { color: var(--ok); }
     table.diff tr.same td.tx { color: var(--muted2); }
     table.diff tr.gap td { color: var(--muted); font-style: italic; text-align: center; background: var(--surface2); }
-    table.diff span.diff-del, table.diff span.diff-add { border-radius: 2px; }
-    table.diff span.diff-del { background: rgba(255,91,107,0.35); color: var(--text); }
-    table.diff span.diff-add { background: rgba(79,255,176,0.28); color: var(--text); }
+    table.diff span.diff-del, table.diff span.diff-add { border-radius: 0; }
+    table.diff span.diff-del { background: color-mix(in srgb, var(--danger) 35%, transparent); color: var(--text); text-decoration: line-through; }
+    table.diff span.diff-add { background: color-mix(in srgb, var(--ok) 28%, transparent); color: var(--text); text-decoration: underline 2px; text-underline-offset: 2px; }
     .grid-2 textarea { min-height: 220px; }
   </style>
 </head>

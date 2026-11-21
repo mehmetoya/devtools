@@ -2,7 +2,7 @@
 
 A growing collection of free online developer utilities. Every tool runs entirely in your browser — no data is sent to any server or logged. The only thing kept is local to your browser: favorites and the last draft of the Markdown, HTML and Diagram viewers (localStorage).
 
-**Live site:** https://devtool-moya.netlify.app
+**Live site:** https://tool.mehmetoya.com
 
 ---
 
@@ -148,7 +148,7 @@ Generated files — edit the generators, not the output:
 node scripts/json-codegen/build-gen-pages.js   # json-to-csharp / java / typescript pages
 node scripts/gen-site.mjs .                    # home, 404, _headers, netlify.toml, sitemap, robots, page <head>s + CSP hashes
 node scripts/check.mjs                         # quality gate (also runs as the Netlify build command)
-node scripts/smoke.mjs https://devtool-moya.netlify.app   # post-deploy smoke test (or a deploy-preview URL)
+node scripts/smoke.mjs https://tool.mehmetoya.com   # post-deploy smoke test (or a deploy-preview URL)
 ```
 
 Any edit to a page's inline `<script>` changes its CSP hash, so run `gen-site` afterwards (the check fails otherwise).

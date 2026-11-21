@@ -3,16 +3,16 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-0sjXNRLSCPZ4DlPj68npZUrRd8WcZ2v+1X4BqKYpSj8='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self';" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-9XbNuIq5B6vYCf9CV7lVpGmdZhuwTUxXnw+x6nhRDXo='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self';" />
   <title>Password Generator — Strong, Random, Customizable</title>
   <meta name="description" content="Generate strong random passwords with custom length, character sets, minimum counts and rules such as no ambiguous or sequential characters. Uses the browser's secure random generator; nothing leaves your device." />
   <meta name="keywords" content="password generator, strong password, random password, secure password generator, passphrase, password strength" />
   <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large" />
-  <link rel="canonical" href="https://devtool-moya.netlify.app/password-generator" />
+  <link rel="canonical" href="https://tool.mehmetoya.com/password-generator" />
   <meta property="og:type" content="website" />
   <meta property="og:title" content="Password Generator — Strong, Random, Customizable" />
   <meta property="og:description" content="Secure random passwords generated locally with crypto.getRandomValues." />
-  <meta property="og:url" content="https://devtool-moya.netlify.app/password-generator" />
+  <meta property="og:url" content="https://tool.mehmetoya.com/password-generator" />
   <meta property="og:site_name" content="DevTools" />
   <meta name="twitter:card" content="summary" />
   <script type="application/ld+json">
@@ -20,7 +20,7 @@
     "@context": "https://schema.org",
     "@type": "WebApplication",
     "name": "Password Generator",
-    "url": "https://devtool-moya.netlify.app/password-generator",
+    "url": "https://tool.mehmetoya.com/password-generator",
     "description": "Free secure password generator with custom character sets, minimum counts, exclusion rules and an entropy-based strength meter. Runs client-side.",
     "applicationCategory": "SecurityApplication",
     "operatingSystem": "Any",
@@ -31,14 +31,14 @@
   </script>
   <script type="application/ld+json">
   { "@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [
-    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://devtool-moya.netlify.app/" },
-    { "@type": "ListItem", "position": 2, "name": "Password Generator", "item": "https://devtool-moya.netlify.app/password-generator" } ] }
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://tool.mehmetoya.com/" },
+    { "@type": "ListItem", "position": 2, "name": "Password Generator", "item": "https://tool.mehmetoya.com/password-generator" } ] }
   </script>
   <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
   <link rel="stylesheet" href="/assets/app.css" />
   <style>
     .cfg { padding: 14px; display: flex; flex-direction: column; gap: 14px; }
-    .cfg h3 { font-size: 11px; font-weight: 700; letter-spacing: 0.6px; text-transform: uppercase; color: var(--muted); }
+    .cfg h3 { font-size: 11px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
     .len-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
     .len-row input[type=range] { flex: 1; min-width: 140px; accent-color: var(--accent); }
     .types { display: flex; flex-direction: column; gap: 8px; }
@@ -55,9 +55,9 @@
     .pw-list li:last-child { border-bottom: none; }
     .pw-list .pw { flex: 1; min-width: 0; font-family: var(--mono); font-size: 14px; word-break: break-all; }
     .meter { padding: 14px; border-bottom: 1px solid var(--border); }
-    .meter-bar { height: 8px; border-radius: 4px; background: var(--surface3); overflow: hidden; }
+    .meter-bar { height: 8px; border-radius: 0; background: var(--surface3); overflow: hidden; }
     .meter-fill { height: 100%; width: 0; transition: width 0.2s, background 0.2s; }
-    .meter-text { display: flex; justify-content: space-between; margin-top: 6px; font-size: 12px; font-weight: 700; }
+    .meter-text { display: flex; justify-content: space-between; margin-top: 6px; font-size: 12px; font-weight: 500; }
     .meter-text .bits { font-family: var(--mono); color: var(--muted2); font-weight: 400; }
     @media (max-width: 600px) { .rules { grid-template-columns: 1fr; } }
   </style>
@@ -290,7 +290,7 @@
     };
   }
 
-  const COLORS = { 'Very Weak': 'var(--danger)', 'Weak': 'var(--danger)', 'Fair': 'var(--warn)', 'Strong': 'var(--accent)', 'Very Strong': 'var(--accent)' };
+  const COLORS = { 'Very Weak': 'var(--danger)', 'Weak': 'var(--danger)', 'Fair': 'var(--warn)', 'Strong': 'var(--ok)', 'Very Strong': 'var(--ok)' };
 
   function renderPreviews(o) {
     const sets = buildSets(o);
