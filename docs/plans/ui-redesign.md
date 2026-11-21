@@ -150,6 +150,17 @@ Her kapı bir kontrol noktasında çalışır. Kapının bulguları düzeltilmed
   - OPS-02: 301 yönlendirmesi merge'den sonra doğrulanacak.
   - Geri dönüş: Netlify'da `6b01366b3511466fd70aea87` yeniden yayınlanır, ardından main'de `git revert` yapılır.
 
+## Yayın (2026-11-21)
+- PR mehmetoya/devtools#2 merge edildi (d682fe4).
+- Production kontrolleri:
+  - `smoke.mjs https://tool.mehmetoya.com` yeşil.
+  - `scan.mjs` 30 sayfa × 320/375/1280 px temiz.
+  - `devtool-moya.netlify.app/*` → 301 → `tool.mehmetoya.com`.
+  - Repo yolları (büyük/küçük harf varyantları dahil) 404.
+  - Fontlar immutable.
+  - Canonical, robots ve sitemap yeni alan adında.
+- Açık kalan: Ölçüt 9 (ziyaretçi testi) ve VoiceOver turu; bunları sahibi yapacak.
+
 ## Riskler ve önlemler
 | Risk | Etki | Önlem |
 |---|---|---|

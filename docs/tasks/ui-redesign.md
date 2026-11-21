@@ -211,10 +211,10 @@ Registry'ye `aliases` alanı eklenir. `rankTools` saf bir fonksiyon olarak dış
 5. Merge'den sonra production üzerinde `smoke.mjs` çalıştırılır.
 
 **Kabul kriterleri:**
-- [ ] Engelleyici (P0/P1) bir oda bulgusu kalmadı.
-- [ ] Preview ve production (`https://tool.mehmetoya.com`) smoke testleri yeşil; `/docs/...` 404 dönüyor.
-- [ ] `devtool-moya.netlify.app` adresi 301 ile `tool.mehmetoya.com` adresine yönleniyor; DNS kaydı DNS only, sertifika geçerli.
-- [ ] Geri dönüş deploy'unun kimliği PR açıklamasına yazıldı.
+- [x] Engelleyici (P0/P1) bir oda bulgusu kalmadı.
+- [x] Preview ve production (`https://tool.mehmetoya.com`) smoke testleri yeşil; `/docs/...` 404 dönüyor.
+- [x] `devtool-moya.netlify.app` adresi 301 ile `tool.mehmetoya.com` adresine yönleniyor; DNS kaydı DNS only, sertifika geçerli.
+- [x] Geri dönüş deploy'unun kimliği PR açıklamasına yazıldı.
 
 **Doğrulama:** Oda raporları, smoke çıktıları, PR bağlantısı.
 
