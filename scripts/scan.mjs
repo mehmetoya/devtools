@@ -193,10 +193,13 @@ async function scenarios() {
     for (let i = 0; i < 60 && (await js('location.pathname').catch(() => '')) !== want; i++) await sleep(50);
     await sleep(150);
     const landed = await js('location.pathname');
+    // wait for the new page's shell before using the palette again (network latency on remote hosts)
+    for (let i = 0; i < 100 && !(await js("document.readyState === 'complete' && !!window.DevTools && !!document.querySelector('.find-btn')").catch(() => false)); i++) await sleep(50);
     if (landed !== '/' + String(second).replace('pal-opt-', '')) issues.push(`palette: Enter opened ${landed}, expected the active option ${second}`);
     await key('/', 'Slash', 191, '/'); await sleep(100);
-    await typeText('zzzz'); await sleep(100);
-    const expanded = await js("document.querySelector('.pal-input').getAttribute('aria-expanded')");
+    await typeText('zzzz');
+    let expanded = null;
+    for (let i = 0; i < 20 && expanded !== 'false'; i++) { await sleep(50); expanded = await js("document.querySelector('.pal-input') && document.querySelector('.pal-input').getAttribute('aria-expanded')"); }
     if (expanded !== 'false') issues.push('palette: aria-expanded should be false with no results');
     await key('Enter', 'Enter', 13, '\r'); await sleep(300);
     if ((await js('location.pathname')) !== landed) issues.push('palette: Enter with no results navigated away');
