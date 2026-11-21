@@ -90,6 +90,10 @@ for (const f of ['index.html', '404.html', ...routes.map(r => `${r}/index.html`)
     const body = h.slice(h.indexOf('<body'));
     if (!/<aside id="sidebar"><nav[^>]*>[\s\S]*<a class="side-link" href="\//.test(body)) fail(f, 'static sidebar links missing (crawlers without JS)');
     if (f !== 'index.html' && !body.includes('<!-- related: generated')) fail(f, 'Related tools block missing');
+    for (const [needle, label] of [['<script src="/assets/tools.js"></script>', 'tools.js include'], ['<!-- related: generated', 'Related tools block'], ['<!-- faq: generated', 'FAQ block'], ['<header id="site-header">', 'header']]) {
+      const n = h.split(needle).length - 1;
+      if (n > 1 || (n === 0 && !(f === 'index.html' && /related|faq/i.test(label)))) fail(f, `${label} appears ${n} times (expected 1)`);
+    }
     if (f !== 'index.html' && (body.match(/<section class="about faq"[\s\S]*?<\/section>/) || [''])[0].split('<h3>').length - 1 < 3) fail(f, 'needs at least 3 FAQ entries (scripts/content/faq.json)');
     if (!body.includes(`href="https://mehmetoya.com" rel="author"`)) fail(f, 'static author link missing');
   }

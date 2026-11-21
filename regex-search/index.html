@@ -177,8 +177,7 @@
     <section class="about faq" aria-labelledby="faq-title">
       <h2 id="faq-title">Questions</h2>
       <h3>How do I test a regular expression online?</h3>
-      <p>Type a pattern, paste your test text, and every match is highlighted and listed with its index, length, value and capture groups. Both numbered groups (<code>
-</code>, <code>  </main></code>) and named groups (<code>(?&lt;name&gt;…)</code>) are shown. The tool uses your browser's JavaScript regex engine, so results match what <code>String.prototype.matchAll</code> returns in JavaScript. Matching runs locally; nothing is uploaded.</p>
+      <p>Type a pattern, paste your test text, and every match is highlighted and listed with its index, length, value and capture groups. Both numbered groups (<code>$1</code>, <code>$2</code>) and named groups (<code>(?&lt;name&gt;…)</code>) are shown. The tool uses your browser's JavaScript regex engine, so results match what <code>String.prototype.matchAll</code> returns in JavaScript. Matching runs locally; nothing is uploaded.</p>
       <h3>What do the g, i, m, s and u regex flags do?</h3>
       <p><code>g</code> finds all matches instead of the first; this tool always searches globally. <code>i</code> ignores case, and <code>m</code> makes <code>^</code> and <code>$</code> match at every line break. <code>s</code> lets <code>.</code> match newlines, and <code>u</code> enables full Unicode, including <code>\u{1F600}</code> escapes and property classes such as <code>\p{L}</code>. The <code>u</code> flag is on by default.</p>
       <h3>Why does my regex hang or time out?</h3>
