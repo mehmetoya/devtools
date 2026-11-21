@@ -2,7 +2,7 @@
 
 # DevTools · DT‑28
 
-**28 developer tools that never see your data.**<br>
+**28 developer tools that never see your data.** By [Mehmet Oya](https://mehmetoya.com).<br>
 JSON, Base64, hashes, JWT, regex, GUIDs, diagrams and more — running entirely in your browser, under a strict per-page Content-Security-Policy.
 
 [**tool.mehmetoya.com**](https://tool.mehmetoya.com)
@@ -166,4 +166,4 @@ Semantic HTML, per-tool titles and descriptions, Open Graph / Twitter cards, `We
 
 ## License
 
-[MIT](LICENSE) © 2026 Mehmet Oya — free to use, fork and adapt.
+[MIT](LICENSE) © 2026 [Mehmet Oya](https://mehmetoya.com) — free to use, fork and adapt.

@@ -314,7 +314,8 @@ details.info > div { padding: 0 16px 16px; color: var(--muted2); }
 .tb-cell:nth-last-child(-n+3) { border-bottom: 0; }
 .titleblock dt { font-family: var(--sans); font-size: 10px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
 .titleblock dd { margin: 0; font-family: var(--sans); font-size: 13px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text); overflow-wrap: anywhere; }
-.tb-sig dd { color: var(--accent); }
+.tb-sig dd, .tb-sig dd a { color: var(--accent); }
+.tb-sig dd a { text-decoration: none; border-bottom: 1px solid currentColor; }
 .colophon { display: flex; flex-wrap: wrap; gap: 6px 20px; margin-top: 40px; padding: 16px 0 8px; border-top: 1px solid var(--border2); font-size: 11px; color: var(--muted); }
 .colophon a { color: var(--muted2); }
 .colophon a:hover { color: var(--accent); }
