@@ -76,7 +76,7 @@ Her kapı bir kontrol noktasında çalışır. Kapının bulguları düzeltilmed
 
 ### Aşama 4: Temizlik ve yayın
 - [x] T10: Syne'yi kaldır, README'yi ve bütçe ölçümünü güncelle
-- [ ] T11: Oda kapıları (Designers → Developers + Security → QA → Ops), PR, preview smoke testi, merge onayı
+- [x] T11: Oda kapıları (Designers → Developers + Security → QA → Ops), PR, preview smoke testi, merge onayı
 
 ## Paralellik
 - T3, T1 ve T2 ile paralel yürüyebilir; dosyaları ayrı.
@@ -130,6 +130,25 @@ Her kapı bir kontrol noktasında çalışır. Kapının bulguları düzeltilmed
 - **T8:** Antet kutusu ve kolofon eklendi; `rev` biçimi `check.mjs` ile denetleniyor.
 - **T9:** Ana sayfa ve 404 numaralı pafta dizini oldu; ana sayfadaki büyük "Find a tool" düğmesi paleti açıyor.
 - **T10:** Syne ve kullanılmayan Condensed 500 kaldırıldı. Ana sayfanın ilk yüklemesi **3 font, 58.729 bayt** (başlangıçta 72.763 bayt). Skip link ve yıldız düğmesi artık yüklenmemiş ağırlık ya da Arial istemiyor.
+
+## T11 oda kapıları (2026-11-21)
+- **Designers:** Engelleyici bulgu yok, D2-01…08 düzeltildi.
+  - İmza ana sayfanın ilk ekranına taşındı.
+  - Kısayol ipuçları ayara göre görünüyor.
+  - Palete kapatma düğmesi eklendi.
+  - Sayfada tek `aria-current` kalıyor.
+- **Developers + güvenlik:** Yeni açık yok, T11-DEV-01…05 düzeltildi.
+  - `serve.mjs` artık `dist/`'i de sunabiliyor.
+  - `build-dist` ürettiği çıktıyı kendisi doğruluyor.
+  - Yayın kapıları sıkılaştırıldı.
+- **QA:** Sonuç "koşullu uygun"du, koşullar kapandı.
+  - QA-01: mobil menü düğmesi yeniden 44 px; `scan` 320 px'te bu boyutu ölçüyor ve bozuk kopyada kırmızı yandı.
+  - QA-02: palette ✕'e Enter basınca palet kapanıyor.
+  - QA-03 ve QA-05 de düzeltildi.
+- **Ops:** Sonuç "koşullu hazır".
+  - OPS-01 (preview taramasında Netlify drawer'ının yarattığı gürültü) kapandı: `scan` bunu yalnız deploy preview host'unda yok sayıyor. Preview'da 30 × 3 genişlik temiz.
+  - OPS-02: 301 yönlendirmesi merge'den sonra doğrulanacak.
+  - Geri dönüş: Netlify'da `6b01366b3511466fd70aea87` yeniden yayınlanır, ardından main'de `git revert` yapılır.
 
 ## Riskler ve önlemler
 | Risk | Etki | Önlem |

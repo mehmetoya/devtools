@@ -67,7 +67,7 @@ ws.onclose = () => { for (const { reject } of pending.values()) reject(new Error
 
 // ── scan one page ──
 async function scan(pathname, expectStatus, width) {
-  const issues = []; const fontBytes = new Map(); const inflight = new Set(); const types = new Map();
+  const issues = []; const fontBytes = new Map(); const inflight = new Set(); const types = new Map(); const urls = new Map();
   let status = null; let loaded = false; let lastActivity = Date.now(); let fontsBeforeInteraction = 0, fontFilesBefore = 0;
   const { targetId } = await send('Target.createTarget', { url: 'about:blank' });
   const { sessionId } = await send('Target.attachToTarget', { targetId, flatten: true });
@@ -89,6 +89,7 @@ async function scan(pathname, expectStatus, width) {
       case 'Network.requestWillBeSent': {
         inflight.add(p.requestId); lastActivity = Date.now();
         const u = p.request.url;
+        urls.set(p.requestId, u);
         if (!/^(data|blob|about):/.test(u) && new URL(u).origin !== ORIGIN) issues.push('third-party request: ' + u);
         break;
       }
@@ -103,7 +104,9 @@ async function scan(pathname, expectStatus, width) {
         break;
       case 'Network.loadingFailed':
         inflight.delete(p.requestId); lastActivity = Date.now();
-        if (!p.canceled) issues.push('request failed: ' + p.errorText);
+        // on previews the drawer iframe Netlify injects is blocked by our frame-src before a request is recorded
+        if (NETLIFY_PREVIEW && (/netlify/i.test(urls.get(p.requestId) || '') || (!urls.has(p.requestId) && p.type === 'Document' && p.errorText === 'net::ERR_BLOCKED_BY_CSP'))) break;
+        if (!p.canceled) issues.push(`request failed: ${p.errorText} ${urls.get(p.requestId) || ''}`.trim());
         break;
       case 'Page.loadEventFired': loaded = true; break;
     }
