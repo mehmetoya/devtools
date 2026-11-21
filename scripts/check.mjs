@@ -8,7 +8,7 @@ import path from 'node:path';
 import vm from 'node:vm';
 import os from 'node:os';
 import crypto from 'node:crypto';
-import { SITE_URL, PREVIOUS_ORIGINS } from './site.mjs';
+import { SITE_URL, PREVIOUS_ORIGINS, SECURITY_TXT_EXPIRES } from './site.mjs';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
@@ -78,6 +78,67 @@ for (const f of ['index.html', '404.html', ...routes.map(r => `${r}/index.html`)
   for (const o of PREVIOUS_ORIGINS) if (src.includes(o)) fail(f, `still references the old origin ${o}`);
 }
 
+// ── SEO, social cards, icons, AI discovery ──
+{
+  const decode = (s) => s.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'");
+  for (const f of ['index.html', ...routes.map(r => `${r}/index.html`)]) {
+    const h = read(f);
+    const title = decode(((h.match(/<title>([\s\S]*?)<\/title>/) || [])[1] || '').trim());
+    const desc = decode((h.match(/<meta name="description" content="([^"]*)"/) || [])[1] || '');
+    if (title.length > 60) fail(f, `title is ${title.length} characters (max 60)`);
+    if (desc.length < 70 || desc.length > 160) fail(f, `meta description is ${desc.length} characters (70–160)`);
+    const body = h.slice(h.indexOf('<body'));
+    if (!/<aside id="sidebar"><nav[^>]*>[\s\S]*<a class="side-link" href="\//.test(body)) fail(f, 'static sidebar links missing (crawlers without JS)');
+    if (f !== 'index.html' && !body.includes('<!-- related: generated')) fail(f, 'Related tools block missing');
+    if (f !== 'index.html' && (body.match(/<section class="about faq"[\s\S]*?<\/section>/) || [''])[0].split('<h3>').length - 1 < 3) fail(f, 'needs at least 3 FAQ entries (scripts/content/faq.json)');
+    if (!body.includes(`href="https://mehmetoya.com" rel="author"`)) fail(f, 'static author link missing');
+  }
+}
+{
+  const pngSize = (rel) => {
+    const p = path.join(ROOT, rel);
+    if (!fs.existsSync(p)) return null;
+    const b = fs.readFileSync(p);
+    return b.slice(1, 4).toString() === 'PNG' ? [b.readUInt32BE(16), b.readUInt32BE(20)] : null;
+  };
+  const expectPng = (rel, w, h, where) => {
+    const s = pngSize(rel);
+    if (!s) fail(where, `${rel} is missing or not a PNG — run: node scripts/build-images.mjs`);
+    else if (s[0] !== w || s[1] !== h) fail(where, `${rel} is ${s[0]}×${s[1]}, expected ${w}×${h}`);
+  };
+  const seoPages = [['index.html', 'home'], ...routes.map(r => [`${r}/index.html`, r])];
+  for (const [f, img] of seoPages) {
+    const h = read(f).slice(0, read(f).indexOf('</head>'));
+    const need = [
+      [`<meta property="og:image" content="${SITE_URL}/assets/og/${img}.png" />`, 'og:image'],
+      ['<meta name="twitter:card" content="summary_large_image" />', 'twitter:card summary_large_image'],
+      ['<meta property="og:image:alt"', 'og:image:alt'], ['<meta name="theme-color"', 'theme-color'],
+      ['<link rel="manifest" href="/manifest.webmanifest" />', 'manifest link'], ['<link rel="apple-touch-icon"', 'apple-touch-icon'],
+      ['<link rel="icon" href="/favicon.ico"', 'favicon.ico link'], ['<meta name="author"', 'author meta'],
+    ];
+    for (const [needle, label] of need) if (!h.includes(needle)) fail(f, `missing ${label}`);
+    if ((h.match(/name="twitter:card"/g) || []).length !== 1) fail(f, 'exactly one twitter:card expected');
+    expectPng(`assets/og/${img}.png`, 1200, 630, f);
+    if (img !== 'home') {
+      const ld = [...h.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)].map(m => { try { return JSON.parse(m[1]); } catch { fail(f, 'invalid JSON-LD'); return {}; } });
+      const app = ld.find(d => d['@type'] === 'WebApplication');
+      if (!app) fail(f, 'missing WebApplication JSON-LD');
+      else if (!app.author || !app.isPartOf) fail(f, 'WebApplication JSON-LD lacks author / isPartOf');
+    }
+  }
+  for (const [rel, w] of [['assets/icons/icon-192.png', 192], ['assets/icons/icon-512.png', 512], ['assets/icons/icon-maskable-512.png', 512], ['apple-touch-icon.png', 180]]) expectPng(rel, w, w, rel);
+  if (!fs.existsSync(path.join(ROOT, 'favicon.ico')) || fs.readFileSync(path.join(ROOT, 'favicon.ico')).readUInt16LE(2) !== 1) fail('favicon.ico', 'missing or not an ICO file');
+  try {
+    const man = JSON.parse(read('manifest.webmanifest'));
+    for (const i of man.icons || []) if (!fs.existsSync(path.join(ROOT, i.src))) fail('manifest.webmanifest', `icon ${i.src} missing`);
+  } catch { fail('manifest.webmanifest', 'missing or invalid JSON'); }
+  const llms = fs.existsSync(path.join(ROOT, 'llms.txt')) ? read('llms.txt') : '';
+  for (const r of routes) if (!llms.includes(`(${SITE_URL}/${r})`)) fail('llms.txt', `missing /${r}`);
+  for (const t of tools) if (!read('sitemap.xml').includes(`<loc>${SITE_URL}/${t.route}</loc><lastmod>${t.rev.replace(/\./g, '-')}</lastmod>`)) fail('sitemap.xml', `/${t.route} lastmod must equal its rev`);
+  const days = (Date.parse(SECURITY_TXT_EXPIRES) - Date.now()) / 864e5;
+  if (!(days > 30)) fail('scripts/site.mjs', `security.txt expires in ${Math.floor(days)} days — move SECURITY_TXT_EXPIRES forward`);
+}
+
 // ── generator drift: run generators on a temp copy and diff ──
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'devtools-check-'));
 try {
@@ -85,6 +146,7 @@ try {
   execFileSync(process.execPath, [path.join(tmp, 'scripts/json-codegen/build-gen-pages.js')], { stdio: 'ignore' });
   execFileSync(process.execPath, [path.join(tmp, 'scripts/gen-site.mjs'), tmp], { stdio: 'ignore' });
   const generated = ['index.html', '404.html', '_headers', 'netlify.toml', 'robots.txt', 'sitemap.xml',
+    'manifest.webmanifest', 'llms.txt', 'llms-full.txt', '.well-known/security.txt',
     ...routes.map(r => `${r}/index.html`)];
   for (const f of generated) {
     const a = read(f), b = fs.readFileSync(path.join(tmp, f), 'utf8');

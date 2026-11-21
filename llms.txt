@@ -1,0 +1,60 @@
+# DevTools (DT-28) by Mehmet Oya
+
+> 28 free developer tools that run entirely in the browser: no backend, no accounts, no tracking, no share links. Pasted data never leaves the page — every page has a strict, hash-based Content-Security-Policy with connect-src 'none' (only the HTTP Client may make network requests, by design).
+
+- Site: https://tool.mehmetoya.com/
+- Author: Mehmet Oya (https://mehmetoya.com)
+- Source: https://github.com/mehmetoya/devtools (MIT)
+- Last revision: 2026.11.21
+
+## Text Operations
+
+- [Case Converter](https://tool.mehmetoya.com/case-converter): camelCase, snake_case, PascalCase, kebab-case and more.
+- [String Reverse](https://tool.mehmetoya.com/reverse): Reverse strings, lines, words or each word.
+- [Trim / Pad](https://tool.mehmetoya.com/trim-pad): Trim whitespace or pad text to a width.
+- [Line Counter](https://tool.mehmetoya.com/line-counter): Lines, words, characters, bytes and more.
+- [Line Operations](https://tool.mehmetoya.com/line-operations): Sort, dedupe, filter, number, join lines.
+- [String Compare](https://tool.mehmetoya.com/compare): Compare two strings line by line.
+
+## Encode / Decode
+
+- [Base64](https://tool.mehmetoya.com/base64): Encode and decode Base64 (UTF-8, ASCII, UTF-16, UTF-32).
+- [URL Encode](https://tool.mehmetoya.com/url-encode): Percent-encode or decode URL strings.
+- [Hash Generator](https://tool.mehmetoya.com/hash-generator): MD5, SHA-1, SHA-256, SHA-384, SHA-512 + verify.
+- [JWT Tool](https://tool.mehmetoya.com/jwt-tool): Generate, decode and validate JSON Web Tokens.
+
+## JSON Tools
+
+- [JSON Formatter](https://tool.mehmetoya.com/json-formatter): Validate, beautify, minify, sort keys.
+- [JSON Compare](https://tool.mehmetoya.com/json-compare): Structural diff of two JSON documents.
+- [JSON to C#](https://tool.mehmetoya.com/json-to-csharp): Generate C# classes or records from JSON.
+- [JSON to Java](https://tool.mehmetoya.com/json-to-java): Generate Java POJOs / records from JSON.
+- [JSON to TypeScript](https://tool.mehmetoya.com/json-to-typescript): Generate TypeScript interfaces / types.
+
+## Regex Tools
+
+- [Regex Search](https://tool.mehmetoya.com/regex-search): Find matches and capture groups.
+- [Regex Replace](https://tool.mehmetoya.com/regex-replace): Find and replace with group references.
+- [String Extract](https://tool.mehmetoya.com/extract): Extract by position, delimiters, regex or line range.
+
+## Developer Tools
+
+- [DateTime Formatter](https://tool.mehmetoya.com/datetime-formatter): .NET-style date/time format strings.
+- [String Formatter](https://tool.mehmetoya.com/string-formatter): Numeric formats, padding, composite formatting.
+- [GUID Generator](https://tool.mehmetoya.com/guid-generator): Generate and parse GUIDs / UUIDs.
+- [Password Generator](https://tool.mehmetoya.com/password-generator): Secure passwords with custom rules.
+- [Number Converter](https://tool.mehmetoya.com/number-converter): Binary, decimal, hexadecimal, octal.
+- [Barcode Generator](https://tool.mehmetoya.com/barcode-generator): QR codes, EAN-13 and EAN-8 barcodes.
+- [HTTP Client](https://tool.mehmetoya.com/http-client): Build and send HTTP requests.
+
+## Viewers
+
+- [Markdown Viewer](https://tool.mehmetoya.com/markdown-viewer): Live Markdown preview and export.
+- [HTML Viewer](https://tool.mehmetoya.com/html-viewer): Sandboxed live HTML preview.
+- [Diagram Viewer](https://tool.mehmetoya.com/diagram-viewer): Mermaid diagrams to SVG / PNG.
+
+## Optional
+
+- [Privacy and security model](https://github.com/mehmetoya/devtools#privacy--security-model): how the site guarantees input stays local
+- [Full text of every tool page](https://tool.mehmetoya.com/llms-full.txt): descriptions and common questions in Markdown
+- [About the author](https://mehmetoya.com/about/)

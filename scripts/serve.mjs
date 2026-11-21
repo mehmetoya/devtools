@@ -14,6 +14,7 @@ const TYPES = {
   '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8',
   '.json': 'application/json', '.svg': 'image/svg+xml', '.png': 'image/png', '.woff2': 'font/woff2',
   '.txt': 'text/plain; charset=utf-8', '.xml': 'application/xml', '.md': 'text/plain; charset=utf-8',
+  '.ico': 'image/x-icon', '.webmanifest': 'application/manifest+json'
 };
 
 const glob = (pat, flags) => new RegExp('^' + pat.replace(/[.+?^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '.*') + '$', flags);
@@ -62,7 +63,7 @@ http.createServer((req, res) => {
   if (p.includes('\0')) { res.writeHead(400); return res.end('bad request'); }
   // normalise before matching hidden rules: /a/../README.md, /README.md/ and dot-folders (.git) included
   p = path.posix.normalize(p).replace(/(.)\/+$/, '$1');
-  const dotted = p.split('/').some(seg => seg.startsWith('.'));
+  const dotted = p.split('/').some(seg => seg.startsWith('.') && seg !== '.well-known');
 
   const hidden = dotted || hiddenRules().some(re => re.test(p));
   let file = hidden ? null : resolve(p);

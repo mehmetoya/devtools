@@ -283,6 +283,20 @@ details.info > div { padding: 0 16px 16px; color: var(--muted2); }
 .about { margin-top: 32px; color: var(--muted2); font-family: var(--prose); font-size: 14px; line-height: 1.65; max-width: 72ch; }
 .about h2 { color: var(--text); font-size: 13px; letter-spacing: 0.12em; text-transform: uppercase; margin: 22px 0 6px; }
 .about ul { padding-left: 18px; }
+.faq h3 { margin: 16px 0 4px; font-family: var(--prose); font-size: 15px; font-weight: 400; letter-spacing: 0; text-transform: none; color: var(--text); }
+.faq code { font-size: 12px; }
+
+/* static shell before tools.js runs (crawlers, no-JS): plain stacked links */
+#sidebar > .side-nav > .side-group > .side-link { display: block; }
+#site-header > .header-tool a { color: var(--muted2); }
+/* related tools (generated in every tool page) */
+.related { margin-top: 32px; max-width: 72ch; font-family: var(--prose); font-size: 14px; color: var(--muted2); }
+.related h2 { font-size: 13px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text); margin-bottom: 8px; }
+.related ul { padding-left: 18px; line-height: 1.8; }
+.related a { color: var(--text); }
+.related a:hover { color: var(--accent); }
+.related-by { margin-top: 10px; font-size: 12px; color: var(--muted); }
+.related-by a { color: var(--muted2); }
 
 /* ── HOME: sheet index ── */
 .hero { padding: 24px 0 8px; }

@@ -243,7 +243,7 @@ const pages = [
   },
   {
     route: 'json-to-java', name: 'JSON to Java',
-    title: 'JSON to Java Class Generator — POJOs, Records, Lombok, Jackson',
+    title: 'JSON to Java Class Generator — POJOs, Records, Jackson',
     desc: 'Turn JSON into Java POJOs or records with optional Lombok @Data, Jackson @JsonProperty annotations, getters and setters. Runs entirely in your browser.',
     keywords: 'json to java, json to pojo, json to java class, json to java record, jackson jsonproperty, lombok data',
     ogTitle: 'JSON to Java — POJOs and Records from JSON',
