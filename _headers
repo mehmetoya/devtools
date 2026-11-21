@@ -20,10 +20,10 @@
   Cache-Control: public, max-age=31536000, immutable
 
 /
-  Content-Security-Policy: default-src 'self'; script-src 'self' 'sha256-ypTLaTV6nj0DYk5zorU6BwBeJn67HkzxTIrR98rEhtg='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'sha256-Uz+vpTzubPnWnOcSERFDXNU4Y6YzeimsqD9lrFCIk3o='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';
 
 /index.html
-  Content-Security-Policy: default-src 'self'; script-src 'self' 'sha256-ypTLaTV6nj0DYk5zorU6BwBeJn67HkzxTIrR98rEhtg='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'sha256-Uz+vpTzubPnWnOcSERFDXNU4Y6YzeimsqD9lrFCIk3o='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';
 
 /404.html
   Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';

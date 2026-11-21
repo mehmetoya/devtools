@@ -167,7 +167,9 @@ for (const f of fs.readdirSync(path.join(ROOT, 'assets')).filter(f => f.endsWith
     const top = h.replace(/^\//, '').replace(/\/\*$/, '');
     if (new RegExp(`['"]${top.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}['"]`).test(bd.slice(bd.indexOf('const PUBLIC'), bd.indexOf('];', bd.indexOf('const PUBLIC'))))) fail('scripts/build-dist.mjs', `${top} must not be in the PUBLIC allow-list`);
   }
-  const firstRewrite = toml.indexOf('to     = "/' );
+  if (/^\s*\[context\./m.test(toml)) fail('netlify.toml', 'context overrides are not allowed (they could change publish/command per deploy)');
+  const firstRewrite = toml.search(/to\s*=\s*"\//);
+  if (firstRewrite < 0) fail('netlify.toml', 'no path rewrites found — cannot verify redirect order');
   for (const m of toml.matchAll(/from\s*=\s*"(https?:\/\/[^"]+)"/g)) if (firstRewrite >= 0 && m.index > firstRewrite) fail('netlify.toml', `host redirect ${m[1]} must come before the path rewrites (first match wins)`);
 }
 

@@ -177,7 +177,10 @@ async function scenarios() {
     await key('ArrowDown', 'ArrowDown', 40); await sleep(50);
     const second = await js("document.querySelector('.pal-input').getAttribute('aria-activedescendant')");
     if (!first || first === second) issues.push(`palette: ↓ did not move the active option (${first} → ${second})`);
-    await key('Enter', 'Enter', 13, '\r'); await sleep(600);
+    await key('Enter', 'Enter', 13, '\r');
+    const want = '/' + String(second).replace('pal-opt-', '');
+    for (let i = 0; i < 60 && (await js('location.pathname').catch(() => '')) !== want; i++) await sleep(50);
+    await sleep(150);
     const landed = await js('location.pathname');
     if (landed !== '/' + String(second).replace('pal-opt-', '')) issues.push(`palette: Enter opened ${landed}, expected the active option ${second}`);
     await key('/', 'Slash', 191, '/'); await sleep(100);
@@ -186,6 +189,16 @@ async function scenarios() {
     if (expanded !== 'false') issues.push('palette: aria-expanded should be false with no results');
     await key('Enter', 'Enter', 13, '\r'); await sleep(300);
     if ((await js('location.pathname')) !== landed) issues.push('palette: Enter with no results navigated away');
+    // palette: a text selection that starts in the input and ends on the backdrop must not close it
+    await key('Escape', 'Escape', 27); await sleep(100);
+    await key('/', 'Slash', 191, '/'); await sleep(120);
+    const box = await js("(() => { const r = document.querySelector('.pal-input').getBoundingClientRect(); return { x: r.left + 20, y: r.top + r.height / 2 }; })()");
+    await send('Input.dispatchMouseEvent', { type: 'mousePressed', x: box.x, y: box.y, button: 'left', clickCount: 1 }, sessionId);
+    await send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: 5, y: 5, button: 'left' }, sessionId);
+    await send('Input.dispatchMouseEvent', { type: 'mouseReleased', x: 5, y: 5, button: 'left', clickCount: 1 }, sessionId);
+    await sleep(100);
+    if (!(await js("!!document.querySelector('dialog.palette[open]')"))) issues.push('palette: a drag ending on the backdrop closed it');
+    await key('Escape', 'Escape', 27); await sleep(100);
     // drawer: open at 375, widen to 1280 → drawer closes and main is no longer inert
     await go(BASE + '/base64', 375);
     await js("document.querySelector('.menu-toggle').click()"); await sleep(200);

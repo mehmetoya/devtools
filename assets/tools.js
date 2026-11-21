@@ -205,8 +205,9 @@
     });
     const list = el('ul', { class: 'pal-list', id: 'pal-list', role: 'listbox', 'aria-label': 'Tools' });
     const empty = el('p', { class: 'pal-empty', hidden: true }, 'No tool matches. Try a shorter word, e.g. "json" or "hash".');
+    const closeBtn = el('button', { type: 'button', class: 'pal-close', 'aria-label': 'Close' }, '✕');
     const dlg = el('dialog', { class: 'palette', 'aria-label': 'Find a tool' },
-      input, list, empty,
+      el('div', { class: 'pal-head' }, input, closeBtn), list, empty,
       el('div', { class: 'pal-hint', 'aria-hidden': 'true' },
         el('span', null, el('kbd', null, '↑'), el('kbd', null, '↓'), ' move'),
         el('span', null, el('kbd', null, '↵'), ' open'),
@@ -246,6 +247,7 @@
       input.focus();
     }
     function close() { if (dlg.open) dlg.close(); }
+    closeBtn.addEventListener('click', close);
     dlg.addEventListener('close', () => { if (opener && document.contains(opener)) opener.focus(); opener = null; });
     let downOnBackdrop = false;
     dlg.addEventListener('mousedown', (e) => { downOnBackdrop = e.target === dlg; });
@@ -282,16 +284,16 @@
       onclick: () => setNav(!document.body.classList.contains('nav-open')),
     }, '☰');
     header.replaceChildren(
-      el('a', { class: 'skip-link', href: '#main' }, 'Skip to tool'),
+      el('a', { class: 'skip-link', href: '#main' }, active ? 'Skip to tool' : 'Skip to content'),
       toggle,
-      el('a', { class: 'logo', href: '/', 'aria-label': 'DevTools by Moya — all tools' },
+      el('a', { class: 'logo', href: '/', 'aria-label': 'Moya / DT-28 — all tools' },
         el('span', { class: 'logo-dot', 'aria-hidden': 'true' }), 'Moya', el('span', { class: 'logo-sep', 'aria-hidden': 'true' }, '/'), 'DT‑28'),
       el('span', { class: 'header-tool' }, active ? active.name : ''),
-      el('button', { type: 'button', class: 'find-btn', 'aria-keyshortcuts': 'Control+K Meta+K /', onclick: openPalette },
+      el('button', { type: 'button', class: 'find-btn', 'aria-keyshortcuts': shortcutsOn() ? 'Control+K Meta+K /' : 'Control+K Meta+K', onclick: openPalette },
         el('span', { class: 'find-label' }, el('span', { class: 'find-long' }, 'Find a tool…'), el('span', { class: 'find-short' }, 'Find')), el('kbd', { 'aria-hidden': 'true' }, '/')),
       el('span', { class: 'spacer' }),
       el('span', { class: 'sheet-count', 'aria-hidden': 'true' }, active ? `Sheet ${sheetNo(active.route)} / ${total}` : `${total} sheets`),
-      el('span', { class: 'badge-private', title: 'Everything runs in your browser — nothing is uploaded' }, el('span', { class: 'badge-long' }, 'Client-side only'), el('span', { class: 'badge-short' }, 'Local')),
+      el('span', { class: 'badge-private', title: 'Everything runs in your browser — nothing is uploaded' }, el('span', { class: 'badge-long' }, 'Client-side only'), el('span', { class: 'badge-short' }, 'No upload')),
     );
   }
 
@@ -349,7 +351,7 @@
     const tools = allTools();
     const list = el('nav', { class: 'side-nav', 'aria-label': 'Tools' });
 
-    function link(t, hint) {
+    function link(t, hint, inFavs) {
       const isFav = favs.includes(t.route);
       const star = el('button', {
         class: 'fav-btn' + (isFav ? ' on' : ''), title: isFav ? 'Remove from favorites' : 'Add to favorites',
@@ -359,7 +361,7 @@
       }, isFav ? '★' : '☆');
       const here = t.route === activeRoute;
       return el('div', { class: 'side-item' + (here ? ' active' : '') },
-        el('a', { href: '/' + t.route, class: 'side-link', title: t.desc, 'aria-current': here ? 'page' : null },
+        el('a', { href: '/' + t.route, class: 'side-link', title: t.desc, 'aria-current': here && !inFavs ? 'page' : null },
           el('span', { class: 'side-num', 'aria-hidden': 'true' }, sheetNo(t.route)),
           el('span', { class: 'side-name' }, t.name),
           hint ? el('kbd', { class: 'side-key', 'aria-hidden': 'true' }, hint) : null),
@@ -373,7 +375,7 @@
       const favTools = favs.map(r => tools.find(t => t.route === r)).filter(Boolean);
       if (favTools.length) {
         list.appendChild(el('div', { class: 'side-group side-favs' }, el('div', { class: 'side-group-title' }, '★ Favorites'),
-          favTools.map((t, i) => link(t, on && i < 9 ? 'g' + (i + 1) : null))));
+          favTools.map((t, i) => link(t, on && i < 9 ? 'g' + (i + 1) : null, true))));
       }
       for (const c of CATEGORIES) {
         list.appendChild(el('div', { class: 'side-group' }, el('div', { class: 'side-group-title' }, c.name), c.tools.map(t => link(t))));
@@ -399,10 +401,13 @@
         const next = !shortcutsOn();
         try { localStorage.setItem(SHORTCUTS_KEY, next ? 'on' : 'off'); } catch { /* preference just won't persist */ }
         toggle.setAttribute('aria-checked', String(next));
+        syncShortcutsUi();
         render();
         announce(next ? 'Keyboard shortcuts on' : 'Keyboard shortcuts off');
       } }, el('span', { class: 'switch-track', 'aria-hidden': 'true' }), 'Single-key shortcuts');
-    const help = el('p', { class: 'side-help' }, el('kbd', null, '/'), ' find · ', el('kbd', null, 'g'), el('kbd', null, '1'), ' favorite · ', el('kbd', null, '⌘K'), ' always');
+    const help = el('p', { class: 'side-help' },
+      el('span', { class: 'k-single' }, el('kbd', null, '/'), ' find · ', el('kbd', null, 'g'), el('kbd', null, '1'), ' favorite · '),
+      el('kbd', null, '⌘K'), ' / ', el('kbd', null, 'Ctrl+K'), ' find');
     side.replaceChildren(list, el('div', { class: 'side-foot' }, toggle, help));
     render();
   }
@@ -435,6 +440,13 @@
       el('span', null, 'Rev. ' + ((active && active.rev) || latest))));
   }
 
+  /** Reflect the single-key shortcut preference: hint text and aria-keyshortcuts only promise what works. */
+  function syncShortcutsUi() {
+    const on = shortcutsOn();
+    document.body.dataset.shortcuts = on ? 'on' : 'off';
+    $$('[aria-keyshortcuts]').forEach(b => b.setAttribute('aria-keyshortcuts', on ? 'Control+K Meta+K /' : 'Control+K Meta+K'));
+  }
+
   /** g then 1–9 within a second opens that favorite. */
   function wireFavoriteKeys() {
     let armed = 0;
@@ -458,6 +470,7 @@
     wireFavoriteKeys();
     buildTitleBlock(active);
     buildColophon(active);
+    syncShortcutsUi();
     const main = $('main');
     if (main && !main.id) main.id = 'main';
     if (main && !main.hasAttribute('tabindex')) main.setAttribute('tabindex', '-1');

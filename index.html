@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-ypTLaTV6nj0DYk5zorU6BwBeJn67HkzxTIrR98rEhtg='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self';" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-Uz+vpTzubPnWnOcSERFDXNU4Y6YzeimsqD9lrFCIk3o='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self';" />
   <title>DevTools — Free, Private, Client-Side Developer Tools</title>
   <meta name="description" content="28 free developer tools: JSON formatter, Base64, hashes, JWT, regex, case converter, GUID, password generator, Mermaid diagrams and more. Everything runs in your browser." />
   <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large" />
@@ -261,14 +261,15 @@
 
   <main class="page">
     <section class="hero">
-      <p class="hero-kicker">Drawing set · 28 sheets · rev. 2026.11.21</p>
+      <p class="hero-kicker">Drawing set · 28 sheets · Drawn by <a href="https://github.com/mehmetoya" rel="author noopener">M. Oya</a> · rev. 2026.11.21</p>
       <h1>Developer tools that <em>never see your data</em>.</h1>
       <p class="hero-lede">28 utilities for text, encoding, JSON, regex and everyday development. No backend, no logging, no share links — everything runs in your browser.</p>
       <button type="button" class="hero-find" id="home-find" aria-keyshortcuts="Control+K Meta+K /"><span>Find a tool…</span><kbd aria-hidden="true">/</kbd></button>
     </section>
-    <section class="sheet-cat" id="home-favs" aria-labelledby="favs-title" hidden>
+    <section class="sheet-cat" id="home-favs" aria-labelledby="favs-title">
       <h2 id="favs-title">★ Favorites</h2>
       <ul class="sheet-list" id="home-favs-list"></ul>
+      <p class="sheet-empty" id="home-favs-empty">Star a tool in the sidebar to pin it here — then open it from anywhere with <kbd>g</kbd> <kbd>1</kbd>–<kbd>9</kbd>.</p>
     </section>
       <section class="sheet-cat" aria-labelledby="cat-text">
         <h2 id="cat-text">Text Operations</h2>
@@ -344,7 +345,7 @@
   function favs() {
     const tools = allTools();
     const list = readFavs().map(r => tools.find(t => t.route === r)).filter(Boolean);
-    $('#home-favs').hidden = list.length === 0;
+    $('#home-favs-empty').hidden = list.length > 0;
     $('#home-favs-list').replaceChildren(...list.map(t => el('li', null, el('a', { class: 'sheet', href: '/' + t.route },
       el('span', { class: 'sheet-no', 'aria-hidden': 'true' }, String(tools.indexOf(t) + 1).padStart(2, '0')),
       el('span', { class: 'sheet-name' }, t.name), el('span', { class: 'sheet-desc' }, t.desc)))));

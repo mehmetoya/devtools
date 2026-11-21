@@ -20,6 +20,22 @@ fs.mkdirSync(DIST);
 for (const entry of PUBLIC) {
   const src = path.join(ROOT, entry);
   if (!fs.existsSync(src)) { console.error(`build-dist: missing ${entry}`); process.exit(1); }
-  fs.cpSync(src, path.join(DIST, entry), { recursive: true, filter: s => !path.basename(s).startsWith('.') });
+  // skip OS/VCS junk only; deliberate dotfiles such as .well-known/ would be copied
+  fs.cpSync(src, path.join(DIST, entry), { recursive: true, filter: s => !/^(\.DS_Store|\.git.*)$/.test(path.basename(s)) });
 }
-console.log(`dist/: ${PUBLIC.length} entries (${routes.length} tools)`);
+
+// ── verify the output: nothing private, nothing missing ──
+const problems = [];
+const PRIVATE = /^(readme(\.md)?|license|netlify\.toml|scripts|docs|dist|\.git.*|\.github|package(-lock)?\.json)$/i;
+for (const name of fs.readdirSync(DIST)) if (PRIVATE.test(name)) problems.push(`private entry published: ${name}`);
+const walk = (dir) => fs.readdirSync(dir, { withFileTypes: true }).flatMap(d => d.isDirectory() ? walk(path.join(dir, d.name)) : [path.join(dir, d.name)]);
+const files = walk(DIST);
+for (const f of files.filter(f => /\.(html|css|js)$/.test(f))) {
+  const src = fs.readFileSync(f, 'utf8');
+  for (const m of src.matchAll(/["'(](\/assets\/[^"'()\s?#`$]+)/g)) {
+    if (!fs.existsSync(path.join(DIST, m[1]))) problems.push(`${path.relative(DIST, f)} references missing ${m[1]}`);
+  }
+}
+for (const r of routes) if (!fs.existsSync(path.join(DIST, r, 'index.html'))) problems.push(`missing /${r}/index.html`);
+if (problems.length) { console.error(problems.map(p => '✗ ' + p).join('\n')); process.exit(1); }
+console.log(`dist/: ${PUBLIC.length} entries, ${files.length} files (${routes.length} tools) — verified`);

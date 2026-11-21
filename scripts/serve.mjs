@@ -6,6 +6,7 @@
 import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 const root = path.resolve(process.argv[2] || '.');
 const port = Number(process.argv[3] || 8888);
@@ -28,9 +29,11 @@ function headerRules() {
   return rules;
 }
 
-// forced 404 redirects (repository files) from netlify.toml
+// forced 404 redirects (repository files) from netlify.toml — next to the served folder, else the repo root
+const TOML = [path.join(root, 'netlify.toml'), path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', 'netlify.toml')].find(f => fs.existsSync(f));
 function hiddenRules() {
-  const toml = fs.readFileSync(path.join(root, 'netlify.toml'), 'utf8');
+  if (!TOML) return [];
+  const toml = fs.readFileSync(TOML, 'utf8');
   return toml.split('[[redirects]]').slice(1)
     .filter(b => /status\s*=\s*404/.test(b) && /force\s*=\s*true/.test(b))
     .map(b => (b.match(/from\s*=\s*"([^"]+)"/) || [])[1]).filter(f => f && f.startsWith('/')).map(f => glob(f, 'i'));

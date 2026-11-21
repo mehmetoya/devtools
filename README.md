@@ -103,6 +103,9 @@ No bundler, no `npm install` — Node 22+ and Chrome are all you need.
 node scripts/serve.mjs . 8888                  # local server: _headers CSP, rewrites, hidden paths (127.0.0.1 only)
 node scripts/check.mjs                         # build gate — also the first half of the Netlify build
 node scripts/scan.mjs http://127.0.0.1:8888    # every page at 375 / 1280 px in real Chrome
+
+# exactly what Netlify publishes:
+node scripts/build-dist.mjs && node scripts/serve.mjs dist 8889
 ```
 
 `scan.mjs` drives Chrome over the DevTools Protocol and fails on any CSP violation, console error, third-party request, horizontal overflow, or palette / drawer regression.
