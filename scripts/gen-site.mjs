@@ -220,7 +220,8 @@ ${items.map(({ q, a }) => `      <h3>${inline(q)}</h3>
     </section>
     <!-- /faq -->
 `;
-  return html.replace(/(\n)([ \t]*<\/main>)/, `$1${block}$2`);
+  // function replacer: generated text may contain $&, $` or $' which a replacement string would expand
+  return html.replace(/(\n)([ \t]*<\/main>)/, (_, nl, close) => nl + block + close);
 }
 
 // "Related tools": same-category siblings + the author, as plain links in the page body (crawlable without JS)
@@ -241,7 +242,8 @@ ${sibs.map(x => `        <li><a href="/${x.route}">${esc(x.name)}</a> — ${esc(
     </nav>
     <!-- /related -->
 `;
-  return html.replace(/(\n)([ \t]*<\/main>)/, `$1${block}$2`);
+  // function replacer: generated text may contain $&, $` or $' which a replacement string would expand
+  return html.replace(/(\n)([ \t]*<\/main>)/, (_, nl, close) => nl + block + close);
 }
 
 function syncPage(file, route) {
